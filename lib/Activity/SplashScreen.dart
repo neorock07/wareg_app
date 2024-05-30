@@ -32,20 +32,42 @@ class _SplashScreenState extends State<SplashScreen> {
       body: Container(
         decoration: const BoxDecoration(
             gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-          Color.fromRGBO(62, 161, 117, 1),
-          Color.fromRGBO(48, 122, 89, 1),
-        ])),
-        child: Center(
-          child: Text("Wareg",
-           style: TextStyle(
-            color: Colors.white,
-            fontFamily: "Bree",
-            fontSize: 25.sp
-           ),),
-        ),
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+              Color.fromRGBO(62, 161, 117, 1),
+              Color.fromRGBO(48, 122, 89, 1),
+            ])),
+        child: Stack(children: [
+          // Image.asset("assets/image/geo.png", opacity: 90,),
+          Container(
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(
+                image: DecorationImage(
+                    image: AssetImage("assets/image/bg_sp.png"),
+                    fit: BoxFit.fill)),
+          ),
+          Center(
+              child: RichText(
+                  text: TextSpan(
+                      text: "Re",
+                      style: TextStyle(
+                          fontFamily: "Bree",
+                          fontSize: 30.sp,
+                          color: Colors.white),
+                      children: [
+                        
+                TextSpan(
+                  text: "Food",
+                  style: TextStyle(
+                      fontFamily: "Bree",
+                      fontSize: 30.sp,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold),
+                )
+              ]))),
+        ]),
       ),
     );
   }

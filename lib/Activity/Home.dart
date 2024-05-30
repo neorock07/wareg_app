@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:wareg_app/Partials/CardDonate.dart';
 import 'package:wareg_app/Partials/CardFood.dart';
+import 'package:wareg_app/Partials/CardSearch.dart';
 
 import '../Partials/CardBoard.dart';
 
@@ -21,7 +22,7 @@ class _HomeState extends State<Home> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          "Hi, Neo",
+          "Hi, Bento",
           style: TextStyle(fontFamily: "Bree", color: Colors.black),
         ),
         actions: [
@@ -42,31 +43,7 @@ class _HomeState extends State<Home> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Center(
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.9,
-                child: Card(
-                  color: Colors.white,
-                  shadowColor: Colors.white10,
-                  elevation: 3,
-                  child: TextFormField(
-                    style: TextStyle(
-                        fontFamily: "Poppins",
-                        fontSize: 15.sp,
-                        color: Colors.black),
-                    decoration: InputDecoration(
-                        prefixIcon: Icon(
-                          LucideIcons.search,
-                          color: Colors.grey,
-                        ),
-                        hintText: "Cari",
-                        hintStyle:
-                            TextStyle(fontFamily: "Poppins", fontSize: 15.sp),
-                        border: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.circular(3.dm))),
-                  ),
-                ),
-              ),
+              child: CardSearch(context)
             ),
             SizedBox(
               height: 10.h,
