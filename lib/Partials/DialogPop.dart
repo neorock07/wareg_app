@@ -4,6 +4,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 Future<dynamic> DialogPop(BuildContext context, {
   Widget? icon,
+  List<double>? size,
   bool? dismissable = true
 }){
   return showDialog(
@@ -14,7 +15,8 @@ Future<dynamic> DialogPop(BuildContext context, {
                           // title: Text("Loading..."),
                           backgroundColor: Colors.white,
                           content: Container(
-                              height: 100.h,
+                              height: (size != null)? size[0] : 100.h,
+                              width: (size != null)? size[1] : 100.h,
                               child: Column(
                                 children: [
                                   icon!

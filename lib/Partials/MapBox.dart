@@ -5,8 +5,9 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:wareg_app/Controller/MapsController.dart';
 import 'package:wareg_app/Util/IconMaker.dart';
 
-Widget MapBox(BuildContext context, var controller, var point, {
-  bool? isDraw = false
+Widget MapBox(BuildContext context, var controller, dynamic point, {
+  bool? isDraw = false,
+  bool? isPicker = false
 }) {
   var mpController = Get.put(MapsController());
   return OSMFlutter(
@@ -22,7 +23,8 @@ Widget MapBox(BuildContext context, var controller, var point, {
       }   
       },
       osmOption: OSMOption(
-          staticPoints: point,
+          isPicker: isPicker!,
+          staticPoints: (point != null)? point : [],
           showDefaultInfoWindow: true,
           showZoomController: false,
           userTrackingOption: const UserTrackingOption(

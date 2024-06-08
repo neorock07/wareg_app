@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:wareg_app/Activity/FoodPicture.dart';
 import 'package:wareg_app/Partials/CardButton.dart';
 import "package:camera/camera.dart";
 
@@ -62,7 +63,9 @@ class _DonasiState extends State<Donasi> {
           ),
           Obx(() => CardButton(context, isPressed, onTap: (_) {
                 // isPressed.value = true;
-                Navigator.pushNamed(context, "/picture");
+                // Navigator.pushNamed(context, "/picture");
+                Navigator.push(
+                  context, MaterialPageRoute(builder: ((context) => FoodPicture())));
               },
                   width_a: 0.4,
                   width_b: 0.5,

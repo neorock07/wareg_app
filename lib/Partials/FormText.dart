@@ -5,7 +5,8 @@ Widget FormText(BuildContext context, {
   TextEditingController? controller,
   String? label, 
   String? hint,
-  TextInputType? type
+  TextInputType? type,
+  bool? isEnabled = true,
 }) {
   return Column(children: [
     Padding(
@@ -29,6 +30,7 @@ Widget FormText(BuildContext context, {
         child: Padding(
           padding: EdgeInsets.only(left: 5.w),
           child: TextField(
+              enabled: isEnabled ,
               keyboardType: (type == null && type != TextInputType.multiline)? null : type,
               maxLines: (type != TextInputType.multiline)? null : 4,
               controller: controller,

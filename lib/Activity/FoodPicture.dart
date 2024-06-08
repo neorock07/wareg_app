@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,8 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:wareg_app/Activity/PreviewFood.dart';
 import 'package:wareg_app/Controller/FoodController.dart';
 import 'package:wareg_app/Controller/PictureController.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 
 class FoodPicture extends StatefulWidget {
   const FoodPicture({Key? key}) : super(key: key);
@@ -20,13 +23,40 @@ class _FoodPictureState extends State<FoodPicture> {
   PictureController picController = Get.put(PictureController());
   // late PictureController picController;
   var paths = <String>[].obs;
-  late CameraController camController;
+  CameraController? _camController;
 
+  
   Future<void> initCamera() async {
     var cameras = await availableCameras();
-    camController = CameraController(cameras[0], ResolutionPreset.ultraHigh);
-    await camController.initialize();
+    _camController = CameraController(cameras[0], ResolutionPreset.medium);
+    await _camController!.initialize();
   }
+
+  @override
+  void dispose() {
+    _camController!.dispose();
+    super.dispose();
+  }
+
+ Future<String> takePicture() async {
+    Directory root = await getTemporaryDirectory();
+    String dir = "${root.path}/ReFood";
+    await Directory(dir).create(recursive: true);
+    String filePath = "${dir}/${DateTime.now()}.jpg";
+    try {
+      XFile? pic = await _camController!.takePicture();
+      pic.saveTo(filePath);
+    } catch (e) {
+      log("Error : ${e.toString()}");
+    }
+    return filePath;
+  }
+
+  // Future<void> initCamera() async {
+  //   var cameras = await availableCameras();
+  //   camController = CameraController(cameras[0], ResolutionPreset.ultraHigh);
+  //   await camController.initialize();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -51,10 +81,8 @@ class _FoodPictureState extends State<FoodPicture> {
           ],
         ),
         body: FutureBuilder(
-            future: picController.initCamera(),
-            builder: ((controller, snap) {
-              
-              return !(snap.connectionState == ConnectionState.done)
+            future: initCamera(),
+            builder: (_, snap) => (snap.connectionState == ConnectionState.waiting)
                   ? const Center(
                       child: CircularProgressIndicator(),
                     )
@@ -63,9 +91,11 @@ class _FoodPictureState extends State<FoodPicture> {
                       children: [
                         // Text("paths : ${paths.toString()}"),
                         Container(
-                          height: MediaQuery.of(context).size.height * 0.6,
+                          height: MediaQuery.of(context).size.height *
+                                0.8 /
+                                _camController!.value.aspectRatio,
                           width: MediaQuery.of(context).size.width * 0.9,
-                          child: CameraPreview(picController.camController!),
+                          child: CameraPreview(_camController!),
                         ),
                         SizedBox(
                           height: 20.h,
@@ -82,7 +112,8 @@ class _FoodPictureState extends State<FoodPicture> {
                                   backgroundColor:
                                       Color.fromRGBO(42, 122, 89, 1),
                                   onPressed: () {
-                                    picController.takePicture().then((value) {
+                                    // picController.takePicture().then((value) {
+                                    takePicture().then((value) {
                                       log("path : ${value}");
                                       // paths.value.add(value);
                                       picController.arr_img.value.add(value);
@@ -140,7 +171,7 @@ class _FoodPictureState extends State<FoodPicture> {
                               ],
                             )),
                       ],
-                    );
-            })));
+                    )
+            ));
   }
 }
