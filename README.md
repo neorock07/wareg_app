@@ -1,4 +1,4 @@
-*ReFood Repo Project*
+##ReFood Repo Project##
 
 ReFood is Food Donation App to overcome food-waste problem by donate and distribute our unwanted but still edible food to people who needs it.
 we take leverage of LLM of Mistral to checking quality of donation before it take to share. By using openstreetmaps user who need a food could met with donor make easily and directed.
