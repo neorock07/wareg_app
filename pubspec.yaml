@@ -82,6 +82,7 @@ flutter:
     - assets/image/geo.png
     - assets/image/bg_sp.png
     - assets/image/lg.png
+    - assets/image/food_worth.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

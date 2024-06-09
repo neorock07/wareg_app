@@ -175,9 +175,10 @@ class _CekLayakState extends State<CekLayak> {
                     Navigator.of(context, rootNavigator: true).pop();
                     DialogPop(
                       context,
+                      size: [250.h, 150.w],
                       dismissable: false,
                       icon: Container(
-                          height: 150.h,
+                          height: 250.h,
                           child: Column(
                             children: [
                               Icon(
@@ -202,7 +203,7 @@ class _CekLayakState extends State<CekLayak> {
                                     child: CardButton(context, isPressed2,
                                         onTap: (_) {
                                       isPressed2.value = true;
-                                      // Navigator.pushNamed(context, "/cek");
+                                      Navigator.pushNamed(context, "/result_check");
                                       // log("${foodController.data_food!.values}");
                                       // log("${foodController.data_food!['date_donate']}");
                                     },
@@ -212,8 +213,9 @@ class _CekLayakState extends State<CekLayak> {
                                         height_b: 0.06,
                                         borderRadius: 10.dm,
                                         gradient: const LinearGradient(colors: [
-                                          Color.fromRGBO(19, 19, 19, 1),
-                                          Color.fromRGBO(0, 0, 0, 1)                                       ]),
+                                          Color.fromRGBO(52, 135, 98, 1),
+                                          Color.fromRGBO(48, 122, 99, 1),
+                                        ]),
                                         child: Center(
                                           child: Text(
                                             "Donasikan",

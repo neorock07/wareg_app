@@ -13,6 +13,7 @@ class PromptController extends GetxController {
   Future<String> cekQuality(String prompt) async {
     final Map<String, dynamic> payload = {"inputs": prompt};
     var result = [];
+    var hasil;
     final response = await http.post(Uri.parse(API_URL),
         headers: {
           "Authorization": authorizationHeader,
@@ -24,12 +25,13 @@ class PromptController extends GetxController {
 
     if (response.statusCode == 200) {
       result = jsonDecode(response.body);
+      hasil = result[0]['generated_text'].toString().split('```')[0];
       log("hasil : ${result[0][['generated_text']]}");
       log("lha iki respon 200");
     } else {
       log("response : ${response.statusCode}");
     }
-    return result[0]['generated_text'];
+    return result[0]['generated_text'].toString().split('```')[0];
   }
 }
 

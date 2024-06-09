@@ -6,6 +6,7 @@ import 'package:wareg_app/Activity/FormFood.dart';
 import 'package:wareg_app/Activity/Home.dart';
 import 'package:wareg_app/Activity/OnMap.dart';
 import 'package:wareg_app/Activity/PreviewFood.dart';
+import 'package:wareg_app/Activity/ResultCheck.dart';
 
 class Routes{
   static Route<dynamic> generateRoute(RouteSettings setting){
@@ -20,6 +21,8 @@ class Routes{
         return MaterialPageRoute(builder: (_)=> FormFood());
       case '/cek':
         return MaterialPageRoute(builder: (_)=> CekLayak());
+      case '/result_check':
+        return MaterialPageRoute(builder: (_)=> ResultCheck());
       default:
         return _errorRoute();
 
