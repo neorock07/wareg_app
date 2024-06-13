@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import 'package:wareg_app/Controller/PrefController.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -10,12 +12,16 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  
+  var prefController = Get.put(PrefController());
+  
   @override
   void initState() {
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     Future.delayed(const Duration(seconds: 3), () {
-      Navigator.pushReplacementNamed(context, '/home');
+      prefController.cekLogin(context);
+      // Navigator.pushReplacementNamed(context, '/login');
     });
   }
 
@@ -53,7 +59,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   text: TextSpan(
                       text: "Re",
                       style: TextStyle(
-                          fontFamily: "Bree",
+                          fontFamily: "Poppins",
                           fontSize: 30.sp,
                           color: Colors.white),
                       children: [
@@ -61,7 +67,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 TextSpan(
                   text: "Food",
                   style: TextStyle(
-                      fontFamily: "Bree",
+                      fontFamily: "Poppins",
                       fontSize: 30.sp,
                       color: Colors.white,
                       fontWeight: FontWeight.bold),

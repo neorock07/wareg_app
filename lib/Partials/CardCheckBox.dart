@@ -4,18 +4,18 @@ import 'package:get/get.dart';
 
 Widget CardCheckBox(BuildContext context, {
   String? text,
-  RxInt? count,
+  RxBool? count,
   // RxBool? isPressed
 }) {
   return InkWell(
     onTap: (){
       //  isPressed!.value = true;
-       count.value += 1; 
+       count.value = !count.value; 
     },
     child: Container(
       width: MediaQuery.of(context).size.width * 0.9,
       decoration: BoxDecoration(
-        color: (count!.value % 2 == 0)? Colors.white : Color.fromRGBO(48, 122, 89, 1),
+        color: (count!.value == false)? Colors.white : Color.fromRGBO(48, 122, 89, 1),
         border: Border.all(color: Colors.grey)
       ),
       child: Padding(
@@ -25,7 +25,7 @@ Widget CardCheckBox(BuildContext context, {
             text!,
             style: TextStyle(
               fontFamily: "Poppins",
-              color: (count.value % 2 == 0)? Colors.black : Colors.white
+              color: (count.value == false)? Colors.black : Colors.white
             ),
           ),
         ),

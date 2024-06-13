@@ -21,6 +21,7 @@ class FoodPicture extends StatefulWidget {
 
 class _FoodPictureState extends State<FoodPicture> {
   PictureController picController = Get.put(PictureController());
+  FoodController foodController = Get.put(FoodController());
   // late PictureController picController;
   var paths = <String>[].obs;
   CameraController? _camController;

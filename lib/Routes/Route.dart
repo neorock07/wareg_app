@@ -4,6 +4,7 @@ import 'package:wareg_app/Activity/CekLayak.dart';
 import 'package:wareg_app/Activity/FoodPicture.dart';
 import 'package:wareg_app/Activity/FormFood.dart';
 import 'package:wareg_app/Activity/Home.dart';
+import 'package:wareg_app/Activity/LoginActivity.dart';
 import 'package:wareg_app/Activity/OnMap.dart';
 import 'package:wareg_app/Activity/PreviewFood.dart';
 import 'package:wareg_app/Activity/ResultCheck.dart';
@@ -13,6 +14,8 @@ class Routes{
     switch(setting.name){
       case '/home':
         return MaterialPageRoute(builder: (_)=> BottomNavPage());
+      case '/login':
+        return MaterialPageRoute(builder: (_)=> LoginActivity());
       case '/onmap':
         return MaterialPageRoute(builder: (_)=> OnMap());
       case '/picture':

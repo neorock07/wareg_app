@@ -10,10 +10,11 @@ class PromptController extends GetxController {
   static String authorizationHeader =
       "Bearer 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";
 
-  Future<String> cekQuality(String prompt) async {
+  Future<Map<String, dynamic>> cekQuality(String prompt) async {
     final Map<String, dynamic> payload = {"inputs": prompt};
     var result = [];
     var hasil;
+    Map<String, dynamic>? json_hasil;
     final response = await http.post(Uri.parse(API_URL),
         headers: {
           "Authorization": authorizationHeader,
@@ -25,13 +26,22 @@ class PromptController extends GetxController {
 
     if (response.statusCode == 200) {
       result = jsonDecode(response.body);
-      hasil = result[0]['generated_text'].toString().split('```')[0];
-      log("hasil : ${result[0][['generated_text']]}");
+      // log("hasil : ${result[0][['generated_text']]}");
+      // hasil = result[0]['generated_text'].toString().split('```')[1];
+      // hasil = hasil.replaceAll("'", '"');
+      // json_hasil = jsonDecode(hasil);
       log("lha iki respon 200");
+      hasil = result[0]['generated_text'].toString().split('!!');
+      hasil = hasil[hasil.length - 1].replaceAll("'", '"');
+      json_hasil = jsonDecode(hasil);
+      log(
+        "${json_hasil}" 
+      );
     } else {
+      json_hasil = {'result':{'scan' : 'error'}};
       log("response : ${response.statusCode}");
     }
-    return result[0]['generated_text'].toString().split('```')[0];
+    return json_hasil!;
   }
 }
 

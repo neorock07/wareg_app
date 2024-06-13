@@ -91,7 +91,7 @@ Widget CardBoard(
               Align(
                   alignment: Alignment.bottomLeft,
                   child: Padding(
-                    padding: EdgeInsets.only(top: 15.h, left: 5.w, bottom: 15),
+                    padding: EdgeInsets.only(top: 15.h, left: 10.w, bottom: 15),
                     child: Text(
                       "80 Points",
                       style:

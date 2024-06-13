@@ -16,12 +16,7 @@ Widget FormDate(BuildContext context,
     TextEditingController? controller}) {
   return Column(
     children: [
-      Text(
-        "$label",
-        style: TextStyle(
-            fontFamily: "Poppins", fontSize: 12.sp, color: Colors.grey),
-      ),
-      SizedBox(height:5.h),
+      SizedBox(height: 5.h),
       Container(
           width: MediaQuery.of(context).size.width * width!,
           decoration: BoxDecoration(

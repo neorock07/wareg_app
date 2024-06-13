@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:get/get.dart';
@@ -7,18 +9,27 @@ import 'package:wareg_app/Util/IconMaker.dart';
 
 Widget MapBox(BuildContext context, var controller, dynamic point, {
   bool? isDraw = false,
-  bool? isPicker = false
+  bool? isPicker = false,
+  StreamController<GeoPoint>? stream_controller
+  
 }) {
   var mpController = Get.put(MapsController());
+  stream_controller = StreamController<GeoPoint>();
   return OSMFlutter(
       onMapIsReady: (condition)async{
       if(condition == true && isDraw == true){
         await mpController.getUserLocation().then((value) {
+          
+          Timer.periodic(Duration(seconds: 3), (timer) { 
+                stream_controller!.add(GeoPoint(latitude: value!.latitude, longitude: value.longitude));
+          });
+
           mpController.drawRoad(
             start: GeoPoint(latitude: value!.latitude, longitude: value.longitude),
             end: GeoPoint(latitude: -7.056030, longitude: 110.434945),
             type: RoadType.bike
-          );
+          );  
+
         });
       }   
       },

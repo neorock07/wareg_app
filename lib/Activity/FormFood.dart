@@ -3,7 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:wareg_app/Controller/API/Postingan/PostFood.dart';
 import 'package:wareg_app/Controller/FoodController.dart';
 import 'package:wareg_app/Controller/MapsController.dart';
 import 'package:wareg_app/Partials/CardButton.dart';
@@ -16,6 +18,7 @@ import 'package:wareg_app/Partials/FormText.dart';
 import 'package:wareg_app/Partials/FormText2.dart';
 import '../Controller/PictureController.dart';
 import '../Partials/MapBox.dart';
+import 'package:flutter_open_street_map/open_street_map.dart';
 
 class FormFood extends StatefulWidget {
   const FormFood({Key? key}) : super(key: key);
@@ -41,11 +44,14 @@ class _FormFoodState extends State<FormFood> {
   var deskripsiController = TextEditingController();
 
   RxInt count = 0.obs;
+  DateFormat formatInput = DateFormat('yyyy-MM-dd HH:mm');
 
   var mapController = Get.put(MapsController());
+  var postController = Get.put(PostFood());
+
   //dynamic textfield
-  var quantityController = <int, TextEditingController>{};
-  var valueController = <int, TextEditingController>{};
+  // var quantityController = <int, TextEditingController>{};
+  // var valueController = <int, TextEditingController>{};
   var item = <int, Widget>{};
   RxBool isActivate = false.obs;
 
@@ -63,8 +69,8 @@ class _FormFoodState extends State<FormFood> {
       setState(() {
         print(item);
         item.remove(count.value - 1);
-        quantityController.remove(count.value - 1);
-        valueController.remove(count.value - 1);
+        foodController.quantityController.remove(count.value - 1);
+        foodController.valueController.remove(count.value - 1);
       });
     }
   }
@@ -72,8 +78,8 @@ class _FormFoodState extends State<FormFood> {
   newCard(BuildContext context, int index, bool isNewCard) {
     var _quantityController = TextEditingController(text: " ");
     var _valueController = TextEditingController(text: "");
-    quantityController.addAll({index: _quantityController});
-    valueController.addAll({index: _valueController});
+    foodController.quantityController.addAll({index: _quantityController});
+    foodController.valueController.addAll({index: _valueController});
     return Padding(
       padding: EdgeInsets.only(left: 10.w, right: 10.w, bottom: 5.h),
       child: Card(
@@ -86,100 +92,112 @@ class _FormFoodState extends State<FormFood> {
           child: Padding(
             padding: EdgeInsets.all(5.dm),
             child: Center(
-              child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    IconButton(
-                        onPressed: () {
-                          setState(() {
-                            print(item);
-                            item.removeWhere((key, value) => key == index);
-                            quantityController
-                                .removeWhere((key, value) => key == index);
-                            valueController
-                                .removeWhere((key, value) => key == index);
-                          });
-                        },
-                        icon: const Icon(Icons.cancel)),
+              child: Column(
+                children: [
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        IconButton(
+                            onPressed: () {
+                              setState(() {
+                                print(item);
+                                item.removeWhere((key, value) => key == index);
+                                foodController.quantityController
+                                    .removeWhere((key, value) => key == index);
+                                foodController.valueController
+                                    .removeWhere((key, value) => key == index);
+                              });
+                            },
+                            icon: const Icon(Icons.cancel)),
 
-                    /// Textfield
-                    SizedBox(
-                      width: 120.w,
-                      child: TextFormField(
-                        controller: _quantityController,
-                        style: TextStyle(
-                          fontFamily: "Poppins",
-                        ),
-                        decoration: InputDecoration(
-                          fillColor: Theme.of(context).colorScheme.onPrimary,
-                          focusColor: Theme.of(context).colorScheme.onPrimary,
-                          enabledBorder: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(4.dm)),
-                              borderSide:
-                                  BorderSide(color: Colors.grey, width: 1.5.w)),
-                          focusedBorder: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(4.dm)),
-                              borderSide: BorderSide(
-                                color: Colors.grey,
-                                width: 1.5.w,
-                              )),
-                          errorMaxLines: 2,
-                          disabledBorder: const OutlineInputBorder(
-                              gapPadding: 0, borderRadius: BorderRadius.zero),
-                          isDense: true,
-                          label: const Text(
-                            "Nama",
+                        /// Textfield
+                        SizedBox(
+                          width: 120.w,
+                          child: TextFormField(
+                            controller: _quantityController,
                             style: TextStyle(
-                                color: Colors.grey, fontFamily: "Poppins"),
+                              fontFamily: "Poppins",
+                            ),
+                            decoration: InputDecoration(
+                              fillColor:
+                                  Theme.of(context).colorScheme.onPrimary,
+                              focusColor:
+                                  Theme.of(context).colorScheme.onPrimary,
+                              enabledBorder: OutlineInputBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(4.dm)),
+                                  borderSide: BorderSide(
+                                      color: Colors.grey, width: 1.5.w)),
+                              focusedBorder: OutlineInputBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(4.dm)),
+                                  borderSide: BorderSide(
+                                    color: Colors.grey,
+                                    width: 1.5.w,
+                                  )),
+                              errorMaxLines: 2,
+                              disabledBorder: const OutlineInputBorder(
+                                  gapPadding: 0,
+                                  borderRadius: BorderRadius.zero),
+                              isDense: true,
+                              label: const Text(
+                                "Nama",
+                                style: TextStyle(
+                                    color: Colors.grey, fontFamily: "Poppins"),
+                              ),
+                              labelStyle: TextStyle(
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary,
+                                  fontSize: 14.sp),
+                            ),
                           ),
-                          labelStyle: TextStyle(
-                              color: Theme.of(context).colorScheme.onPrimary,
-                              fontSize: 14.sp),
                         ),
-                      ),
-                    ),
-                    SizedBox(width: 10.w),
+                        SizedBox(width: 10.w),
 
-                    /// Textfield
-                    SizedBox(
-                      width: 80.w,
-                      child: TextFormField(
-                        controller: _valueController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          fillColor: Theme.of(context).colorScheme.onPrimary,
-                          focusColor: Theme.of(context).colorScheme.onPrimary,
-                          enabledBorder: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(4.dm)),
-                              borderSide: BorderSide(
-                                  color: Colors.grey, width: 1.5.dm)),
-                          focusedBorder: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(4.dm)),
-                              borderSide: BorderSide(
-                                color: Colors.grey,
-                                width: 1.5.dm,
-                              )),
-                          errorMaxLines: 2,
-                          disabledBorder: const OutlineInputBorder(
-                              gapPadding: 0, borderRadius: BorderRadius.zero),
-                          isDense: true,
-                          label: const Text(
-                            "Jumlah",
-                            style: TextStyle(
-                                color: Colors.grey, fontFamily: "Poppins"),
+                        /// Textfield
+                        SizedBox(
+                          width: 80.w,
+                          child: TextFormField(
+                            controller: _valueController,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              fillColor:
+                                  Theme.of(context).colorScheme.onPrimary,
+                              focusColor:
+                                  Theme.of(context).colorScheme.onPrimary,
+                              enabledBorder: OutlineInputBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(4.dm)),
+                                  borderSide: BorderSide(
+                                      color: Colors.grey, width: 1.5.dm)),
+                              focusedBorder: OutlineInputBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(4.dm)),
+                                  borderSide: BorderSide(
+                                    color: Colors.grey,
+                                    width: 1.5.dm,
+                                  )),
+                              errorMaxLines: 2,
+                              disabledBorder: const OutlineInputBorder(
+                                  gapPadding: 0,
+                                  borderRadius: BorderRadius.zero),
+                              isDense: true,
+                              label: const Text(
+                                "Jumlah",
+                                style: TextStyle(
+                                    color: Colors.grey, fontFamily: "Poppins"),
+                              ),
+                              labelStyle: TextStyle(
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary,
+                                  fontSize: 14.sp),
+                            ),
                           ),
-                          labelStyle: TextStyle(
-                              color: Theme.of(context).colorScheme.onPrimary,
-                              fontSize: 14.sp),
-                        ),
-                      ),
-                    )
-                  ]),
+                        )
+                      ]),
+                ],
+              ),
             ),
           )),
     );
@@ -201,8 +219,7 @@ class _FormFoodState extends State<FormFood> {
     "Makanan kemasan",
     "Karbohidrat",
     "Lauk Pauk",
-    "Cemilan"
-        "Minuman"
+    "Cemilan/Minuman",
   ];
 
   List<dynamic> items_icon = [
@@ -313,60 +330,63 @@ class _FormFoodState extends State<FormFood> {
                 width: MediaQuery.of(context).size.width * 0.9,
                 decoration:
                     BoxDecoration(border: Border.all(color: Colors.grey)),
-                child: Expanded(
-                    child: DropdownButton<String>(
-                  underline: SizedBox(
-                    height: 5.h,
-                  ),
-                  dropdownColor: Colors.white,
-                  isExpanded: true,
-
-                  borderRadius: BorderRadius.circular(10.dm),
-                  padding: EdgeInsets.only(left: 10.w, right: 10.w),
-                  // value: (controller.current_value == null)? "" : controller.current_value!.value ,
-                  value: dropdownValue,
-                  hint: Text(
-                    "--pilih--",
-                    style: TextStyle(
-                      fontFamily: "Poppins",
-                      fontSize: 14.sp,
+                child: Padding(
+                  padding: EdgeInsets.all(5.dm),
+                  child: Expanded(
+                      child: DropdownButton<String>(
+                    underline: SizedBox(
+                      height: 5.h,
                     ),
-                  ),
-                  icon: const Icon(LucideIcons.chevronDown),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      dropdownValue = newValue!;
-                    });
-                  },
+                    dropdownColor: Colors.white,
+                    isExpanded: true,
 
-                  items: items!.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Row(
-                        children: [
-                          Text(
-                            "${value}",
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 12.sp,
-                                fontFamily: "Poppins"),
-                          ),
-                          SizedBox(
-                            width: 10.w,
-                          ),
-                          Icon(
-                            items_icon[items.indexOf(value)],
-                            size: 20,
-                            color: Color.fromARGB(255, 204, 191, 90),
-                          )
-                        ],
+                    borderRadius: BorderRadius.circular(10.dm),
+                    padding: EdgeInsets.only(left: 10.w, right: 10.w),
+                    // value: (controller.current_value == null)? "" : controller.current_value!.value ,
+                    value: dropdownValue,
+                    hint: Text(
+                      "--pilih--",
+                      style: TextStyle(
+                        fontFamily: "Poppins",
+                        fontSize: 14.sp,
                       ),
-                    );
-                  }).toList(),
-                )
-
-                    // Obx(() => )
                     ),
+                    icon: const Icon(LucideIcons.chevronDown),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        dropdownValue = newValue!;
+                      });
+                    },
+
+                    items: items!.map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Row(
+                          children: [
+                            Text(
+                              "${value}",
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 12.sp,
+                                  fontFamily: "Poppins"),
+                            ),
+                            SizedBox(
+                              width: 10.w,
+                            ),
+                            Icon(
+                              items_icon[items.indexOf(value)],
+                              size: 20,
+                              color: Color.fromARGB(255, 204, 191, 90),
+                            )
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  )
+
+                      // Obx(() => )
+                      ),
+                ),
               ),
               SizedBox(height: 10.h),
               Padding(
@@ -498,24 +518,24 @@ class _FormFoodState extends State<FormFood> {
               ),
               SizedBox(height: 10.h),
               Padding(
-                padding: EdgeInsets.only(left: 15.w, right: 15.w),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    // FormText2(context, width: 0.2, hint:"0", label:"Jumlah"),
-                    FormDate(context,
-                        width: 0.45,
-                        hint: "0",
-                        label: "Tanggal beli/masak",
-                        controller: dateStart),
-                    FormDate(context,
-                        width: 0.45,
-                        hint: "0",
-                        label: "Tanggal donasi",
-                        controller: dateDonate,
-                        isEditable: false),
-                  ],
+                padding: EdgeInsets.only(left:10.w),
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: Text(
+                    "Tanggal beli/masak",
+                    style: TextStyle(
+                        fontFamily: "Poppins",
+                        fontSize: 12.sp,
+                        color: Colors.grey),
+                  ),
                 ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(left: 15.w, right: 15.w),
+                child: FormDate(context,
+                    width: 0.9,
+                    hint: "0",
+                    controller: dateStart),
               ),
               (isActivate == false)
                   ? Column(
@@ -544,9 +564,9 @@ class _FormFoodState extends State<FormFood> {
               ),
               Obx(() => Padding(
                     padding: EdgeInsets.only(bottom: 20.h),
-                    child: CardButton(context, isPressed, onTap: (_) {
+                    child: CardButton(context, isPressed, onTap: (_) async {
                       isPressed.value = true;
-                      if (global_key.currentState!.validate() == false ) {
+                      if (global_key.currentState!.validate() == false) {
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                             content: Text(
                           "Field tidak boleh kosong!",
@@ -556,23 +576,56 @@ class _FormFoodState extends State<FormFood> {
                           ),
                         )));
                       } else {
-                        foodController.data_food!['name'] =
+                        foodController.data_food!['title'] =
                             "${nameController.text}";
-                        foodController.data_food!['kategori'] =
-                            "${dropdownValue}";
-                        foodController.data_food!['variasi'] = variasi_item;
-                        foodController.data_food!['lokasi'] =
-                            "${nameController.text}";
-                        foodController.data_food!['date_start'] =
-                            "${dateStart.text}";
-                        foodController.data_food!['date_donate'] =
-                            "${dateDonate.text}";
-                        foodController.data_food!['jumlah'] =
-                            "${jumlahController.text}";
-                        foodController.data_food!['deskripsi'] =
+                        foodController.data_food!['categories[]'] =
+                            "${items.indexOf(dropdownValue!)}";
+
+                        foodController.data_food!['body[alamat]'] =
+                            "${lokasiController.text}";
+
+                        foodController.data_food!['body[deskripsi]'] =
                             "${deskripsiController.text}";
 
+                        
+                        if (jumlahController.text == null ||
+                            jumlahController.text == '') {
+                          for (int i = 0; i < foodController.quantityController.length; i++) {
+                            foodController.data_food!['variants[${i}][name]'] =
+                                "${foodController.quantityController[i]!.text}";
+                            foodController.data_food!['variants[${i}][stok]'] =
+                                "${foodController.valueController[i]!.text}";
+
+                            DateTime waktuStart =
+                                formatInput.parse("${dateStart.text}");
+
+                            String waktuISO_start =
+                                waktuStart.toIso8601String();
+                            foodController
+                                    .data_food!['variants[${i}][startAt]'] =
+                                waktuISO_start;
+
+                            log("ternyata ${foodController.quantityController[i]!.text}");
+                            log("harus ke jalan ${foodController.valueController[i]!.text}");
+                          }
+                        } else {
+                          foodController.data_food!['variants[0][name]'] =
+                              "${nameController!.text}";
+                          foodController.data_food!['variants[0][stok]'] =
+                              "${jumlahController.text}";
+
+                          DateTime waktuStart =
+                              formatInput.parse("${dateStart.text}");
+                          String waktuISO_start = waktuStart.toIso8601String();
+                          foodController.data_food!['variants[0][startAt]'] =
+                              waktuISO_start;
+                        }
+
+                        foodController.data_food!['body[coordinate]'] =
+                            koordinatController.text;
+
                         Navigator.pushNamed(context, "/cek");
+                        
                       }
 
                       // log("${foodController.data_food!.values}");

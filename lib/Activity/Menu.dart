@@ -87,18 +87,6 @@ class _MenuState extends State<Menu> {
         actions: [
           IconButton(
               onPressed: () async {
-                roadInfo = await mpController.controller.drawRoad(
-                    GeoPoint(latitude: -7.5809948, longitude: 110.8101376),
-                    GeoPoint(latitude: -7.5739886, longitude: 110.8098979),
-                    roadType: RoadType.bike,
-                    roadOption: RoadOption(
-                        roadColor: Color.fromRGBO(42, 122, 89, 1),
-                        roadBorderColor: Color.fromRGBO(42, 122, 89, 1),
-                        zoomInto: true,
-                        roadWidth: 10));
-                print("Jarak : ${roadInfo!.distance! * 1000} m");
-                log("Jarak : ${roadInfo!.distance! * 1000} m");
-                log("Jarak : ${roadInfo!.instructions}");
                
               },
               icon: Icon(
@@ -216,7 +204,7 @@ class _MenuState extends State<Menu> {
                       height: MediaQuery.of(context).size.height,
                       // height: 80.h,
                       child: Padding(
-                        padding: EdgeInsets.only(bottom: 20.h),
+                        padding: EdgeInsets.only(bottom: 40.h),
                         child: ListView.builder(
                             controller: scrollController,
                             itemCount: 10,
@@ -225,7 +213,6 @@ class _MenuState extends State<Menu> {
                               return InkWell(
                                 onTap: () {
                                   Navigator.pushNamed(context, "/onmap");
-                                  
                                 },
                                 child: Padding(
                                   padding: EdgeInsets.only(bottom: 5.h),
