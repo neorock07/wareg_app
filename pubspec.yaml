@@ -54,6 +54,7 @@ dependencies:
   flutter_open_street_map: ^0.0.4
   dio: ^5.4.3+1
   http_parser: ^4.0.2
+  geolocator: ^11.1.0
 
 dev_dependencies:
   flutter_test:

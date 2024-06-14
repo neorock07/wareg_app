@@ -60,7 +60,7 @@ class _ResultCheckState extends State<ResultCheck> {
             padding: EdgeInsets.only(bottom: 120.h),
             child: CardButton(context, isPressed2, onTap: (_) {
                   isPressed2.value = true;
-                  Navigator.pushNamed(context, "/result_check");
+                  Navigator.pushNamed(context, "/home");
                   // log("${foodController.data_food!.values}");
                   // log("${foodController.data_food!['date_donate']}");
                 },

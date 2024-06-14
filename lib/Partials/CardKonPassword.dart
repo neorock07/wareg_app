@@ -5,14 +5,16 @@ import 'package:wareg_app/Controller/PasswordController.dart';
 
 var passController = Get.put(PasswordController());
 
-Widget CardPassword(BuildContext context,
+Widget CardKonPassword(BuildContext context,
     {String? label,
     GlobalKey<FormState>? key,
     String? hint,
     bool? isBorder = false,  
     TextInputType? type,
     RxBool? isObscure,
-    TextEditingController? controller}) {
+    TextEditingController? controller,
+    TextEditingController? controller2,
+    }) {
   return Column(
     children: [
       Padding(
@@ -36,10 +38,12 @@ Widget CardPassword(BuildContext context,
         child: Padding(
           padding: EdgeInsets.all(5.dm),
           child: TextFormField(
-              obscureText: !passController.visibility.value,
+              obscureText: !passController.Konvisibility.value,
               validator: (String? sr) {
                 if (sr == null || sr.isEmpty || sr.length < 8) {
                   return 'Tidak boleh kosong dan minimal 8 karakter!';
+                }else if(sr != controller2!.text){
+                  return 'Password tidak sesuai!';
                 }
                 return null;
               },
@@ -55,7 +59,7 @@ Widget CardPassword(BuildContext context,
                   ),
                   onPressed: () {
                     isObscure!.value = !isObscure!.value;
-                    passController.visibility.value = !passController.visibility.value;
+                    passController.Konvisibility.value = !passController.Konvisibility.value;
                   },
                 ),
               ),

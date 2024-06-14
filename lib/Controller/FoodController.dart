@@ -14,9 +14,32 @@ class FoodController extends GetxController {
 
   //untuk tanggal
   var selectedDate = DateTime.now().obs;
+  var pilihDate = DateTime(2000).obs;
   var selectedTime = TimeOfDay.now().obs;
   String? formattedDate;
   
+  Future<String> showDate(BuildContext context) async{
+  
+  final DateTime? datePilih = await showDatePicker(
+    context: context,
+    initialDate: pilihDate.value,
+    firstDate: DateTime(1901),
+    lastDate: DateTime(DateTime.now().year, DateTime.now().month),
+  );
+
+  if (datePilih != null) {
+    pilihDate.value = datePilih;
+    String formattedDate = DateFormat('yyyy-MM-dd').format(pilihDate.value);
+    log("kiii $formattedDate");
+    return "${formattedDate!.substring(0, 10)}";
+  }else{
+    return "no data";
+  }
+
+     
+  }
+
+
   Future<String> selectDate(BuildContext context) async {
   // Show date picker and get the selected date
   final DateTime? pickedDate = await showDatePicker(

@@ -5,6 +5,7 @@ Widget FormText(BuildContext context,
     {TextEditingController? controller,
     String? label,
     String? hint,
+    double? radius = 0,
     TextInputType? type,
     bool? isEnabled = true,
     GlobalKey<FormState>? key}) {
@@ -24,6 +25,7 @@ Widget FormText(BuildContext context,
     Container(
         width: MediaQuery.of(context).size.width * 0.9,
         decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(radius!),
             border: Border.all(color: Colors.grey),
             color: Color.fromRGBO(251, 251, 251, 1)),
         child: Padding(

@@ -7,6 +7,7 @@ import 'package:wareg_app/Activity/Home.dart';
 import 'package:wareg_app/Activity/LoginActivity.dart';
 import 'package:wareg_app/Activity/OnMap.dart';
 import 'package:wareg_app/Activity/PreviewFood.dart';
+import 'package:wareg_app/Activity/RegisterActivity.dart';
 import 'package:wareg_app/Activity/ResultCheck.dart';
 
 class Routes{
@@ -16,6 +17,8 @@ class Routes{
         return MaterialPageRoute(builder: (_)=> BottomNavPage());
       case '/login':
         return MaterialPageRoute(builder: (_)=> LoginActivity());
+      case '/register':
+        return MaterialPageRoute(builder: (_)=> RegisterActivity());
       case '/onmap':
         return MaterialPageRoute(builder: (_)=> OnMap());
       case '/picture':

@@ -92,18 +92,39 @@ class _LoginActivityState extends State<LoginActivity> {
                       setState(() {
                         isLoad.value = true;
                       });
+                      DialogPop(
+                        context,
+                        icon: Container(
+                            height: 100.h,
+                            child: Column(
+                              children: [
+                                SpinKitCircle(
+                                    color: Color.fromRGBO(48, 122, 89, 1)),
+                                Text(
+                                  "Mohon Tunggu...",
+                                  style: TextStyle(
+                                      fontFamily: "Poppins",
+                                      fontSize: 14.sp,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            )),
+                      );
                       await loginController
                           .login(emailController.text, passController.text)
                           .then((value) {
                         setState(() {
                           isLoad.value = false;
+                          Navigator.of(context, rootNavigator: true).pop();
                         });
+
                         if (value == true) {
                           Navigator.pushNamed(context, "/home");
                         } else {
                           setState(() {
-                          isLoad.value = false;
-                        });
+                            isLoad.value = false;
+                          });
                           DialogPop(
                             context,
                             size: [180.h, 150.w],
@@ -174,6 +195,7 @@ class _LoginActivityState extends State<LoginActivity> {
                       color: Colors.transparent,
                       child: InkWell(
                         onTap: () {
+                          Navigator.pushNamed(context, "/register");
                           log("kami tak sudi memilih");
                         },
                         splashColor: Colors.grey,
@@ -191,11 +213,11 @@ class _LoginActivityState extends State<LoginActivity> {
                 ),
               ),
               SizedBox(height: 10.h),
-              (isLoad.value == true)
-                  ? SpinKitDoubleBounce(
-                      color: Colors.green,
-                    )
-                  : Text("")
+              // (isLoad.value == true)
+              //     ? SpinKitDoubleBounce(
+              //         color: Colors.green,
+              //       )
+              //     : Text("")
             ],
           ),
         ),

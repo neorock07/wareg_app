@@ -3,34 +3,28 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http_parser/http_parser.dart';
 import 'package:wareg_app/Util/Ip.dart';
+// import 'package:dio/dio.dart' as dio;
 
-class PostFood extends GetxController {
-  Future<Map<String, dynamic>?> postData(
-      Map<String, dynamic> post_data, List<File> img) async {
+class RegisterController extends GetxController {
+  Future<Map<String, dynamic>?> register(
+      Map<String, dynamic> post_data, File img) async {
     var data = post_data;
     Map<String, dynamic>? result;
     var ipAdd = Ip();
-
-    // Fetch token from SharedPreferences
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    var token = prefs.getString('token') ?? '';
-
     // Create a URI object from the URL of the server endpoint
-    final uri = Uri.parse('${ipAdd.getType()}://${ipAdd.getIp()}/post/create');
-
+    final uri = Uri.parse('${ipAdd.getType()}://${ipAdd.getIp()}/auth/register');
+    
     // Create an HTTP request object
     final request = http.MultipartRequest('POST', uri);
-    request.headers['Authorization'] = 'Bearer $token';
     request.headers['Content-Type'] =
-        'multipart/form-data'; // Adding Content-Type
-    for (var i in img) {
+        'multipart/form-data'; // Menambahkan Content-Type
+    
       request.files.add(await http.MultipartFile.fromPath(
-        "images",
-        i.path,
+        "profile_picture",
+        img.path,
       ));
-    }
     
     for (final entry in data.entries) {
       request.fields[entry.key] = entry.value.toString();
@@ -43,7 +37,7 @@ class PostFood extends GetxController {
     final response = await request.send();
 
     // Check the status code of the response
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200 || response.statusCode == 201) {
       // The request was successful
       print('Success!');
       result = {"response": 200};

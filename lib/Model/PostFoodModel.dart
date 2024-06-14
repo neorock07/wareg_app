@@ -1,57 +1,94 @@
-import 'package:wareg_app/Model/AddressModel.dart';
-import 'package:wareg_app/Model/UserModel.dart';
-import 'package:wareg_app/Model/VariantsModel.dart';
+import 'dart:convert';
 
-class PostFoodModel{
-  
-  String? title;
-  String? body;
-  UserModel? user;
-  AddressModel? address;
-  List<VariantModel>? variants;
-  int? id;
-  int? status;
-  DateTime? createdAt;
-  DateTime? updatedAt;
+class Post {
+  final int id;
+  final String title;
+  final Body body;
+  final String createdAt;
+  final String updatedAt;
+  final String expiredAt;
+  final String distance;
+  final int stok;
+  final int userId;
+  final String userName;
+  final String userProfilePicture;
+  final double averageReview;
+  final List<Media> media;
 
-    PostFoodModel({
+  Post({
+    required this.id,
     required this.title,
     required this.body,
-    required this.user,
-    required this.address,
-    required this.variants,
-    required this.id,
-    required this.status,
-    this.createdAt,
-    this.updatedAt,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.expiredAt,
+    required this.distance,
+    required this.stok,
+    required this.userId,
+    required this.userName,
+    required this.userProfilePicture,
+    required this.averageReview,
+    required this.media,
   });
 
-   factory PostFoodModel.fromJson(Map<String, dynamic> json) {
-    return PostFoodModel(
-      title: json['title'],
-      body: json['body'],
-      user: UserModel.fromJson(json['user']),
-      address: AddressModel.fromJson(json['address']),
-      variants: List<VariantModel>.from(json['variants'].map((x) => VariantModel.fromJson(x))),
+  factory Post.fromJson(Map<String, dynamic> json) {
+    var mediaList = json['media'] as List;
+    List<Media> media = mediaList.map((i) => Media.fromJson(i)).toList();
+
+    return Post(
       id: json['id'],
-      status: json['status'],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      title: json['title'],
+      body: Body.fromJson(json['body']),
+      createdAt: json['createdAt'],
+      updatedAt: json['updatedAt'],
+      expiredAt: json['expiredAt'],
+      distance: json['distance'],
+      stok: json['stok'],
+      userId: json['userId'],
+      userName: json['userName'],
+      userProfilePicture: json['userProfilePicture'],
+      averageReview: (json['averageReview'] == null) ? 0 : json['averageReview'].toDouble(),
+      media: media,
     );
   }
+}
 
-  Map<String, dynamic> toJson() {
-    return {
-      'title': title,
-      'body': body,
-      'user': user?.toJson(),
-      'address': address?.toJson(),
-      'variants': List<dynamic>.from(variants!.map((x) => x.toJson())),
-      'id': id,
-      'status': status,
-      'createdAt': createdAt?.toIso8601String(),
-      'updatedAt': updatedAt?.toIso8601String(),
-    };
+class Body {
+  final String alamat;
+  final String coordinate;
+
+  Body({
+    required this.alamat,
+    required this.coordinate,
+  });
+
+  factory Body.fromJson(Map<String, dynamic> json) {
+    return Body(
+      alamat: json['alamat'],
+      coordinate: json['coordinate'],
+    );
   }
+}
 
+class Media {
+  final int id;
+  final String url;
+  final String createdAt;
+  final String updatedAt;
+
+  Media({
+    required this.id,
+    required this.url,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  factory Media.fromJson(Map<String, dynamic> json) {
+    return Media(
+      id: json['id'],
+      url: json['url'],
+      createdAt: json['createdAt'],
+      updatedAt: json['updatedAt'],
+    );
+  }
 }

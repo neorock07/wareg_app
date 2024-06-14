@@ -281,14 +281,14 @@ class _CekLayakState extends State<CekLayak> {
                         Navigator.of(context, rootNavigator: true).pop();
                         DialogPop(
                           context,
-                          size: [180.h, 150.w],
+                          size: [220.h, 150.w],
                           dismissable: false,
                           icon: Container(
                               height: 180.h,
                               child: Column(
                                 children: [
                                   Icon(
-                                    LucideIcons.checkCircle,
+                                    LucideIcons.shieldOff,
                                     color: Color.fromRGBO(48, 122, 99, 1),
                                     size: 30.dm,
                                   ),
@@ -304,6 +304,7 @@ class _CekLayakState extends State<CekLayak> {
                                         color: Colors.black,
                                         fontWeight: FontWeight.bold),
                                   ),
+                                  SizedBox(height: 10.h,),
                                   Text(
                                     "${presiden!['result']['reason']}",
                                     textAlign: TextAlign.center,
@@ -320,7 +321,7 @@ class _CekLayakState extends State<CekLayak> {
                                             onTap: (_) {
                                           isPressed2.value = true;
                                           Navigator.pushNamed(
-                                              context, "/result_check");
+                                              context, "/home");
                                           // log("${foodController.data_food!.values}");
                                           // log("${foodController.data_food!['date_donate']}");
                                         },
