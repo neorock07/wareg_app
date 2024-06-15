@@ -10,6 +10,7 @@ class ChatActivity extends StatefulWidget {
 class _ChatActivityState extends State<ChatActivity> {
   final TextEditingController _controller = TextEditingController();
   final List<String> _messages = [];
+  final ScrollController _scrollController = ScrollController();
 
   void _sendMessage() {
     if (_controller.text.isNotEmpty) {
@@ -17,7 +18,26 @@ class _ChatActivityState extends State<ChatActivity> {
         _messages.add(_controller.text);
         _controller.clear();
       });
+      _scrollToBottom();
     }
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollToBottom();
   }
 
   @override
@@ -55,6 +75,7 @@ class _ChatActivityState extends State<ChatActivity> {
           children: <Widget>[
             Expanded(
               child: ListView.builder(
+                controller: _scrollController,
                 reverse: false,
                 itemCount: _messages.length,
                 itemBuilder: (context, index) {
@@ -69,7 +90,6 @@ class _ChatActivityState extends State<ChatActivity> {
                             ? Alignment.topRight
                             : Alignment.topLeft,
                         child: Container(
-                          // width: 20.w,
                           decoration: BoxDecoration(
                               color: (index! % 2 == 0)
                                   ? const Color.fromRGBO(48, 122, 89, 1)
@@ -81,7 +101,6 @@ class _ChatActivityState extends State<ChatActivity> {
                                       topLeft: Radius.circular(10.dm),
                                     )
                                   : BorderRadius.only(
-                                      // bottomLeft: Radius.circular(10.dm),
                                       topRight: Radius.circular(10.dm),
                                       topLeft: Radius.circular(10.dm),
                                       bottomRight: Radius.circular(10.dm))),
@@ -106,7 +125,7 @@ class _ChatActivityState extends State<ChatActivity> {
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
                                     Text(
-                                      "20:43 AM",
+                                      "${DateTime.now().toString().substring(11, 16)}",
                                       style: TextStyle(
                                         fontFamily: "Poppins",
                                         fontSize: 10.sp,
@@ -126,58 +145,6 @@ class _ChatActivityState extends State<ChatActivity> {
                         ),
                       ),
                     ),
-
-                    // LayoutBuilder(
-                    //   builder: (context, constraints) {
-                    //     return Container(
-                    //       // constraints: BoxConstraints(
-                    //       //   maxWidth: ,
-                    //       // ),
-                    //       decoration: BoxDecoration(
-                    //         color: const Color.fromRGBO(48, 122, 89, 1),
-                    //         borderRadius: BorderRadius.only(
-                    //           topLeft: Radius.circular(10.dm),
-                    //           topRight: Radius.circular(10.dm),
-                    //           bottomLeft: Radius.circular(10.dm),
-                    //         ),
-                    //       ),
-                    //       padding: const EdgeInsets.all(10.0),
-                    //       child: Column(
-                    //         crossAxisAlignment: CrossAxisAlignment.end,
-                    //         children: [
-                    //           Text(
-                    //             _messages[index],
-                    //             style: TextStyle(
-                    //               fontFamily: "Poppins",
-                    //               fontSize: 12.sp,
-                    //               color: Colors.white,
-                    //             ),
-                    //           ),
-                    //           SizedBox(height: 5.sp),
-                    //           Row(
-                    //             mainAxisAlignment:
-                    //                 MainAxisAlignment.end,
-                    //             children: [
-                    //               Text(
-                    //                 "20:43 AM",
-                    //                 style: TextStyle(
-                    //                   fontFamily: "Poppins",
-                    //                   fontSize: 10.sp,
-                    //                   color: Colors.grey,
-                    //                 ),
-                    //               ),
-                    //               Icon(
-                    //                 LucideIcons.checkCheck,
-                    //                 color: Colors.blue,
-                    //                 size: 10,
-                    //               ),
-                    //             ],
-                    //           ),
-                    //         ],
-                    //       ),
-                    //     );
-                    //   },
-                    // ),
                   );
                 },
               ),
