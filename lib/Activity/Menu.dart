@@ -298,7 +298,7 @@ class _MenuState extends State<Menu> {
                                                     link: updatedUrl,
                                                     title: post.title),
                                               );
-                                              mpController.map_dataTarget['url'] = updatedUrl;
+                                              mpController.map_dataTarget['url'] = post.media[0].url;
                                               log("data : ${mpController.map_dataTarget['url']} | ${mpController.map_dataTarget['stok']}");
                                               Navigator.pushNamed(
                                                   context, "/onmap");

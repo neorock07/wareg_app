@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wareg_app/Activity/BottomNavPage.dart';
 import 'package:wareg_app/Activity/CekLayak.dart';
+import 'package:wareg_app/Activity/ChatActivity.dart';
 import 'package:wareg_app/Activity/FoodPicture.dart';
 import 'package:wareg_app/Activity/FormFood.dart';
 import 'package:wareg_app/Activity/Home.dart';
@@ -21,6 +22,8 @@ class Routes{
         return MaterialPageRoute(builder: (_)=> RegisterActivity());
       case '/onmap':
         return MaterialPageRoute(builder: (_)=> OnMap());
+      case '/chat':
+        return MaterialPageRoute(builder: (_)=> ChatActivity());
       case '/picture':
         return MaterialPageRoute(builder: (_)=> FoodPicture());
       case '/formfood':

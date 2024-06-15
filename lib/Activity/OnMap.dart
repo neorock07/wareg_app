@@ -125,14 +125,14 @@ class _OnMapState extends State<OnMap> {
               Container(
                   height: MediaQuery.of(context).size.height * 0.6,
                   child: MapBox(
-                    context,
-                    mpController.controller,
-                    koordinat,
-                    userProfile,
-                    isDraw: true,
-                    lat: mpController.target_lat,
-                    long: mpController.target_long,
-                  )),
+                        context,
+                        mpController.controller,
+                        koordinat,
+                        userProfile,
+                        isDraw: true,
+                        lat: mpController.target_lat,
+                        long: mpController.target_long,
+                      )),
               DraggableScrollableSheet(
                   initialChildSize: 0.45,
                   minChildSize: 0.45,
@@ -173,7 +173,7 @@ class _OnMapState extends State<OnMap> {
                                                   BorderRadius.circular(5.dm),
                                               image: DecorationImage(
                                                   image: NetworkImage(
-                                                      "${updatedUrl}"),
+                                                      "${mpController.map_dataTarget['url']}"),
                                                   scale: 1,
                                                   fit: BoxFit.cover)),
                                         ),
@@ -333,6 +333,7 @@ class _OnMapState extends State<OnMap> {
                             color: Colors.grey,
                             onPressed: () async {
                               // log("lokasi user : )}");
+                              Navigator.pushNamed(context, "/chat");
                             },
                             icon: Icon(LucideIcons.messagesSquare))
                       ],
