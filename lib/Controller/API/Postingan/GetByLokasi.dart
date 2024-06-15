@@ -14,7 +14,7 @@ class GetPostController extends GetxController {
   //   fetchPosts(); // Example coordinates
   // }
 
-  void fetchPosts(var lat, var long) async {
+   Future<RxBool> fetchPosts(var lat, var long) async {
     try {
       isLoading(true);
       var fetchedPosts = await PostService().fetchPosts(lat, long);
@@ -24,5 +24,6 @@ class GetPostController extends GetxController {
     } finally {
       isLoading(false);
     }
+    return isLoading;
   }
 }

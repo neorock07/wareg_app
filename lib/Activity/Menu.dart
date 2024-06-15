@@ -31,17 +31,11 @@ class _MenuState extends State<Menu> {
   RxList<StaticPositionGeoPoint> koordinat = <StaticPositionGeoPoint>[].obs;
   var postController = Get.put(GetPostController());
   String userName = "Bento";
-
-  Future setPos() async {
-    // await mpController.controller.setStaticPosition(koordinat, "1");
-    await mpController.controller.setMarkerOfStaticPoint(
-        id: "1",
-        markerIcon: MarkerIcon(
-          iconWidget: IconMaker(
-              link:
-                  "https://cdn.idntimes.com/content-images/duniaku/post/20230309/raw-06202016rf-1606-3d3997f53e6f3e9277cd5a67fbd8f31f-1a44de7c1e0085a4ec8d2e4cb9602659.jpg"),
-        ));
-  }
+  var userProfile =
+      "https://cdn.idntimes.com/content-images/duniaku/post/20230309/raw-06202016rf-1606-3d3997f53e6f3e9277cd5a67fbd8f31f-1a44de7c1e0085a4ec8d2e4cb9602659.jpg";
+  var marker_user;
+  var ipAdd = Ip();
+  String? updatedUrl;
 
   Future<void> _loadUserName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -50,28 +44,44 @@ class _MenuState extends State<Menu> {
     });
   }
 
+  Future<void> _loadProfile() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String newBaseUrl = "${ipAdd.getType()}://${ipAdd.getIp()}";
+
+    setState(() {
+      userProfile = prefs.getString('profile_picture')!;
+      // ??
+      //     "https://cdn.idntimes.com/content-images/duniaku/post/20230309/raw-06202016rf-1606-3d3997f53e6f3e9277cd5a67fbd8f31f-1a44de7c1e0085a4ec8d2e4cb9602659.jpg";
+
+      marker_user =
+          userProfile.replaceFirst("http://localhost:3000", newBaseUrl);
+    });
+  }
+
   Future<void> _fetchLocationAndPosts() async {
     LocationService locationService = LocationService();
     try {
       Position position = await locationService.getCurrentLocation();
-      postController.fetchPosts(position.latitude, position.longitude);
-      var ipAdd = Ip();
+      await postController.fetchPosts(position.latitude, position.longitude);
       String newBaseUrl = "${ipAdd.getType()}://${ipAdd.getIp()}";
-      
-      for(var i in postController.posts){
-        var lat = i.body.coordinate.split(",")[0];
-        var long = i.body.coordinate.split(",")[1];
-        String updatedUrl = i.media[0].url.replaceFirst("http://localhost:3000", newBaseUrl);
-        koordinat.value.add(StaticPositionGeoPoint(
-          i.id.toString(),
-          MarkerIcon(
-            iconWidget: IconMaker(
-              link:
-                  "${updatedUrl}")
+
+      for (var post in postController.posts) {
+        var coordinates = post.body.coordinate.split(",");
+        double lat = double.parse(coordinates[0]);
+        double long = double.parse(coordinates[1]);
+        GeoPoint point = GeoPoint(latitude: lat, longitude: long);
+
+        // Update the media URL with the new base URL
+        String updatedUrl =
+            post.media[0].url.replaceFirst("http://localhost:3000", newBaseUrl);
+
+        // Add marker to the map with the correct icon and title
+        await mpController.controller.addMarker(
+          point,
+          markerIcon: MarkerIcon(
+            iconWidget: IconMaker(link: updatedUrl, title: post.title),
           ),
-          [
-            GeoPoint(latitude: double.parse(lat), longitude: double.parse(long))
-          ]));
+        );
       }
     } catch (e) {
       print('Could not fetch location: $e');
@@ -79,10 +89,21 @@ class _MenuState extends State<Menu> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Fetch new data when the widget reappears
+    _fetchLocationAndPosts();
+  }
+
+  @override
   void initState() {
     super.initState();
-    setPos();
-    _fetchLocationAndPosts();
+    // prefController.loadData("profile_picture");
+    setState(() {
+      _loadProfile();
+      _fetchLocationAndPosts();
+    });
+
     ScrollController scController = ScrollController();
   }
 
@@ -90,9 +111,16 @@ class _MenuState extends State<Menu> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        title: Text(
+          "Cari Donasi Gratis yuk!",
+          style: TextStyle(
+              fontFamily: "Bree", color: Colors.black, fontSize: 18.sp),
+        ),
         actions: [
           IconButton(
-              onPressed: () async {},
+              onPressed: () async {
+                log("ki coeg : ${updatedUrl}");
+              },
               icon: Icon(
                 LucideIcons.bell,
                 color: Colors.black,
@@ -113,7 +141,8 @@ class _MenuState extends State<Menu> {
               alignment: Alignment.topLeft,
               child: Padding(
                 padding: EdgeInsets.only(
-                    left: MediaQuery.of(context).size.width * 0.05, bottom: 10.h),
+                    left: MediaQuery.of(context).size.width * 0.05,
+                    bottom: 10.h),
                 child: Text(
                   "Lihat makanan disekitar mu",
                   style: TextStyle(
@@ -131,7 +160,13 @@ class _MenuState extends State<Menu> {
                     color: const Color.fromARGB(255, 237, 235, 235)),
                 child: Padding(
                   padding: EdgeInsets.all(4.dm),
-                  child: MapBox(context, mpController.controller, koordinat),
+                  child: Stack(children: [
+                    MapBox(context, mpController.controller, koordinat,
+                        marker_user),
+                    (postController.isLoading.value)
+                        ? CircularProgressIndicator()
+                        : Text(""),
+                  ]),
                 ),
               ),
             ),
@@ -204,42 +239,94 @@ class _MenuState extends State<Menu> {
                         )
                       ],
                     ),
-                    Container(
-                      height: MediaQuery.of(context).size.height,
-                      // height: 80.h,
-                      child: Padding(
-                        padding: EdgeInsets.only(bottom: 40.h),
-                        child: ListView.builder(
-                            controller: scrollController,
-                            itemCount: 10,
-                            scrollDirection: Axis.vertical,
-                            itemBuilder: (context, index) {
-                              return InkWell(
-                                onTap: () {
-                                  Navigator.pushNamed(context, "/onmap");
-                                },
-                                child: Padding(
-                                  padding: EdgeInsets.only(bottom: 5.h),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      CardMenu(context),
-                                      SizedBox(
-                                        height: 5.h,
+                    Obx(() {
+                      if (postController.isLoading.value) {
+                        return Center(
+                            child: Padding(
+                          padding: EdgeInsets.only(top: 10.h),
+                          child: CircularProgressIndicator(),
+                        ));
+                      } else if (postController.posts.isEmpty) {
+                        return Center(child: Text('No posts found.'));
+                      } else {
+                        return Container(
+                          height: MediaQuery.of(context).size.height,
+                          // height: 80.h,
+                          child: Padding(
+                            padding: EdgeInsets.only(bottom: 40.h),
+                            child: ListView.builder(
+                                controller: scrollController,
+                                itemCount: postController.posts.length,
+                                scrollDirection: Axis.vertical,
+                                itemBuilder: (context, index) {
+                                  final post = postController.posts[index];
+                                  return InkWell(
+                                    onTap: () {
+                                      Navigator.pushNamed(context, "/onmap");
+                                    },
+                                    child: Padding(
+                                      padding: EdgeInsets.only(bottom: 5.h),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          InkWell(
+                                            onTap: () {
+                                              String updatedUrl = post
+                                                  .media[0].url
+                                                  .replaceFirst(
+                                                      "http://localhost:3000",
+                                                      newBaseUrl);
+                                              mpController.target_lat =
+                                                  double.parse(post
+                                                      .body.coordinate
+                                                      .toString()
+                                                      .split(",")[0]);
+                                              mpController.target_long =
+                                                  double.parse(post
+                                                      .body.coordinate
+                                                      .toString()
+                                                      .split(",")[1]);
+                                              mpController
+                                                      .map_dataTarget['title'] =
+                                                  post.title;
+                                              mpController.map_dataTarget['stok'] = post.stok;
+                                              mpController.map_dataTarget['alamat'] = post.body.alamat;
+                                              mpController.map_dataTarget[
+                                                  'marker'] = MarkerIcon(
+                                                iconWidget: IconMaker(
+                                                    link: updatedUrl,
+                                                    title: post.title),
+                                              );
+                                              mpController.map_dataTarget['url'] = updatedUrl;
+                                              log("data : ${mpController.map_dataTarget['url']} | ${mpController.map_dataTarget['stok']}");
+                                              Navigator.pushNamed(
+                                                  context, "/onmap");
+                                            },
+                                            child: CardMenu(context,
+                                                jarak: post.distance,
+                                                stok: post.stok,
+                                                url: post.media[0].url,
+                                                title: post.title),
+                                          ),
+                                          SizedBox(
+                                            height: 5.h,
+                                          ),
+                                          Divider(
+                                            height: 2.h,
+                                            color: Colors.grey,
+                                            indent: 10,
+                                            endIndent: 10,
+                                          )
+                                        ],
                                       ),
-                                      Divider(
-                                        height: 2.h,
-                                        color: Colors.grey,
-                                        indent: 10,
-                                        endIndent: 10,
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }),
-                      ),
-                    ),
+                                    ),
+                                  );
+                                }),
+                          ),
+                        );
+                      }
+                    })
                   ],
                 ),
               );

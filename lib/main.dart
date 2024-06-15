@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:wareg_app/Activity/SplashScreen.dart';
+import 'package:wareg_app/Services/PrefService.dart';
 import 'Routes/Route.dart';
 void main() {
+  // await SharedPreferencesService().init();
   runApp(const MyApp());
 }
 

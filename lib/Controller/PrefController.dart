@@ -6,11 +6,20 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wareg_app/Activity/Home.dart';
 import 'package:wareg_app/Activity/LoginActivity.dart';
+import 'package:wareg_app/Services/PrefService.dart';
 import 'package:wareg_app/Util/Ip.dart';
 import 'package:http/http.dart' as http;
 
 class PrefController extends GetxController {
   var ipAdd = Ip();
+  var storedData = ''.obs;
+
+  void loadData(String key) {
+    String? data = SharedPreferencesService().getString(key);
+    if (data != null) {
+      storedData.value = data;
+    }
+  }
 
   Future<void> saveData(Map<String, dynamic> data) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();

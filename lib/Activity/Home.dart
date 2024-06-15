@@ -44,12 +44,8 @@ class _HomeState extends State<Home> {
   Future<void> _fetchLocationAndPosts() async {
     LocationService locationService = LocationService();
     try {
-      Position position = await locationService.getCurrentLocation().then((value) {
-          lat = value.latitude;
-          long = value.longitude;
-          return lat;
-      });
-      postController.fetchPosts(lat, long);
+      Position position = await locationService.getCurrentLocation();
+      postController.fetchPosts(position.latitude, position.longitude);
     } catch (e) {
       print('Could not fetch location: $e');
     }

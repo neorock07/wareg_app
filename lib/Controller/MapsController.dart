@@ -5,17 +5,11 @@ import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:get/get.dart';
 
 class MapsController extends GetxController {
-  // @override
-  // void onInit() async {
-  //   await getUserLocation().then((value) {
-  //       var lat = value![0];
-  //       var long = value[1];
-  //       drawRoute(lat, long);
-  //   });
-  //   super.onInit();
-  // }
   double? latitude, longtitude;
-
+  double? target_lat, target_long;
+  Rx<RoadInfo>? roadInfo;
+  var isLoading = true.obs;
+  Map<String, dynamic> map_dataTarget = {};
   MapController controller = MapController(
     initPosition: GeoPoint(latitude: 47.4358055, longitude: 8.4737324),
     areaLimit: BoundingBox(
@@ -43,22 +37,25 @@ class MapsController extends GetxController {
     GeoPoint? end,
     RoadType? type,
   }) async {
-    RoadInfo roadInfo = await controller.drawRoad(start!, end!,
-        roadType: type!,
+    double? lat_user, long_user;
+    await controller.myLocation().then((value) {
+      lat_user = value.latitude;
+      long_user = value.longitude;
+    });
+    log("lokasi : ${lat_user} ${long_user}");
+    roadInfo!.value = await controller.drawRoad(
+        GeoPoint(latitude: lat_user!, longitude: long_user!),
+        GeoPoint(
+            latitude: target_lat!,
+            longitude: target_long!),
+        roadType: RoadType.bike,
         roadOption: const RoadOption(
             roadColor: Color.fromRGBO(42, 122, 89, 1),
             roadBorderColor: Color.fromRGBO(42, 122, 89, 1),
             zoomInto: true,
             roadWidth: 10));
-    print("Jarak : ${roadInfo!.distance! * 1000} m");
-    log("Jarak : ${roadInfo!.distance! * 1000} m");
-    log("Jarak : ${roadInfo!.instructions}");
-    log("lokasi user : ");
-    return roadInfo;
+    
+    return roadInfo!.value;
+    
   }
-
-  
-  
-
-
 }

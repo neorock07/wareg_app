@@ -1,63 +1,85 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wareg_app/Controller/MapsController.dart';
+import 'package:wareg_app/Controller/PrefController.dart';
 import 'package:wareg_app/Util/IconMaker.dart';
+import 'package:wareg_app/Util/Ip.dart';
 
-Widget MapBox(BuildContext context, var controller, dynamic point, {
+var marker_user;
+var ipAdd = Ip();
+var prefController = Get.put(PrefController());
+var mpController = Get.put(MapsController());
+
+Widget MapBox(
+  BuildContext context,
+  var controller,
+  dynamic point,
+  var url_profile, {
   bool? isDraw = false,
   bool? isPicker = false,
-  StreamController<GeoPoint>? stream_controller
-  
+  double? lat,
+  double? long,
 }) {
   var mpController = Get.put(MapsController());
-  stream_controller = StreamController<GeoPoint>();
+
   return OSMFlutter(
-      onMapIsReady: (condition)async{
-      if(condition == true && isDraw == true){
-        await mpController.getUserLocation().then((value) {
-          
-          Timer.periodic(Duration(seconds: 3), (timer) { 
-                stream_controller!.add(GeoPoint(latitude: value!.latitude, longitude: value.longitude));
-          });
-
-          mpController.drawRoad(
-            start: GeoPoint(latitude: value!.latitude, longitude: value.longitude),
-            end: GeoPoint(latitude: -7.056030, longitude: 110.434945),
-            type: RoadType.bike
-          );  
-
-        });
-      }   
-      },
-      osmOption: OSMOption(
-          isPicker: isPicker!,
-          staticPoints: (point != null)? point : [],
-          showDefaultInfoWindow: true,
-          showZoomController: false,
-          userTrackingOption: const UserTrackingOption(
-            enableTracking: true,
-            unFollowUser: false,
-          ),
-          zoomOption: const ZoomOption(
-            initZoom: 15,
-            minZoomLevel: 3,
-            maxZoomLevel: 19,
-            stepZoom: 1.0,
-          ),
-          userLocationMarker: UserLocationMaker(
-              personMarker: const MarkerIcon(
-                iconWidget: IconMaker(
-                    link:
-                        "https://asset.kompas.com/crops/H7XTk9ntv_CTYnqCryb67P2Zmkc=/66x15:694x433/750x500/data/photo/2018/10/23/8967977.png"),
+    onMapIsReady: (condition) async {
+      if (condition == true && isDraw == true) {
+        // Ensure the getUserLocation method returns a valid location
+        try {
+          var userLocation = await mpController.getUserLocation();
+          if (userLocation != null) {
+            await controller.drawRoad(
+              GeoPoint(
+                  latitude: userLocation.latitude,
+                  longitude: userLocation.longitude),
+              GeoPoint(latitude: lat!, longitude: long!),
+              roadType: RoadType.bike,
+              roadOption: RoadOption(
+                roadWidth: 10,
+                roadColor: Color.fromRGBO(48, 122, 89, 1),
               ),
-              directionArrowMarker: const MarkerIcon(
-                iconWidget: IconMaker(
-                    link:
-                        "https://asset.kompas.com/crops/H7XTk9ntv_CTYnqCryb67P2Zmkc=/66x15:694x433/750x500/data/photo/2018/10/23/8967977.png"),
-              ),)),
-      controller: controller);
+            );
+          }
+        } finally {
+          mpController.isLoading.value = false;
+        }
+      }
+    },
+    osmOption: OSMOption(
+      isPicker: isPicker ?? false,
+      staticPoints: (point != null) ? point : [],
+      showDefaultInfoWindow: true,
+      showZoomController: false,
+      userTrackingOption: const UserTrackingOption(
+        enableTracking: true,
+        unFollowUser: false,
+      ),
+      zoomOption: const ZoomOption(
+        initZoom: 15,
+        minZoomLevel: 3,
+        maxZoomLevel: 19,
+        stepZoom: 1.0,
+      ),
+      userLocationMarker: UserLocationMaker(
+        personMarker: MarkerIcon(
+          iconWidget: IconMaker(
+            title: "Aku",
+            link: "$url_profile",
+          ),
+        ),
+        directionArrowMarker: MarkerIcon(
+          iconWidget: IconMaker(
+            title: "Aku",
+            link: "$url_profile",
+          ),
+        ),
+      ),
+    ),
+    controller: controller,
+  );
 }

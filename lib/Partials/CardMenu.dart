@@ -2,7 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-Widget CardMenu(BuildContext context) {
+import '../Util/Ip.dart';
+
+var ipAdd = Ip();
+String newBaseUrl = "${ipAdd.getType()}://${ipAdd.getIp()}";
+Widget CardMenu(BuildContext context,
+    {String? url, String? title, String? jarak, int? stok}) {
+  String updatedUrl = url!.replaceFirst("http://localhost:3000", newBaseUrl);
   return Container(
     width: MediaQuery.of(context).size.width * 0.9,
     child: Center(
@@ -15,7 +21,7 @@ Widget CardMenu(BuildContext context) {
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10.dm),
                 image: DecorationImage(
-                  image: AssetImage("assets/image/kupat.jpg"),
+                  image: NetworkImage("$updatedUrl"),
                   fit: BoxFit.cover,
                 )),
           ),
@@ -25,7 +31,7 @@ Widget CardMenu(BuildContext context) {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Tahu Kupat sisa kemarin",
+                  "$title",
                   style: TextStyle(
                       color: Colors.black,
                       fontSize: 14.sp,
@@ -33,21 +39,6 @@ Widget CardMenu(BuildContext context) {
                 ),
                 Row(
                   children: [
-                    Icon(
-                      LucideIcons.flame,
-                      color: Colors.grey,
-                      size: 10,
-                    ),
-                    SizedBox(
-                      width: 5.w,
-                    ),
-                    Text(
-                      "200 kal | ",
-                      style: TextStyle(
-                          fontFamily: "Poppins",
-                          fontSize: 12.sp,
-                          color: Colors.grey),
-                    ),
                     Icon(
                       LucideIcons.shieldCheck,
                       color: Colors.grey,
@@ -66,7 +57,7 @@ Widget CardMenu(BuildContext context) {
                   ],
                 ),
                 Text(
-                  "5 Porsi",
+                  "$stok Porsi",
                   style: TextStyle(
                       fontFamily: "Poppins",
                       fontSize: 12.sp,
@@ -89,7 +80,7 @@ Widget CardMenu(BuildContext context) {
                     ),
                     SizedBox(width: 5.w),
                     Text(
-                      "300m dari lokasi Anda",
+                      "$jarak",
                       style: TextStyle(
                           fontFamily: "Poppins",
                           fontSize: 12.sp,

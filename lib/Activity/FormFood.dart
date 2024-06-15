@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wareg_app/Controller/API/Postingan/PostFood.dart';
 import 'package:wareg_app/Controller/FoodController.dart';
 import 'package:wareg_app/Controller/MapsController.dart';
@@ -16,6 +17,7 @@ import 'package:wareg_app/Partials/DropdownForm.dart';
 import 'package:wareg_app/Partials/FormDate.dart';
 import 'package:wareg_app/Partials/FormText.dart';
 import 'package:wareg_app/Partials/FormText2.dart';
+import 'package:wareg_app/Util/Ip.dart';
 import '../Controller/PictureController.dart';
 import '../Partials/MapBox.dart';
 import 'package:flutter_open_street_map/open_street_map.dart';
@@ -233,6 +235,29 @@ class _FormFoodState extends State<FormFood> {
   ];
 
   var isPressed = false.obs;
+
+  var userProfile =
+      "https://cdn.idntimes.com/content-images/duniaku/post/20230309/raw-06202016rf-1606-3d3997f53e6f3e9277cd5a67fbd8f31f-1a44de7c1e0085a4ec8d2e4cb9602659.jpg";
+  var marker_user;
+  var ipAdd = Ip();
+
+  Future<void> _loadProfile() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String newBaseUrl = "${ipAdd.getType()}://${ipAdd.getIp()}";
+
+    setState(() {
+      userProfile = prefs.getString('profile_picture') ??
+          "https://cdn.idntimes.com/content-images/duniaku/post/20230309/raw-06202016rf-1606-3d3997f53e6f3e9277cd5a67fbd8f31f-1a44de7c1e0085a4ec8d2e4cb9602659.jpg";
+      marker_user =
+          userProfile.replaceFirst("http://localhost:3000", newBaseUrl);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
 
   @override
   void dispose() {
@@ -480,7 +505,7 @@ class _FormFoodState extends State<FormFood> {
                                 height: 280.h,
                                 width: 200.h,
                                 child: MapBox(
-                                    context, mapController.controller, null,
+                                    context, mapController.controller, null,marker_user, 
                                     isPicker: true)),
                             SizedBox(height: 10.h),
                             InkWell(

@@ -47,7 +47,7 @@ class _PreviewFoodState extends State<PreviewFood> {
             crossAxisCount: 2,
             children:
                 List.generate(picController.arr_img.value.length + 1, (index) {
-              return (index == picController.arr_img.value.length)
+              return (index == picController.arr_img.value.length || picController.arr_img.value.length == 0 )
                   ?  InkWell(
                     onTap: (){
                       Navigator.pop(context);
