@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
         title: 'WaregApp',
         onGenerateRoute: Routes.generateRoute,
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
+      theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
               seedColor: const Color.fromRGBO(48, 122, 89, 1)),
           useMaterial3: true,

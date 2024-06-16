@@ -40,8 +40,12 @@ class _OnMapState extends State<OnMap> {
   Future<void> _loadProfile() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String newBaseUrl = "${ipAdd.getType()}://${ipAdd.getIp()}";
-    post_foto = mpController.map_dataTarget['url'].toString().replaceFirst("http://localhost:3000", newBaseUrl);
-    donatur_foto = mpController.map_dataTarget['donatur_profile'].toString().replaceFirst("http://localhost:3000", newBaseUrl);
+    post_foto = mpController.map_dataTarget['url']
+        .toString()
+        .replaceFirst("http://localhost:3000", newBaseUrl);
+    donatur_foto = mpController.map_dataTarget['donatur_profile']
+        .toString()
+        .replaceFirst("http://localhost:3000", newBaseUrl);
     koordinat = [
       StaticPositionGeoPoint(
           "2",
@@ -85,7 +89,8 @@ class _OnMapState extends State<OnMap> {
         longUser = value.longitude;
       });
       if (latUser != null && longUser != null) {
-        streamController?.add(GeoPoint(latitude: latUser!, longitude: longUser!));
+        streamController
+            ?.add(GeoPoint(latitude: latUser!, longitude: longUser!));
       }
     });
   }
@@ -109,8 +114,8 @@ class _OnMapState extends State<OnMap> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text(
-            "Hi, Neo",
+          title: Text(
+            "${mpController.map_dataTarget['title']}",
             style: TextStyle(fontFamily: "Bree", color: Colors.black),
           ),
           actions: [
@@ -176,9 +181,95 @@ class _OnMapState extends State<OnMap> {
                                   height:
                                       MediaQuery.of(context).size.height * 0.5,
                                   child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
+                                      SizedBox(height: 10.h),
                                       Padding(
-                                        padding: EdgeInsets.only(top: 10.h),
+                                        padding: EdgeInsets.only(
+                                            left: 20.w, right: 20.w),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Container(
+                                                  height: 45.dm,
+                                                  width: 45.dm,
+                                                  decoration: BoxDecoration(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              50.dm),
+                                                      image: DecorationImage(
+                                                          fit: BoxFit.cover,
+                                                          image: NetworkImage(
+                                                              "${donatur_foto}",
+                                                              scale: 1))),
+                                                ),
+                                                SizedBox(width: 10.w),
+                                                Column(
+                                                  mainAxisAlignment: MainAxisAlignment.start,
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      "${mpController.map_dataTarget['donatur_name']}",
+                                                      style: TextStyle(
+                                                          fontFamily: "Poppins",
+                                                          fontSize: 14.sp,
+                                                          color: Colors.black),
+                                                    ),
+                                                    Text(
+                                                      "donatur",
+                                                      style: TextStyle(
+                                                          fontFamily: "Poppins",
+                                                          fontSize: 12.sp,
+                                                          color: Colors.grey),
+                                                    ),
+                                                    Row(
+                                                      children: [
+                                                        Icon(Icons.star,
+                                                            color:
+                                                                Colors.amber,
+                                                            size: 10.dm),
+                                                        Text(
+                                                          (mpController.map_dataTarget['rating'] == 0 || mpController.map_dataTarget['rating'] == null)? "Belum ada" : "${mpController.map_dataTarget['rating']}",
+                                                          style: TextStyle(
+                                                              fontFamily:
+                                                                  "Poppins",
+                                                              fontSize: 12.sp,
+                                                              color:
+                                                                  Colors.amber),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                )
+                                              ],
+                                            ),
+                                            Column(
+                                              children: [
+                                                Text(
+                                                  "Makanan",
+                                                  style: TextStyle(
+                                                      fontFamily: "Poppins",
+                                                      fontSize: 12.sp,
+                                                      color: Colors.grey),
+                                                ),
+                                                Text(
+                                                  "${mpController.map_dataTarget['title']}",
+                                                  style: TextStyle(
+                                                      fontFamily: "Poppins",
+                                                      fontSize: 14.sp,
+                                                      color: Colors.black),
+                                                ),
+                                              ],
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: EdgeInsets.only(top: 10.h, left: 20.w),
                                         child: Container(
                                           height: 100.h,
                                           width: MediaQuery.of(context)
@@ -198,79 +289,65 @@ class _OnMapState extends State<OnMap> {
                                       Padding(
                                         padding: EdgeInsets.only(
                                             top: 15.h,
-                                            left: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
-                                                0.05,
-                                            right: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
-                                                0.05),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
+                                            left: 20.w,
+                                            ),
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.start,
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
-                                            Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  "${mpController.map_dataTarget['title']}",
-                                                  style: TextStyle(
-                                                      color: Colors.black,
-                                                      fontFamily: "Poppins",
-                                                      fontSize: 14.sp,
-                                                      fontWeight:
-                                                          FontWeight.bold),
-                                                ),
-                                                Text(
-                                                  "${mpController.map_dataTarget['alamat']}",
-                                                  style: TextStyle(
-                                                    color: Colors.grey,
-                                                    fontFamily: "Poppins",
-                                                    fontSize: 12.sp,
-                                                    fontWeight:
-                                                        FontWeight.normal,
-                                                  ),
-                                                ),
-                                                Text(
-                                                  "${mpController.map_dataTarget['stok']} porsi | Layak Konsumsi",
-                                                  style: TextStyle(
-                                                    color: Colors.grey,
-                                                    fontFamily: "Poppins",
-                                                    fontSize: 12.sp,
-                                                    fontWeight:
-                                                        FontWeight.normal,
-                                                  ),
-                                                ),
-                                              ],
+                                            Text(
+                                              "Waktu Posting",
+                                              style: TextStyle(
+                                                  color: Colors.grey,
+                                                  fontFamily: "Poppins",
+                                                  fontSize: 14.sp,
+                                                  fontWeight:
+                                                      FontWeight.normal),
                                             ),
-                                            Column(
-                                              children: [
-                                                Container(
-                                                  height: 45.dm,
-                                                  width: 45.dm,
-                                                  decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              50.dm),
-                                                      image: DecorationImage(
-                                                          fit: BoxFit.cover,
-                                                          image: NetworkImage(
-                                                              "${donatur_foto}",
-                                                              scale: 1))),
-                                                ),
-                                                Text(
-                                                  "${mpController.map_dataTarget['donatur_name']}",
-                                                  style: TextStyle(
-                                                      fontFamily: "Poppins",
-                                                      fontSize: 10.sp,
-                                                      color: Colors.grey),
-                                                )
-                                              ],
+                                            SizedBox(height: 5.h),
+                                            Text(
+                                              "${mpController.map_dataTarget['updateAt']}",
+                                              style: TextStyle(
+                                                color: Colors.black,
+                                                fontFamily: "Poppins",
+                                                fontSize: 12.sp,
+                                                fontWeight:
+                                                    FontWeight.normal,
+                                              ),
                                             ),
+                                            Text(
+                                              "(${mpController.map_dataTarget['expiredAt']})",
+                                              style: TextStyle(
+                                                color: Colors.red,
+                                                fontFamily: "Poppins",
+                                                fontSize: 12.sp,
+                                                fontWeight:
+                                                    FontWeight.normal,
+                                              ),
+                                            ),
+                                            SizedBox(height: 10.h),
+                                            Text(
+                                              "Alamat Pengambilan",
+                                              style: TextStyle(
+                                                  color: Colors.grey,
+                                                  fontFamily: "Poppins",
+                                                  fontSize: 14.sp,
+                                                  fontWeight:
+                                                      FontWeight.normal),
+                                            ),
+                                            SizedBox(height: 5.h),
+                                            Text(
+                                              "${mpController.map_dataTarget['alamat']}",
+                                              style: TextStyle(
+                                                color: Colors.black,
+                                                fontFamily: "Poppins",
+                                                fontSize: 12.sp,
+                                                fontWeight:
+                                                    FontWeight.normal,
+                                              ),
+                                            ),
+                                            
                                           ],
                                         ),
                                       ),
@@ -307,8 +384,7 @@ class _OnMapState extends State<OnMap> {
                               await mpController.controller.removeLastRoad();
                               roadInfo = await mpController.controller.drawRoad(
                                   GeoPoint(
-                                      latitude: latUser!,
-                                      longitude: longUser!),
+                                      latitude: latUser!, longitude: longUser!),
                                   GeoPoint(
                                       latitude: -7.056030,
                                       longitude: 110.434945),

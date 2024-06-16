@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:wareg_app/Activity/BottomNavPage.dart';
 import 'package:wareg_app/Activity/CekLayak.dart';
 import 'package:wareg_app/Activity/ChatActivity.dart';
+import 'package:wareg_app/Activity/Donasi.dart';
 import 'package:wareg_app/Activity/FoodPicture.dart';
 import 'package:wareg_app/Activity/FormFood.dart';
 import 'package:wareg_app/Activity/Home.dart';
+import 'package:wareg_app/Activity/Inventory.dart';
 import 'package:wareg_app/Activity/LoginActivity.dart';
 import 'package:wareg_app/Activity/OnMap.dart';
 import 'package:wareg_app/Activity/PreviewFood.dart';
@@ -20,6 +22,10 @@ class Routes{
         return MaterialPageRoute(builder: (_)=> LoginActivity());
       case '/register':
         return MaterialPageRoute(builder: (_)=> RegisterActivity());
+      case '/inventory':
+        return MaterialPageRoute(builder: (_)=> Inventory());
+      case '/donasi':
+        return MaterialPageRoute(builder: (_)=> Donasi());
       case '/onmap':
         return MaterialPageRoute(builder: (_)=> OnMap());
       case '/chat':

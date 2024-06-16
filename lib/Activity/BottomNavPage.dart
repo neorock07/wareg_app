@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:wareg_app/Activity/Donasi.dart';
 import 'package:wareg_app/Activity/Home.dart';
+import 'package:wareg_app/Activity/Inventory.dart';
 import 'package:wareg_app/Activity/Menu.dart';
 import 'package:wareg_app/Activity/Profile.dart';
 
@@ -20,7 +21,7 @@ class _BottomNavPageState extends State<BottomNavPage> {
     selectedTab.value = index;
   }
 
-  List _pages = [Home(), Menu(), Donasi(), Profile()];
+  List _pages = [Home(), Menu(), Donasi(), Inventory(),Profile()];
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +45,8 @@ class _BottomNavPageState extends State<BottomNavPage> {
                     icon: Icon(LucideIcons.menuSquare), label: "Menu"),
                 BottomNavigationBarItem(
                     icon: Icon(LucideIcons.heartHandshake), label: "Donasi"),
+                BottomNavigationBarItem(
+                    icon: Icon(LucideIcons.boxes), label: "Inventory"),
                 BottomNavigationBarItem(
                     icon: Icon(LucideIcons.user), label: "Profile"),
               ]),
