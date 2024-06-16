@@ -21,6 +21,7 @@ Widget MapBox(
   var url_profile, {
   bool? isDraw = false,
   bool? isPicker = false,
+  bool? isTrack = true,
   double? lat,
   double? long,
 }) {
@@ -56,8 +57,8 @@ Widget MapBox(
       staticPoints: (point != null) ? point : [],
       showDefaultInfoWindow: true,
       showZoomController: false,
-      userTrackingOption: const UserTrackingOption(
-        enableTracking: true,
+      userTrackingOption: UserTrackingOption(
+        enableTracking: isTrack!,
         unFollowUser: false,
       ),
       zoomOption: const ZoomOption(

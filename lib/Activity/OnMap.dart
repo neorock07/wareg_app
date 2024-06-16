@@ -347,6 +347,16 @@ class _OnMapState extends State<OnMap> {
                                                     FontWeight.normal,
                                               ),
                                             ),
+                                            Text(
+                                              "${mpController.map_dataTarget['deskripsi']}",
+                                              style: TextStyle(
+                                                color: Colors.black,
+                                                fontFamily: "Poppins",
+                                                fontSize: 12.sp,
+                                                fontWeight:
+                                                    FontWeight.normal,
+                                              ),
+                                            ),
                                             
                                           ],
                                         ),

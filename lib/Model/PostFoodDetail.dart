@@ -1,8 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:wareg_app/Model/PostFoodModel.dart';
 
-class Post {
+class PostDetail {
   final int id;
   final String title;
   final Body body;
@@ -16,8 +17,12 @@ class Post {
   final String userProfilePicture;
   final double averageReview;
   final List<Media> media;
-  
-  Post({
+  List<String>? categories;
+  List<Variants>? variants;
+  int? reviewCount;
+  var transaction;
+
+  PostDetail({
     required this.id,
     required this.title,
     required this.body,
@@ -31,13 +36,20 @@ class Post {
     required this.userProfilePicture,
     required this.averageReview,
     required this.media,
+    this.categories,
+    this.variants,
+    this.reviewCount,
+    this.transaction
   });
 
-  factory Post.fromJson(Map<String, dynamic> json) {
+  factory PostDetail.fromJson(Map<String, dynamic> json) {
     var mediaList = json['media'] as List;
     List<Media> media = mediaList.map((i) => Media.fromJson(i)).toList();
     
-    return Post(
+    var varianList = (json['variants'] == null)? [] : json['variants'] as List;
+    List<Variants> varian = varianList.map((i) => Variants.fromJson(i)).toList();
+
+    return PostDetail(
       id: json['id'],
       title: json['title'],
       body: Body.fromJson(json['body']),
@@ -51,49 +63,32 @@ class Post {
       userProfilePicture: json['userProfilePicture'],
       averageReview: (json['averageReview'] == null) ? 0 : json['averageReview'].toDouble(),
       media: media,
+      reviewCount: (json['reviewCount'] == null) ? 0 : json['reviewCount'],
+      variants: varian,
+      transaction: json['transaction'],
+      categories: (json['categories'] == null)? [] : json['categories'][0],
     );
   }
 }
 
-class Body {
-  final String alamat;
-  final String coordinate;
-  final String deskripsi;
 
-  Body({
-    required this.alamat,
-    required this.coordinate,
-    required this.deskripsi,
-  });
+class Variants {
+  final String id;
+  final String name;
+  final String stok;
 
-  factory Body.fromJson(Map<String, dynamic> json) {
-    return Body(
-      alamat: json['alamat'],
-      coordinate: json['coordinate'],
-      deskripsi: json['deskripsi'],
-    );
-  }
-}
-
-class Media {
-  final int id;
-  final String url;
-  final String createdAt;
-  final String updatedAt;
-
-  Media({
+  Variants({
     required this.id,
-    required this.url,
-    required this.createdAt,
-    required this.updatedAt,
+    required this.name,
+    required this.stok,
   });
 
-  factory Media.fromJson(Map<String, dynamic> json) {
-    return Media(
+  factory Variants.fromJson(Map<String, dynamic> json) {
+    return Variants(
       id: json['id'],
-      url: json['url'],
-      createdAt: json['createdAt'],
-      updatedAt: json['updatedAt'],
+      name: json['name'],
+      stok: json['stok'],
     );
   }
 }
+
