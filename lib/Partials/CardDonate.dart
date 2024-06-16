@@ -46,7 +46,9 @@ Widget CardDonate(BuildContext context, RxBool isPressed) {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: InkWell(
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.pushNamed(context, "/donasi");
+                      },
                       splashColor: Colors.grey,
                       hoverColor: Colors.grey,
                       child: Container(

@@ -292,6 +292,7 @@ class _MenuState extends State<Menu> {
                                                   post.title;
                                               mpController.map_dataTarget['stok'] = post.stok;
                                               mpController.map_dataTarget['alamat'] = post.body.alamat;
+                                              mpController.map_dataTarget['id'] = post.id;
                                               mpController.map_dataTarget[
                                                   'marker'] = MarkerIcon(
                                                 iconWidget: IconMaker(
@@ -299,6 +300,9 @@ class _MenuState extends State<Menu> {
                                                     title: post.title),
                                               );
                                               mpController.map_dataTarget['url'] = post.media[0].url;
+                                              mpController.map_dataTarget['donatur_name'] = post.userName;
+                                              mpController.map_dataTarget['deskripsi'] = post.body.deskripsi;
+                                              mpController.map_dataTarget['donatur_profile'] = post.userProfilePicture;
                                               log("data : ${mpController.map_dataTarget['url']} | ${mpController.map_dataTarget['stok']}");
                                               Navigator.pushNamed(
                                                   context, "/onmap");

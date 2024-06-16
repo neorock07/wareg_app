@@ -56,16 +56,19 @@ class Post {
 class Body {
   final String alamat;
   final String coordinate;
+  final String deskripsi;
 
   Body({
     required this.alamat,
     required this.coordinate,
+    required this.deskripsi,
   });
 
   factory Body.fromJson(Map<String, dynamic> json) {
     return Body(
       alamat: json['alamat'],
       coordinate: json['coordinate'],
+      deskripsi: json['deskripsi'],
     );
   }
 }

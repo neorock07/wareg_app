@@ -3,16 +3,11 @@ import 'package:wareg_app/Controller/MapsController.dart';
 import 'package:wareg_app/Model/PostFoodModel.dart';
 import 'package:wareg_app/Services/PostService.dart';
 
-
 class GetPostController extends GetxController {
   var posts = <Post>[].obs;
+  var posts2 = <Post>[].obs;
   var isLoading = true.obs;
-
-  // @override
-  // void onInit() {
-  //   super.onInit();
-  //   fetchPosts(); // Example coordinates
-  // }
+  var isLoading2 = true.obs;
 
    Future<RxBool> fetchPosts(var lat, var long) async {
     try {
@@ -25,5 +20,18 @@ class GetPostController extends GetxController {
       isLoading(false);
     }
     return isLoading;
+  }
+
+   Future<RxBool> fetchPostsNew(var lat, var long) async {
+    try {
+      isLoading2(true);
+      var fetchedPosts = await PostService().fetchPostsNew(lat, long);
+      if (fetchedPosts != null) {
+        posts2.value = fetchedPosts;
+      }
+    } finally {
+      isLoading2(false);
+    }
+    return isLoading2;
   }
 }

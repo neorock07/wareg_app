@@ -25,20 +25,23 @@ class _OnMapState extends State<OnMap> {
   MapsController mpController = Get.put(MapsController());
   RoadInfo? roadInfo;
   RxBool isPressed = false.obs;
-  StreamController<GeoPoint>? stream_controller = StreamController<GeoPoint>();
+  StreamController<GeoPoint>? streamController = StreamController<GeoPoint>();
+  Timer? locationUpdateTimer;
 
   List<StaticPositionGeoPoint>? koordinat;
 
   var userProfile =
       "https://cdn.idntimes.com/content-images/duniaku/post/20230309/raw-06202016rf-1606-3d3997f53e6f3e9277cd5a67fbd8f31f-1a44de7c1e0085a4ec8d2e4cb9602659.jpg";
-  var marker_user;
+  var markerUser;
   var ipAdd = Ip();
   String? updatedUrl;
-
+  String? post_foto;
+  String? donatur_foto;
   Future<void> _loadProfile() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String newBaseUrl = "${ipAdd.getType()}://${ipAdd.getIp()}";
-
+    post_foto = mpController.map_dataTarget['url'].toString().replaceFirst("http://localhost:3000", newBaseUrl);
+    donatur_foto = mpController.map_dataTarget['donatur_profile'].toString().replaceFirst("http://localhost:3000", newBaseUrl);
     koordinat = [
       StaticPositionGeoPoint(
           "2",
@@ -55,10 +58,7 @@ class _OnMapState extends State<OnMap> {
     ];
     setState(() {
       userProfile = prefs.getString('profile_picture')!;
-      // ??
-      //     "https://cdn.idntimes.com/content-images/duniaku/post/20230309/raw-06202016rf-1606-3d3997f53e6f3e9277cd5a67fbd8f31f-1a44de7c1e0085a4ec8d2e4cb9602659.jpg";
-
-      marker_user =
+      markerUser =
           userProfile.replaceFirst("http://localhost:3000", newBaseUrl);
     });
   }
@@ -67,17 +67,33 @@ class _OnMapState extends State<OnMap> {
   void initState() {
     super.initState();
     _loadProfile();
+    startLocationUpdates();
   }
 
-  Future<void> drawRoute() async {
-    double? lat_user, long_user;
-    await mpController.controller.myLocation().then((value) {
-      lat_user = value.latitude;
-      long_user = value.longitude;
+  @override
+  void dispose() {
+    locationUpdateTimer?.cancel();
+    streamController?.close();
+    super.dispose();
+  }
+
+  void startLocationUpdates() {
+    locationUpdateTimer = Timer.periodic(Duration(seconds: 10), (timer) async {
+      double? latUser, longUser;
+      await mpController.controller.myLocation().then((value) {
+        latUser = value.latitude;
+        longUser = value.longitude;
+      });
+      if (latUser != null && longUser != null) {
+        streamController?.add(GeoPoint(latitude: latUser!, longitude: longUser!));
+      }
     });
-    log("lokasi : ${lat_user} ${long_user}");
+  }
+
+  Future<void> drawRoute(GeoPoint userLocation) async {
+    await mpController.controller.removeLastRoad();
     roadInfo = await mpController.controller.drawRoad(
-        GeoPoint(latitude: lat_user!, longitude: long_user!),
+        userLocation,
         GeoPoint(
             latitude: mpController.target_lat!,
             longitude: mpController.target_long!),
@@ -87,12 +103,6 @@ class _OnMapState extends State<OnMap> {
             roadBorderColor: Color.fromRGBO(42, 122, 89, 1),
             zoomInto: true,
             roadWidth: 10));
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    drawRoute();
   }
 
   @override
@@ -124,15 +134,22 @@ class _OnMapState extends State<OnMap> {
             children: [
               Container(
                   height: MediaQuery.of(context).size.height * 0.6,
-                  child: MapBox(
-                        context,
-                        mpController.controller,
-                        koordinat,
-                        userProfile,
-                        isDraw: true,
-                        lat: mpController.target_lat,
-                        long: mpController.target_long,
-                      )),
+                  child: StreamBuilder<GeoPoint>(
+                      stream: streamController?.stream,
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          drawRoute(snapshot.data!);
+                        }
+                        return MapBox(
+                          context,
+                          mpController.controller,
+                          koordinat,
+                          userProfile,
+                          isDraw: true,
+                          lat: mpController.target_lat,
+                          long: mpController.target_long,
+                        );
+                      })),
               DraggableScrollableSheet(
                   initialChildSize: 0.45,
                   minChildSize: 0.45,
@@ -173,7 +190,7 @@ class _OnMapState extends State<OnMap> {
                                                   BorderRadius.circular(5.dm),
                                               image: DecorationImage(
                                                   image: NetworkImage(
-                                                      "${mpController.map_dataTarget['url']}"),
+                                                      "${post_foto}"),
                                                   scale: 1,
                                                   fit: BoxFit.cover)),
                                         ),
@@ -242,11 +259,11 @@ class _OnMapState extends State<OnMap> {
                                                       image: DecorationImage(
                                                           fit: BoxFit.cover,
                                                           image: NetworkImage(
-                                                              "https://cdn.idntimes.com/content-images/duniaku/post/20230309/raw-06202016rf-1606-3d3997f53e6f3e9277cd5a67fbd8f31f-1a44de7c1e0085a4ec8d2e4cb9602659.jpg",
+                                                              "${donatur_foto}",
                                                               scale: 1))),
                                                 ),
                                                 Text(
-                                                  "John Cena",
+                                                  "${mpController.map_dataTarget['donatur_name']}",
                                                   style: TextStyle(
                                                       fontFamily: "Poppins",
                                                       fontSize: 10.sp,
@@ -279,18 +296,19 @@ class _OnMapState extends State<OnMap> {
                         Obx(() =>
                             CardButton(context, isPressed, onTap: (_) async {
                               isPressed.value = true;
-                              double? lat_user, long_user;
+                              double? latUser, longUser;
                               await mpController.controller
                                   .myLocation()
                                   .then((value) {
-                                lat_user = value.latitude;
-                                long_user = value.longitude;
+                                latUser = value.latitude;
+                                longUser = value.longitude;
                               });
-                              log("lokasi : ${lat_user} ${long_user}");
+                              log("lokasi : ${latUser} ${longUser}");
+                              await mpController.controller.removeLastRoad();
                               roadInfo = await mpController.controller.drawRoad(
                                   GeoPoint(
-                                      latitude: lat_user!,
-                                      longitude: long_user!),
+                                      latitude: latUser!,
+                                      longitude: longUser!),
                                   GeoPoint(
                                       latitude: -7.056030,
                                       longitude: 110.434945),
@@ -332,7 +350,6 @@ class _OnMapState extends State<OnMap> {
                         IconButton(
                             color: Colors.grey,
                             onPressed: () async {
-                              // log("lokasi user : )}");
                               Navigator.pushNamed(context, "/chat");
                             },
                             icon: Icon(LucideIcons.messagesSquare))

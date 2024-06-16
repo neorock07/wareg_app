@@ -46,6 +46,7 @@ class _HomeState extends State<Home> {
     try {
       Position position = await locationService.getCurrentLocation();
       postController.fetchPosts(position.latitude, position.longitude);
+      postController.fetchPostsNew(position.latitude, position.longitude);
     } catch (e) {
       print('Could not fetch location: $e');
     }
@@ -123,6 +124,43 @@ class _HomeState extends State<Home> {
                         scrollDirection: Axis.horizontal,
                         itemBuilder: (context, index) {
                           final post = postController.posts[index];
+                          return CardFood(
+                              url: post.media[0].url,
+                              jarak: post.distance,
+                              name: post.title);
+                        }),
+                  ),
+                );
+              }
+            }),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: EdgeInsets.only(
+                    left: MediaQuery.of(context).size.width * 0.05),
+                child: Text(
+                  "Makanan Terbaru",
+                  style: TextStyle(
+                      fontFamily: "Bree", color: Colors.black, fontSize: 18.sp),
+                ),
+              ),
+            ),
+            SizedBox(height: 20.h,),
+            Obx(() {
+              if (postController.isLoading2.value) {
+                return Center(child: CircularProgressIndicator());
+              } else if (postController.posts2.isEmpty) {
+                return Center(child: Text('No posts found.'));
+              } else {
+                return Padding(
+                  padding: EdgeInsets.only(left: 10.w),
+                  child: Container(
+                    height: 200.h,
+                    child: ListView.builder(
+                        itemCount: min(postController.posts2.length, 10),
+                        scrollDirection: Axis.horizontal,
+                        itemBuilder: (context, index) {
+                          final post = postController.posts2[index];
                           return CardFood(
                               url: post.media[0].url,
                               jarak: post.distance,
