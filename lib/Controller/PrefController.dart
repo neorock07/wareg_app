@@ -32,6 +32,11 @@ class PrefController extends GetxController {
     await prefs.setString('profile_picture', user['profile_picture']);
   }
 
+  Future<bool> clearData()async {
+    final SharedPreferences pref = await SharedPreferences.getInstance();
+    return pref.clear();
+  }
+
   Map<dynamic, dynamic>? parseJwt(String token) {
     try {
       final part = token.split(".");
@@ -72,7 +77,7 @@ class PrefController extends GetxController {
 
     if (token != null) {
       bool isValid = isTokenValid(token);
-      if (isValid) {
+      if (isValid == true) {
         Navigator.pushReplacementNamed(context, '/home');
       } else {
         Navigator.pushReplacementNamed(context, '/login');

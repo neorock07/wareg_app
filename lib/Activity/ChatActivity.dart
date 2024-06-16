@@ -79,6 +79,22 @@ class _ChatActivityState extends State<ChatActivity> {
                 reverse: false,
                 itemCount: _messages.length,
                 itemBuilder: (context, index) {
+                  Column(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            color: const Color.fromARGB(255, 245, 225, 47),
+                            borderRadius: BorderRadius.circular(10.dm)
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.all(5.dm),
+                            child: Text("${DateTime.now().toString().substring(0,10)}",
+                              style: TextStyle(fontFamily: "Poppins", color: Colors.black),
+                            ),
+                            ),
+                        )
+                      ],
+                    );
                   return Padding(
                     padding: const EdgeInsets.symmetric(
                         vertical: 5.0, horizontal: 10.0),

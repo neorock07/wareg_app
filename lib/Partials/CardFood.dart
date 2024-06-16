@@ -56,7 +56,7 @@ Widget CardFood({String? url, String? jarak, String? name}) {
                 width: 5.w,
               ),
               Text(
-                "${jarak!.split(" ")[0]}m",
+                "${jarak!.split(" ")[0]} ${jarak!.split(" ")[1]} ",
                 style: TextStyle(
                     fontFamily: "Poppins",
                     fontSize: 12.sp,
