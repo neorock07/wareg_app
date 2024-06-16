@@ -182,7 +182,8 @@ class _OnMapState extends State<OnMap> {
                                       MediaQuery.of(context).size.height * 0.5,
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       SizedBox(height: 10.h),
                                       Padding(
@@ -209,8 +210,10 @@ class _OnMapState extends State<OnMap> {
                                                 ),
                                                 SizedBox(width: 10.w),
                                                 Column(
-                                                  mainAxisAlignment: MainAxisAlignment.start,
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
                                                   children: [
                                                     Text(
                                                       "${mpController.map_dataTarget['donatur_name']}",
@@ -229,11 +232,17 @@ class _OnMapState extends State<OnMap> {
                                                     Row(
                                                       children: [
                                                         Icon(Icons.star,
-                                                            color:
-                                                                Colors.amber,
+                                                            color: Colors.amber,
                                                             size: 10.dm),
                                                         Text(
-                                                          (mpController.map_dataTarget['rating'] == 0 || mpController.map_dataTarget['rating'] == null)? "Belum ada" : "${mpController.map_dataTarget['rating']}",
+                                                          (mpController.map_dataTarget[
+                                                                          'rating'] ==
+                                                                      0 ||
+                                                                  mpController.map_dataTarget[
+                                                                          'rating'] ==
+                                                                      null)
+                                                              ? "Belum ada"
+                                                              : "${mpController.map_dataTarget['rating']}",
                                                           style: TextStyle(
                                                               fontFamily:
                                                                   "Poppins",
@@ -269,7 +278,8 @@ class _OnMapState extends State<OnMap> {
                                         ),
                                       ),
                                       Padding(
-                                        padding: EdgeInsets.only(top: 10.h, left: 20.w),
+                                        padding: EdgeInsets.only(
+                                            top: 10.h, left: 20.w),
                                         child: Container(
                                           height: 100.h,
                                           width: MediaQuery.of(context)
@@ -288,11 +298,12 @@ class _OnMapState extends State<OnMap> {
                                       ),
                                       Padding(
                                         padding: EdgeInsets.only(
-                                            top: 15.h,
-                                            left: 20.w,
-                                            ),
+                                          top: 15.h,
+                                          left: 20.w,
+                                        ),
                                         child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.start,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
@@ -312,8 +323,7 @@ class _OnMapState extends State<OnMap> {
                                                 color: Colors.black,
                                                 fontFamily: "Poppins",
                                                 fontSize: 12.sp,
-                                                fontWeight:
-                                                    FontWeight.normal,
+                                                fontWeight: FontWeight.normal,
                                               ),
                                             ),
                                             Text(
@@ -322,8 +332,7 @@ class _OnMapState extends State<OnMap> {
                                                 color: Colors.red,
                                                 fontFamily: "Poppins",
                                                 fontSize: 12.sp,
-                                                fontWeight:
-                                                    FontWeight.normal,
+                                                fontWeight: FontWeight.normal,
                                               ),
                                             ),
                                             SizedBox(height: 10.h),
@@ -343,8 +352,7 @@ class _OnMapState extends State<OnMap> {
                                                 color: Colors.black,
                                                 fontFamily: "Poppins",
                                                 fontSize: 12.sp,
-                                                fontWeight:
-                                                    FontWeight.normal,
+                                                fontWeight: FontWeight.normal,
                                               ),
                                             ),
                                             Text(
@@ -353,11 +361,9 @@ class _OnMapState extends State<OnMap> {
                                                 color: Colors.black,
                                                 fontFamily: "Poppins",
                                                 fontSize: 12.sp,
-                                                fontWeight:
-                                                    FontWeight.normal,
+                                                fontWeight: FontWeight.normal,
                                               ),
                                             ),
-                                            
                                           ],
                                         ),
                                       ),
@@ -436,7 +442,16 @@ class _OnMapState extends State<OnMap> {
                         IconButton(
                             color: Colors.grey,
                             onPressed: () async {
-                              Navigator.pushNamed(context, "/chat");
+                              Navigator.pushNamed(
+                                context,
+                                "/chat",
+                                arguments: {
+                                  'userId':
+                                      mpController.map_dataTarget['userId'],
+                                  'donatur_name': mpController
+                                      .map_dataTarget['donatur_name'],
+                                },
+                              );
                             },
                             icon: Icon(LucideIcons.messagesSquare))
                       ],

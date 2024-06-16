@@ -45,6 +45,8 @@ class _HomeState extends State<Home> {
     LocationService locationService = LocationService();
     try {
       Position position = await locationService.getCurrentLocation();
+      log(position.latitude);
+      log(position.longitude);
       postController.fetchPosts(position.latitude, position.longitude);
       postController.fetchPostsNew(position.latitude, position.longitude);
     } catch (e) {
@@ -66,7 +68,8 @@ class _HomeState extends State<Home> {
         automaticallyImplyLeading: false,
         title: Text(
           "Hi, $userName",
-          style: TextStyle(fontFamily: "Bree", color: Colors.black, fontSize: 18.sp),
+          style: TextStyle(
+              fontFamily: "Bree", color: Colors.black, fontSize: 18.sp),
         ),
         actions: [
           IconButton(
@@ -145,7 +148,9 @@ class _HomeState extends State<Home> {
                 ),
               ),
             ),
-            SizedBox(height: 20.h,),
+            SizedBox(
+              height: 20.h,
+            ),
             Obx(() {
               if (postController.isLoading2.value) {
                 return Center(child: CircularProgressIndicator());

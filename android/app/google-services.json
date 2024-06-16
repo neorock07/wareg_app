@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1097084086447",
+    "project_id": "android-food-e2b3e",
+    "storage_bucket": "android-food-e2b3e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1097084086447:android:d6cb05f6dbb4ad26dd4c5a",
+        "android_client_info": {
+          "package_name": "com.example.wareg_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAdKEkesAbRLWkHPlR-aWxXcyBPQZRFXtc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

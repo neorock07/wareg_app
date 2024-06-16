@@ -16,7 +16,7 @@ class Post {
   final String userProfilePicture;
   final double averageReview;
   final List<Media> media;
-  
+
   Post({
     required this.id,
     required this.title,
@@ -36,7 +36,7 @@ class Post {
   factory Post.fromJson(Map<String, dynamic> json) {
     var mediaList = json['media'] as List;
     List<Media> media = mediaList.map((i) => Media.fromJson(i)).toList();
-    
+
     return Post(
       id: json['id'],
       title: json['title'],
@@ -49,7 +49,9 @@ class Post {
       userId: json['userId'],
       userName: json['userName'],
       userProfilePicture: json['userProfilePicture'],
-      averageReview: (json['averageReview'] == null) ? 0 : json['averageReview'].toDouble(),
+      averageReview: (json['averageReview'] == null)
+          ? 0
+          : json['averageReview'].toDouble(),
       media: media,
     );
   }
@@ -70,7 +72,7 @@ class Body {
     return Body(
       alamat: json['alamat'],
       coordinate: json['coordinate'],
-      deskripsi: json['deskripsi'],
+      deskripsi: json['description'],
     );
   }
 }

@@ -4,8 +4,15 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:wareg_app/Activity/SplashScreen.dart';
 import 'package:wareg_app/Services/PrefService.dart';
 import 'Routes/Route.dart';
-void main() {
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
+Future<void> main() async {
   // await SharedPreferencesService().init();
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
@@ -20,19 +27,19 @@ class MyApp extends StatelessWidget {
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (_, child) {
-      return GetMaterialApp(
-        title: 'WaregApp',
-        onGenerateRoute: Routes.generateRoute,
-        debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color.fromRGBO(48, 122, 89, 1)),
-          useMaterial3: true,
-        ),
-        home: child,
-      );
-    },
-    child: const SplashScreen(),
+        return GetMaterialApp(
+          title: 'WaregApp',
+          onGenerateRoute: Routes.generateRoute,
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+                seedColor: const Color.fromRGBO(48, 122, 89, 1)),
+            useMaterial3: true,
+          ),
+          home: child,
+        );
+      },
+      child: const SplashScreen(),
     );
   }
 }

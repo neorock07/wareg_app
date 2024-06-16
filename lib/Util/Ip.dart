@@ -1,14 +1,12 @@
-class Ip{
-
-  String? ip = "192.168.43.251:3000";
+class Ip {
+  String? ip = "192.168.218.144:3000";
   // String? ip = "tvxnslzg-8080.asse.devtunnels.ms/";
   String? type = "http";
-  String getIp(){
+  String getIp() {
     return ip!;
   }
-  
-  String getType(){
+
+  String getType() {
     return type!;
   }
-  
 }
