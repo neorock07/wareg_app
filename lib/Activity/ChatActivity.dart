@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -8,6 +9,7 @@ import '../Controller/MapsController.dart';
 import '../Controller/message_controller.dart';
 import 'package:image_picker/image_picker.dart';
 import '../Util/Ip.dart';
+import '../main.dart';
 
 class ChatActivity extends StatefulWidget {
   @override
@@ -26,13 +28,13 @@ class _ChatActivityState extends State<ChatActivity> {
   @override
   void initState() {
     super.initState();
-    FirebaseMessaging.instance.requestPermission();
     FirebaseMessaging.instance.getToken().then((token) {
       print("FCM Token: $token");
       _messageController.saveFcmToken(token);
     });
 
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    // Set ChatActivity status to active
+    MyApp.setChatActivityStatus(true, mpController.map_dataTarget['userId']);
     _fetchMessages();
   }
 
@@ -42,23 +44,73 @@ class _ChatActivityState extends State<ChatActivity> {
     if (!_isListenerInitialized) {
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
         print("Message received. ${message.notification?.body}");
-        _messageController.appendMessage(message.data);
-        _scrollToBottom();
+
+        // Periksa apakah pesan dari user yang saat ini dibuka
+        if (message.data['type'] == 'message') {
+          int senderId = int.parse(message.data['userId']);
+          if (senderId == mpController.map_dataTarget['userId']) {
+            _messageController.appendMessage(message.data);
+            _scrollToBottom();
+          } else {
+            // Tampilkan notifikasi lokal jika pesan bukan dari user yang sedang dibuka
+            _showLocalNotification(message);
+          }
+        } else {
+          // Tampilkan notifikasi lokal jika pesan bukan dari user yang sedang dibuka
+          _showLocalNotification(message);
+        }
       });
       _isListenerInitialized = true;
     }
-  }
-
-  static Future<void> _firebaseMessagingBackgroundHandler(
-      RemoteMessage message) async {
-    print('Handling a background message: ${message.messageId}');
-    // Add logic to handle background messages here
   }
 
   Future<void> _fetchMessages() async {
     await _messageController
         .fetchMessages(mpController.map_dataTarget['userId']);
     _scrollToBottom();
+  }
+
+  void _showLocalNotification(RemoteMessage message) {
+    RemoteNotification? notification = message.notification;
+    AndroidNotification? android = message.notification?.android;
+
+    String channelId = message.data['type'] == 'message'
+        ? messageChannel.id
+        : transactionChannel.id;
+
+    String channelName = message.data['type'] == 'message'
+        ? messageChannel.name
+        : transactionChannel.name;
+
+    String? channelDescription = message.data['type'] == 'message'
+        ? messageChannel.description
+        : transactionChannel.description;
+
+    if (notification != null && android != null) {
+      flutterLocalNotificationsPlugin.show(
+        notification.hashCode,
+        notification.title,
+        notification.body,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            channelId,
+            channelName,
+            channelDescription: channelDescription,
+            icon: 'ic_launcher',
+            importance: Importance.max, // Set importance to max
+            priority: Priority.high, // Set priority to high
+            ticker: 'ticker',
+          ),
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    // Set ChatActivity status to inactive
+    MyApp.setChatActivityStatus(false, null);
   }
 
   void _sendMessage(String message) {
