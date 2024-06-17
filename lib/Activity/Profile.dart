@@ -36,28 +36,11 @@ class _ProfileState extends State<Profile> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
+      body: const SingleChildScrollView(
         child: Column(
           children: [
-            const CardExample(),
-            const NavigationMenu(),
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const Text("Profile"),
-                  ElevatedButton(
-                    onPressed: () {
-                      prefController.clearData().then((value) {
-                        Navigator.pushReplacementNamed(context, "/login");
-                      });
-                    },
-                    child: const Text("Logout"),
-                  ),
-                ],
-              ),
-            ),
+            CardExample(),
+            NavigationMenu(),
           ],
         ),
       ),
@@ -75,7 +58,7 @@ class CardExample extends StatelessWidget {
         color: const Color(0xFF307A59),
         margin: const EdgeInsets.all(13.0),
         child: Padding(
-          padding: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.all(20.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
@@ -84,8 +67,8 @@ class CardExample extends StatelessWidget {
                 children: [
                   const ListTile(
                     leading: CircleAvatar(
+                      child: Text('G'),
                       radius: 30,
-                      backgroundImage: AssetImage('images/profile.jpg'),
                     ),
                     title: Text(
                       'Ganjar Pranowo',
@@ -176,7 +159,6 @@ class _NavigationMenuState extends State<NavigationMenu> {
   @override
   Widget build(BuildContext context) {
     final Color color = const Color(0xFF307A59);
-    final screenHeight = MediaQuery.of(context).size.height;
     return Column(
       children: [
         const SizedBox(height: 16),
@@ -186,7 +168,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
           onButtonPressed: _onButtonPressed,
         ),
         SizedBox(
-          height: screenHeight - 176, // Set height for the PageView
+          height: 700, // Set height for the PageView
           child: PageView(
             controller: _pageController,
             onPageChanged: (index) {
@@ -194,35 +176,35 @@ class _NavigationMenuState extends State<NavigationMenu> {
                 _activeButton = _getPageLabel(index);
               });
             },
-            children: _buildPages(),
+            children: const <Widget>[
+              ProfilContent(
+                heading1: 'Deskripsi',
+                isi_heading1:
+                    'Lake Oeschinen lies at the foot of the Blüemlisalp in the '
+                    'Bernese Alps. Situated 1,578 meters above sea level, it '
+                    'is one of the larger Alpine Lakes. A gondola ride from '
+                    'Kandersteg, followed by a half-hour walk through pastures '
+                    'and pine forest, leads you to the lake, which warms to 20 '
+                    'degrees Celsius in the summer. Activities enjoyed here '
+                    'include rowing, and riding the summer toboggan run.',
+                heading2: 'Informasi',
+                isi_heading2:
+                    'Lake Oeschinen lies at the foot of the Blüemlisalp in the '
+                    'Bernese Alps. Situated 1,578 meters above sea level, it '
+                    'is one of the larger Alpine Lakes. A gondola ride from '
+                    'Kandersteg, followed by a half-hour walk through pastures '
+                    'and pine forest, leads you to the lake, which warms to 20 '
+                    'degrees Celsius in the summer. Activities enjoyed here '
+                    'include rowing, and riding the summer toboggan run.',
+              ),
+              RiwayatList(),
+              Center(child: Text('Content for Point')),
+              Center(child: Text('Content for Pesan')),
+            ],
           ),
         ),
       ],
     );
-  }
-
-  List<Widget> _buildPages() {
-    return [
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const TextSection(
-            title: 'Deskripsi',
-            content:
-                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce nec lectus sit amet augue dapibus hendrerit at sed ex. Duis varius nisi at aliquet porttitor.',
-          ),
-          const SizedBox(height: 16),
-          const TextSection(
-            title: 'Informasi Kontak',
-            content:
-                'Email: ganjar@example.com\nTelepon: +62 123 4567\nAlamat: Jl. Contoh No. 123, Semarang',
-          ),
-        ],
-      ),
-      const NotificationList(),
-      const NotificationList(),
-      const NotificationList(),
-    ];
   }
 }
 
@@ -321,65 +303,111 @@ class ButtonWithText extends StatelessWidget {
   }
 }
 
-class TextSection extends StatelessWidget {
-  const TextSection({
-    super.key,
-    required this.title,
-    required this.content,
-  });
-
-  final String title;
-  final String content;
+class RiwayatList extends StatelessWidget {
+  const RiwayatList({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
+    return SingleChildScrollView(
+      child: Column(
+        children: const <Widget>[
+          ListTile(
+            leading: CircleAvatar(child: Text('A')),
+            title: Text('Bakso sisa Kemarin'),
+            subtitle: Text('10 Apr 2024 - 14.56'),
+            trailing: Icon(Icons.favorite_rounded),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          content,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-            color: Colors.black,
+          ListTile(
+            leading: CircleAvatar(child: Text('A')),
+            title: Text('Bakso sisa Kemarin'),
+            subtitle: Text('10 Apr 2024 - 14.56'),
+            trailing: Icon(Icons.favorite_rounded),
           ),
-        ),
-      ],
+          ListTile(
+            leading: CircleAvatar(child: Text('A')),
+            title: Text('Bakso sisa Kemarin'),
+            subtitle: Text('10 Apr 2024 - 14.56'),
+            trailing: Icon(Icons.favorite_rounded),
+          ),
+          ListTile(
+            leading: CircleAvatar(child: Text('A')),
+            title: Text('Bakso sisa Kemarin'),
+            subtitle: Text('10 Apr 2024 - 14.56'),
+            trailing: Icon(Icons.favorite_rounded),
+          ),
+          ListTile(
+            leading: CircleAvatar(child: Text('A')),
+            title: Text('Bakso sisa Kemarin'),
+            subtitle: Text('10 Apr 2024 - 14.56'),
+            trailing: Icon(Icons.favorite_rounded),
+          ),
+        ],
+      ),
     );
   }
 }
 
-class NotificationList extends StatelessWidget {
-  const NotificationList({super.key});
+class ProfilContent extends StatelessWidget {
+  const ProfilContent({
+    super.key,
+    required this.heading1,
+    required this.isi_heading1,
+    required this.heading2,
+    required this.isi_heading2,
+  });
+
+  final String heading1;
+  final String isi_heading1;
+  final String heading2;
+  final String isi_heading2;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: const <Widget>[
-        Card(
-          child: ListTile(
-            leading: Icon(Icons.notifications_sharp),
-            title: Text('Notification 1'),
-            subtitle: Text('This is a notification'),
+    return Padding(
+      padding: const EdgeInsets.all(32),
+      child: Row(
+        children: [
+          Expanded(
+            /*1*/
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                /*2*/
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    heading1,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Text(
+                  isi_heading1,
+                  style: TextStyle(
+                    color: Colors.grey[500],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    heading2,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Text(
+                  isi_heading2,
+                  style: TextStyle(
+                    color: Colors.grey[500],
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        Card(
-          child: ListTile(
-            leading: Icon(Icons.notifications_sharp),
-            title: Text('Notification 2'),
-            subtitle: Text('This is a notification'),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
