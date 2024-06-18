@@ -49,12 +49,10 @@ class MessageController extends GetxController {
 
   Future<void> sendMessage(String message, int userId) async {
     await _messageService.sendMessage(message, userId);
-    fetchMessages(userId); // Refresh messages after sending a new one
   }
 
   Future<void> sendFile(String filePath, int userId) async {
     await _messageService.sendFile(filePath, userId);
-    fetchMessages(userId); // Refresh messages after sending a new one
   }
 
   Future<void> saveFcmToken(String? token) async {

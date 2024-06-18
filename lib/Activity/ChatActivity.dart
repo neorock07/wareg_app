@@ -114,7 +114,7 @@ class _ChatActivityState extends State<ChatActivity> {
       _messageController
           .sendMessage(message, mpController.map_dataTarget['userId'])
           .then((_) {
-        _scrollToBottom();
+        _fetchMessages();
       });
       _controller.clear();
     }
@@ -124,7 +124,7 @@ class _ChatActivityState extends State<ChatActivity> {
     _messageController
         .sendFile(filePath, mpController.map_dataTarget['userId'])
         .then((_) {
-      _scrollToBottom();
+      _fetchMessages();
     });
   }
 
