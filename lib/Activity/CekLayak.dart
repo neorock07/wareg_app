@@ -35,6 +35,7 @@ class _CekLayakState extends State<CekLayak> {
   RxMap<String, dynamic>? presiden = <String, dynamic>{}.obs;
   bool? result_check = false;
   String? expired_time;
+  String? reason;
   var postController = Get.put(PostFood());
   var picController = Get.put(PictureController());
   List<File> files_img = [];
@@ -178,14 +179,22 @@ class _CekLayakState extends State<CekLayak> {
                           )),
                     );
                     log("there is a ${foodController.data_food!['title']} cook date ${foodController.data_food!['variants[0][startAt]']}, date now at ${DateTime.now()}, condition : ${foodController.data_food!['condition']} it is still allowed to consume?, please answer in Json Format like this");
+                    var kueri = "saya punya ${foodController.data_food!['title']} dimasak/beli tanggal ${foodController.data_food!['variants[0][startAt]']}, sekarang tanggal ${DateTime.now()} kategori ${foodController.data_food!['categories[]']}, kondisi : ${foodController.data_food!['condition']}, apakah informasi tersebut valid? dan apakah layak konsumsi?";
                     await query
-                        .cekQuality(
-                            "there is a ${foodController.data_food!['title']} cook date ${foodController.data_food!['variants[0][startAt]']}, date now at ${DateTime.now()}, condition : ${foodController.data_food!['condition']} it is still allowed to consume?, please answer in Json Format like this  !!{'result' : {'scan:'#you should answer only true or false, 'expiredAt':#you should estimate expired time in ISO format, 'reason':#your_reason}}!!")
+                        // .cekQuality(
+                        //     "there is a ${foodController.data_food!['title']} cook date ${foodController.data_food!['variants[0][startAt]']}, date now at ${DateTime.now()}, condition : ${foodController.data_food!['condition']} it is still allowed to consume?, please answer in Json Format like this  !!{'result' : {'scan:'#you should answer only true or false, 'expiredAt':#you should estimate expired time in ISO format, 'reason':#your_reason}}!!")
+                        
+                        .cekQuality(kueri)
                         .then((value) {
                       log("ki hasil e : $value");
                       presiden!.value = value;
-                      result_check = presiden!.value['result']['scan'];
+                      // result_check = presiden!.value['result']['scan'];
+                      result_check = presiden!.value['result']['isEdible'];
                       expired_time = presiden!.value['result']['expiredAt'];
+                      DateTime dateTimeUtc = DateTime.parse(expired_time!);
+                      DateTime dateTimeLocal = dateTimeUtc.toLocal();
+                      String formattedLocalTimeIso = dateTimeLocal.toIso8601String();
+                      reason = presiden!.value['result']['reason'];
 
                       if (foodController.quantityController.length > 1) {
                         for (int i = 0;
@@ -193,11 +202,11 @@ class _CekLayakState extends State<CekLayak> {
                             i++) {
                           foodController
                                   .data_food!['variants[${i}][expiredAt]'] =
-                              expired_time;
+                              formattedLocalTimeIso;
                         }
                       } else {
                         foodController.data_food!['variants[0][expiredAt]'] =
-                            expired_time;
+                            formattedLocalTimeIso;
                       }
 
                       for (var i in picController.arr_img.value) {
@@ -281,10 +290,10 @@ class _CekLayakState extends State<CekLayak> {
                         Navigator.of(context, rootNavigator: true).pop();
                         DialogPop(
                           context,
-                          size: [220.h, 150.w],
+                          size: [250.h, 150.w],
                           dismissable: false,
                           icon: Container(
-                              height: 180.h,
+                              height: 220.h,
                               child: Column(
                                 children: [
                                   Icon(
@@ -306,6 +315,7 @@ class _CekLayakState extends State<CekLayak> {
                                   ),
                                   SizedBox(height: 10.h,),
                                   Text(
+                                    // "${presiden!['result']['reason']}",
                                     "${presiden!['result']['reason']}",
                                     textAlign: TextAlign.center,
                                     style: TextStyle(

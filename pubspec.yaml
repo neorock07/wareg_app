@@ -57,6 +57,7 @@ dependencies:
   firebase_messaging: ^14.7.10
   firebase_core: ^2.24.2
   flutter_local_notifications: ^17.1.2
+  flutter_dotenv: ^5.1.0
 
 dev_dependencies:
   flutter_test:
@@ -87,6 +88,10 @@ flutter:
     - assets/image/bg_sp.png
     - assets/image/lg.png
     - assets/image/food_worth.png
+    - assets/image/logo.png
+    - assets/image/gg.png
+    - assets/image/bglogo.png
+    - .env
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

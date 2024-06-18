@@ -1,94 +1,94 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
 import 'package:wareg_app/Model/PostFoodModel.dart';
 
 class PostDetail {
   final int id;
   final String title;
-  final Body body;
+  final String alamat;
+  final String deskripsi;
+  final String coordinate;
   final String createdAt;
   final String updatedAt;
   final String expiredAt;
   final String distance;
   final int stok;
-  final int userId;
   final String userName;
+  final int userId;
   final String userProfilePicture;
-  final double averageReview;
+  final double? averageReview;
+  final int reviewCount;
+  final List<String> categories;
+  final List<Variant> variants;
   final List<Media> media;
-  List<String>? categories;
-  List<Variants>? variants;
-  int? reviewCount;
-  var transaction;
 
   PostDetail({
     required this.id,
     required this.title,
-    required this.body,
+    required this.alamat,
+    required this.deskripsi,
+    required this.coordinate,
     required this.createdAt,
     required this.updatedAt,
     required this.expiredAt,
     required this.distance,
     required this.stok,
-    required this.userId,
     required this.userName,
+    required this.userId,
     required this.userProfilePicture,
-    required this.averageReview,
+    this.averageReview,
+    required this.reviewCount,
+    required this.categories,
+    required this.variants,
     required this.media,
-    this.categories,
-    this.variants,
-    this.reviewCount,
-    this.transaction
   });
 
   factory PostDetail.fromJson(Map<String, dynamic> json) {
-    var mediaList = json['media'] as List;
-    List<Media> media = mediaList.map((i) => Media.fromJson(i)).toList();
-    
-    var varianList = (json['variants'] == null)? [] : json['variants'] as List;
-    List<Variants> varian = varianList.map((i) => Variants.fromJson(i)).toList();
-
     return PostDetail(
       id: json['id'],
       title: json['title'],
-      body: Body.fromJson(json['body']),
+      alamat: json['body']['alamat'],
+      deskripsi: json['body']['deskripsi'],
+      coordinate: json['body']['coordinate'],
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
       expiredAt: json['expiredAt'],
       distance: json['distance'],
       stok: json['stok'],
-      userId: json['userId'],
       userName: json['userName'],
+      userId: json['userId'],
       userProfilePicture: json['userProfilePicture'],
-      averageReview: (json['averageReview'] == null) ? 0 : json['averageReview'].toDouble(),
-      media: media,
-      reviewCount: (json['reviewCount'] == null) ? 0 : json['reviewCount'],
-      variants: varian,
-      transaction: json['transaction'],
-      categories: (json['categories'] == null)? [] : json['categories'][0],
+      averageReview: json['averageReview']?.toDouble(),
+      reviewCount: json['reviewCount'],
+      categories: List<String>.from(json['categories']),
+      variants: (json['variants'] as List)
+          .map((variant) => Variant.fromJson(variant))
+          .toList(),
+      media: (json['media'] as List)
+          .map((mediaItem) => Media.fromJson(mediaItem))
+          .toList(),
     );
   }
 }
 
-
-class Variants {
-  final String id;
+class Variant {
+  final int id;
   final String name;
-  final String stok;
+  final int stok;
 
-  Variants({
+  Variant({
     required this.id,
     required this.name,
     required this.stok,
   });
 
-  factory Variants.fromJson(Map<String, dynamic> json) {
-    return Variants(
+  factory Variant.fromJson(Map<String, dynamic> json) {
+    return Variant(
       id: json['id'],
       name: json['name'],
       stok: json['stok'],
     );
   }
 }
+
 

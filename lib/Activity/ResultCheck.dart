@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:wareg_app/Controller/FoodController.dart';
+import 'package:wareg_app/Controller/PictureController.dart';
 import 'package:wareg_app/Partials/CardButton.dart';
 
 class ResultCheck extends StatefulWidget {
@@ -12,6 +14,7 @@ class ResultCheck extends StatefulWidget {
 
 class _ResultCheckState extends State<ResultCheck> {
   var isPressed2 = false.obs;
+  var foodController = Get.put(PictureController());
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +63,7 @@ class _ResultCheckState extends State<ResultCheck> {
             padding: EdgeInsets.only(bottom: 120.h),
             child: CardButton(context, isPressed2, onTap: (_) {
                   isPressed2.value = true;
+                  foodController.arr_img.value.clear();
                   Navigator.pushNamed(context, "/home");
                   // log("${foodController.data_food!.values}");
                   // log("${foodController.data_food!['date_donate']}");
