@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wareg_app/Activity/SplashScreen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -119,17 +120,26 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-
-    FirebaseMessaging.instance.getToken().then((token) {
-      print("FCM Token: $token");
-      // Simpan token FCM ke backend di sini
-      // Misalnya, gunakan _messageController.saveFcmToken(token);
-      _messageController.saveFcmToken(token);
-    });
+    _checkAndSaveFcmToken();
     if (!_isChatActivityActive) {
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
         _showLocalNotification(message);
       });
+    }
+  }
+
+  Future<void> _checkAndSaveFcmToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? savedToken = prefs.getString('fcm_token');
+
+    if (savedToken == null) {
+      FirebaseMessaging.instance.getToken().then((token) {
+        if (token != null && token != savedToken) {
+          _messageController.saveFcmToken(token);
+        }
+      });
+    } else {
+      print("FCM Token already exists: $savedToken");
     }
   }
 

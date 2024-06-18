@@ -14,30 +14,34 @@ class GetPostController extends GetxController {
   var isLoading2 = true.obs;
   var isLoading3 = true.obs;
 
-  Future<RxBool> fetchPosts(var lat, var long) async {
+  Future<int> fetchPosts(var lat, var long) async {
     try {
       isLoading(true);
       var fetchedPosts = await PostService().fetchPosts(lat, long);
-      if (fetchedPosts != null) {
+      if (fetchedPosts == 401) {
+        return 401;
+      } else if (fetchedPosts != null) {
         posts.value = fetchedPosts;
       }
     } finally {
       isLoading(false);
     }
-    return isLoading;
+    return 200; // Return 200 or any other success status
   }
 
-  Future<RxBool> fetchPostsNew(var lat, var long) async {
+  Future<int> fetchPostsNew(var lat, var long) async {
     try {
       isLoading2(true);
       var fetchedPosts = await PostService().fetchPostsNew(lat, long);
-      if (fetchedPosts != null) {
+      if (fetchedPosts == 401) {
+        return 401;
+      } else if (fetchedPosts != null) {
         posts2.value = fetchedPosts;
       }
     } finally {
       isLoading2(false);
     }
-    return isLoading2;
+    return 200; // Return 200 or any other success status
   }
 
   Future<RxBool> fetchPostDetail(var lat, var long, var id) async {
@@ -48,7 +52,6 @@ class GetPostController extends GetxController {
         posts3.value = fetchedPosts;
       }
     } finally {
-      Future.delayed(Duration(seconds: 10));  
       isLoading3(false);
     }
     return isLoading3;

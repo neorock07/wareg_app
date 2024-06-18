@@ -12,15 +12,13 @@ import 'package:wareg_app/Util/Ip.dart';
 class PostService extends GetxService {
   var mpController = Get.put(MapsController());
 
-  Future<List<Post>> fetchPosts(var lat, var long) async {
+  Future<dynamic> fetchPosts(var lat, var long) async {
     var ipAdd = Ip();
 
     String? _baseUrl = '${ipAdd.getType()}://${ipAdd.getIp()}';
-    // Fetch token from SharedPreferences
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var token = prefs.getString('token') ?? '';
 
-    // Create request headers with the token
     Map<String, String> headers = {
       'Authorization': 'Bearer $token',
     };
@@ -33,21 +31,21 @@ class PostService extends GetxService {
     if (response.statusCode == 200) {
       List<dynamic> body = jsonDecode(response.body);
       return body.map((dynamic item) => Post.fromJson(item)).toList();
+    } else if (response.statusCode == 401) {
+      return 401;
     } else {
       log("response : ${response.statusCode}");
       throw Exception('Failed to load posts');
     }
   }
 
-  Future<List<Post>> fetchPostsNew(var lat, var long) async {
+  Future<dynamic> fetchPostsNew(var lat, var long) async {
     var ipAdd = Ip();
 
     String? _baseUrl = '${ipAdd.getType()}://${ipAdd.getIp()}';
-    // Fetch token from SharedPreferences
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var token = prefs.getString('token') ?? '';
 
-    // Create request headers with the token
     Map<String, String> headers = {
       'Authorization': 'Bearer $token',
     };
@@ -60,22 +58,22 @@ class PostService extends GetxService {
     if (response.statusCode == 200) {
       List<dynamic> body = jsonDecode(response.body);
       return body.map((dynamic item) => Post.fromJson(item)).toList();
+    } else if (response.statusCode == 401) {
+      return 401;
     } else {
       log("response : ${response.statusCode}");
       throw Exception('Failed to load posts');
     }
   }
 
-
-  Future<Map<String, dynamic>> fetchPostDetail(var lat, var long, var id) async {
+  Future<Map<String, dynamic>?> fetchPostDetail(
+      var lat, var long, var id) async {
     var ipAdd = Ip();
 
     String? _baseUrl = '${ipAdd.getType()}://${ipAdd.getIp()}';
-    // Fetch token from SharedPreferences
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var token = prefs.getString('token') ?? '';
 
-    // Create request headers with the token
     Map<String, String> headers = {
       'Authorization': 'Bearer $token',
     };
@@ -87,7 +85,10 @@ class PostService extends GetxService {
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
+    } else if (response.statusCode == 401) {
+      return null;
     } else {
+      log("response : ${response.statusCode}");
       throw Exception('Failed to load data');
     }
   }

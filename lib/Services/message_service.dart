@@ -9,9 +9,11 @@ import '../Util/Ip.dart';
 
 class MessageService extends GetxService {
   Future<void> saveFcmToken(String? token) async {
-    var ipAdd = Ip();
+    if (token == null) return;
 
+    var ipAdd = Ip();
     String? _baseUrl = '${ipAdd.getType()}://${ipAdd.getIp()}';
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var bearerToken = prefs.getString('token') ?? '';
 
@@ -26,8 +28,11 @@ class MessageService extends GetxService {
       body: jsonEncode({'fcmToken': token}),
     );
 
-    if (response.statusCode != 200) {
-      log('Failed to save FCM token.');
+    if (response.statusCode == 200) {
+      await prefs.setString('fcm_token', token);
+      log('FCM token saved successfully');
+    } else {
+      log('Failed to save FCM token: ${response.statusCode}');
     }
   }
 

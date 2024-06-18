@@ -53,8 +53,15 @@ class _HomeState extends State<Home> {
       Position position = await locationService.getCurrentLocation();
       log(position.latitude);
       log(position.longitude);
-      postController.fetchPosts(position.latitude, position.longitude);
-      postController.fetchPostsNew(position.latitude, position.longitude);
+
+      var result1 = await postController.fetchPosts(
+          position.latitude, position.longitude);
+      var result2 = await postController.fetchPostsNew(
+          position.latitude, position.longitude);
+
+      if (result1 == 401 || result2 == 401) {
+        Navigator.pushReplacementNamed(context, '/login');
+      }
     } catch (e) {
       print('Could not fetch location: $e');
     }
@@ -119,7 +126,9 @@ class _HomeState extends State<Home> {
               ),
             ),
             Obx(() {
-              if (postController.isLoading.value && postController.isLoading2.value && postController.posts.value == null) {
+              if (postController.isLoading.value &&
+                  postController.isLoading2.value &&
+                  postController.posts.value == null) {
                 return Center(child: CircularProgressIndicator());
               } else if (postController.posts.isEmpty) {
                 return Center(child: Text('No posts found.'));
@@ -134,11 +143,11 @@ class _HomeState extends State<Home> {
                       itemBuilder: (context, index) {
                         final post = postController.posts[index];
                         if (post.media == null || post.media.isEmpty) {
-                          return Container(); 
+                          return Container();
                         }
                         final mediaUrl = post.media[0].url;
                         if (mediaUrl == null) {
-                          return Container(); 
+                          return Container();
                         }
                         String updatedUrl = mediaUrl.replaceFirst(
                             "http://localhost:3000", newBaseUrl);

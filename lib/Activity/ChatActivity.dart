@@ -28,10 +28,6 @@ class _ChatActivityState extends State<ChatActivity> {
   @override
   void initState() {
     super.initState();
-    FirebaseMessaging.instance.getToken().then((token) {
-      print("FCM Token: $token");
-      _messageController.saveFcmToken(token);
-    });
 
     // Set ChatActivity status to active
     MyApp.setChatActivityStatus(true, mpController.map_dataTarget['userId']);
