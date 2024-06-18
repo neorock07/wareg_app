@@ -260,6 +260,59 @@ class _OnMapState extends State<OnMap> {
                                                                       userProfile,
                                                                   scale: 1))),
                                                     ),
+                                                      SizedBox(width: 10.w),
+                                                  Column(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.start,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        // "${mpController.map_dataTarget['donatur_name']}",
+                                                        "${postController.posts3.value['userName']}",
+                                                        style: TextStyle(
+                                                            fontFamily:
+                                                                "Poppins",
+                                                            fontSize: 14.sp,
+                                                            color:
+                                                                Colors.black),
+                                                      ),
+                                                      Text(
+                                                        "donatur",
+                                                        style: TextStyle(
+                                                            fontFamily:
+                                                                "Poppins",
+                                                            fontSize: 12.sp,
+                                                            color: Colors.grey),
+                                                      ),
+                                                      Row(
+                                                        children: [
+                                                          Icon(Icons.star,
+                                                              color:
+                                                                  Colors.amber,
+                                                              size: 10.dm),
+                                                          Text(
+                                                            (mpController.map_dataTarget[
+                                                                            'rating'] ==
+                                                                        0 ||
+                                                                    mpController
+                                                                            .map_dataTarget['rating'] ==
+                                                                        null)
+                                                                ? "Belum ada"
+                                                                : "${mpController.map_dataTarget['rating']}",
+                                                            style: TextStyle(
+                                                                fontFamily:
+                                                                    "Poppins",
+                                                                fontSize: 12.sp,
+                                                                color: Colors
+                                                                    .amber),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  )
+
                                                   ],
                                                 ),
                                                 Column(
@@ -283,6 +336,27 @@ class _OnMapState extends State<OnMap> {
                                               ],
                                             ),
                                           ),
+                                          Padding(
+                                          padding: EdgeInsets.only(
+                                              top: 10.h, left: 20.w),
+                                          child: Container(
+                                            height: 100.h,
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.9,
+                                            decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(5.dm),
+                                                image: DecorationImage(
+                                                    image: NetworkImage(
+                                                        // "${post_foto}"),
+                                                        "${postController.posts3.value['media'][0]['url'].toString().replaceFirst('http://localhost:3000', "${ipAdd.getType()}://${ipAdd.getIp()}")}"),
+                                                    scale: 1,
+                                                    fit: BoxFit.cover)),
+                                          ),
+                                        ),
+
                                           Padding(
                                             padding: EdgeInsets.only(
                                               top: 15.h,
