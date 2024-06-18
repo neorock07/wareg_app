@@ -13,6 +13,8 @@ import 'package:wareg_app/Activity/PreviewFood.dart';
 import 'package:wareg_app/Activity/RegisterActivity.dart';
 import 'package:wareg_app/Activity/ResultCheck.dart';
 
+import '../Activity/ResepForm.dart';
+
 class Routes{
   static Route<dynamic> generateRoute(RouteSettings setting){
     switch(setting.name){
@@ -36,6 +38,8 @@ class Routes{
         return MaterialPageRoute(builder: (_)=> FormFood());
       case '/cek':
         return MaterialPageRoute(builder: (_)=> CekLayak());
+      case '/form_resep':
+        return MaterialPageRoute(builder: (_)=> ResepForm());
       case '/result_check':
         return MaterialPageRoute(builder: (_)=> ResultCheck());
       default:

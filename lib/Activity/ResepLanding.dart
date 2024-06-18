@@ -34,7 +34,7 @@ class _ResepLandingState extends State<ResepLanding> {
           SizedBox(height: 50.h,),
           Obx(() => CardButton(context, isPressed, onTap: (_) {
                   isPressed.value = true;
-                  // Navigator.pushNamed(context, "/formfood");
+                  Navigator.pushNamed(context, "/form_resep");
                 },
                     width_a: 0.78,
                     width_b: 0.8,
