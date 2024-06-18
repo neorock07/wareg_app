@@ -72,7 +72,7 @@ class Body {
     return Body(
       alamat: json['alamat'],
       coordinate: json['coordinate'],
-      deskripsi: json['deskripsi'],
+      deskripsi: json['description'],
     );
   }
 }

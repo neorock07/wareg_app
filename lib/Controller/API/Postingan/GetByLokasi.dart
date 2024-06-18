@@ -48,6 +48,7 @@ class GetPostController extends GetxController {
         posts3.value = fetchedPosts;
       }
     } finally {
+      Future.delayed(Duration(seconds: 10));  
       isLoading3(false);
     }
     return isLoading3;

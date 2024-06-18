@@ -48,7 +48,7 @@ class PostDetail {
       id: json['id'],
       title: json['title'],
       alamat: json['body']['alamat'],
-      deskripsi: json['body']['deskripsi'],
+      deskripsi: json['body']['description'],
       coordinate: json['body']['coordinate'],
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],

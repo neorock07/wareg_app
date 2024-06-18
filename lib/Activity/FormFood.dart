@@ -619,7 +619,7 @@ class _FormFoodState extends State<FormFood> {
                           foodController.data_food!['body[alamat]'] =
                               "${lokasiController.text}";
 
-                          foodController.data_food!['body[deskripsi]'] =
+                          foodController.data_food!['body[description]'] =
                               "${deskripsiController.text}";
 
                           if (jumlahController.text == null ||
