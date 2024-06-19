@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
-import '../Controller/FoodController.dart'; // Pastikan Anda menambahkan paket flutter_screenutil di pubspec.yaml
+import '../Controller/FoodController.dart';
 
 class ResepForm extends StatefulWidget {
   @override
@@ -24,7 +25,7 @@ class _ResepFormState extends State<ResepForm> {
   void addField() {
     nameControllers.add(TextEditingController());
     quantityControllers.add(TextEditingController());
-    units.add('kg'); // Default value for the DropdownButton
+    units.add('kg');
     setState(() {});
   }
 
@@ -57,7 +58,7 @@ class _ResepFormState extends State<ResepForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Masukkan Bahan Baku',
           style: TextStyle(
             color: Colors.black,
@@ -66,8 +67,9 @@ class _ResepFormState extends State<ResepForm> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(10.dm),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -80,60 +82,81 @@ class _ResepFormState extends State<ResepForm> {
               ),
             ),
             Padding(
-              padding: EdgeInsets.all(5.0),
+              padding: EdgeInsets.only(top: 5.dm),
               child: Text(
                 "Masukkan data bahan baku yang anda miliki",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     color: Colors.grey,
                     fontFamily: "Poppins",
-                    fontSize: 14.sp,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.normal),
               ),
             ),
-            SizedBox(height: 16.0),
+            SizedBox(height: 15.h),
             Expanded(
               child: ListView.builder(
                 itemCount: nameControllers.length,
                 itemBuilder: (context, index) {
                   return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    padding: EdgeInsets.symmetric(vertical: 8.dm),
                     child: Row(
                       children: [
                         Expanded(
                           flex: 3,
-                          child: TextField(
-                            controller: nameControllers[index],
-                            decoration: InputDecoration(
-                              labelText: 'Nama Bahan Baku ${index + 1}',
+                          child: Container(
+                            decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey)),
+                            child: TextField(
+                              controller: nameControllers[index],
+                              decoration: InputDecoration(
+                                labelText: 'Nama Bahan Baku ${index + 1}',
+                              ),
                             ),
                           ),
                         ),
-                        SizedBox(width: 8.0),
+                        SizedBox(width: 8.w),
                         Expanded(
                           flex: 1,
-                          child: TextField(
-                            controller: quantityControllers[index],
-                            decoration: InputDecoration(
-                              labelText: 'Jumlah',
+                          child: Container(
+                            decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey)),
+                            child: TextField(
+                              controller: quantityControllers[index],
+                              decoration: const InputDecoration(
+                                labelText: 'Jumlah',
+                              ),
+                              keyboardType: TextInputType.number,
                             ),
-                            keyboardType: TextInputType.number,
                           ),
                         ),
-                        SizedBox(width: 8.0),
-                        DropdownButton<String>(
-                          value: units[index],
-                          items: <String>['kg', 'g', 'l'].map((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
-                          onChanged: (newValue) {
-                            setState(() {
-                              units[index] = newValue!;
-                            });
-                          },
+                        SizedBox(width: 8.w),
+                        Container(
+                          decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey)),
+                          child: Padding(
+                            padding: EdgeInsets.only(top: 14.h),
+                            child: Expanded(
+                              child: DropdownButton<String>(
+                                underline: SizedBox(
+                                  height: 5.h,
+                                ),
+                                value: units[index],
+                                items: <String>['kg', 'g', 'l', 'pcs']
+                                    .map((String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(value),
+                                  );
+                                }).toList(),
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    units[index] = newValue!;
+                                  });
+                                },
+                              ),
+                            ),
+                          ),
                         ),
                         IconButton(
                           onPressed: () {
@@ -147,25 +170,31 @@ class _ResepFormState extends State<ResepForm> {
                 },
               ),
             ),
-            SizedBox(height: 16.0),
+            SizedBox(height: 15.h),
             ElevatedButton.icon(
               onPressed: addField,
-              icon: Icon(Icons.add),
-              label: Text('Tambah Bahan Baku'),
+              icon: const Icon(
+                Icons.add,
+                color: Colors.white,
+              ),
+              label: const Text(
+                'Tambah Bahan Baku',
+                style: TextStyle(color: Colors.white, fontFamily: "Poppins"),
+              ),
               style: ElevatedButton.styleFrom(
-                primary: Colors.green,
+                primary: Color.fromRGBO(48, 122, 89, 1),
               ),
             ),
-            SizedBox(height: 16.0),
+            SizedBox(height: 15.h),
             Center(
               child: OutlinedButton.icon(
-                onPressed: () {
-                  // Tambahkan aksi yang diinginkan
-                },
-                icon: Icon(Icons.check, color: Color(0xFF307A59)),
-                label: Text(
+                onPressed: () {},
+                icon:
+                    const Icon(LucideIcons.sparkles, color: Color(0xFF307A59)),
+                label: const Text(
                   'Cari Rekomendasi',
-                  style: TextStyle(color: Color(0xFF307A59)),
+                  style: TextStyle(
+                      color: Color(0xFF307A59), fontFamily: "Poppins"),
                 ),
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(color: Color(0xFF307A59)),

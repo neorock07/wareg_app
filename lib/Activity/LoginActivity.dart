@@ -162,7 +162,7 @@ class _LoginActivityState extends State<LoginActivity> {
                       height_a: 0.05,
                       height_b: 0.06,
                       borderRadius: 10.dm,
-                      gradient: LinearGradient(colors: [
+                      gradient: const LinearGradient(colors: [
                         Color.fromRGBO(52, 135, 98, 1),
                         Color.fromRGBO(48, 122, 99, 1),
                       ]),
@@ -213,11 +213,7 @@ class _LoginActivityState extends State<LoginActivity> {
                 ),
               ),
               SizedBox(height: 10.h),
-              // (isLoad.value == true)
-              //     ? SpinKitDoubleBounce(
-              //         color: Colors.green,
-              //       )
-              //     : Text("")
+              
             ],
           ),
         ),

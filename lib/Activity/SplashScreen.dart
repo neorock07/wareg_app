@@ -56,24 +56,7 @@ class _SplashScreenState extends State<SplashScreen> {
           ),
           Center(
               child: Image.asset("assets/image/gg.png", fit: BoxFit.fill, height: 100.dm, width: 100.dm,) 
-              // RichText(
-              //     text: TextSpan(
-              //         text: "Re",
-              //         style: TextStyle(
-              //             fontFamily: "Poppins",
-              //             fontSize: 30.sp,
-              //             color: Colors.white),
-              //         children: [
-                        
-              //   TextSpan(
-              //     text: "Food",
-              //     style: TextStyle(
-              //         fontFamily: "Poppins",
-              //         fontSize: 30.sp,
-              //         color: Colors.white,
-              //         fontWeight: FontWeight.bold),
-              //   )
-              // ]))
+              
               ),
         ]),
       ),
