@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:wareg_app/Controller/PrefController.dart';
 import 'package:intl/intl.dart';
 import '../Controller/MapsController.dart';
+import '../Controller/transaction_controller.dart';
 import '../Services/message_service.dart';
 import '../Util/Ip.dart';
 
@@ -46,20 +49,18 @@ class _ProfileState extends State<Profile> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            CardExample(), // Removed const
-            const NavigationMenu(),
-          ],
-        ),
+      body: Column(
+        children: [
+          CardExample(),
+          const Expanded(child: NavigationMenu()),
+        ],
       ),
     );
   }
 }
 
 class CardExample extends StatelessWidget {
-  CardExample({super.key}); // Removed const
+  CardExample({super.key});
   final PrefController prefController = Get.put(PrefController());
 
   @override
@@ -195,8 +196,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
           color: color,
           onButtonPressed: _onButtonPressed,
         ),
-        SizedBox(
-          height: 700, // Set height for the PageView
+        Expanded(
           child: PageView(
             controller: _pageController,
             onPageChanged: (index) {
@@ -205,7 +205,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
               });
             },
             children: <Widget>[
-              const RiwayatList(),
+              RiwayatList(),
               const Center(child: Text('Content for Point')),
               const ChatContent(),
             ],
@@ -306,46 +306,212 @@ class ButtonWithText extends StatelessWidget {
 }
 
 class RiwayatList extends StatelessWidget {
-  const RiwayatList({super.key});
+  RiwayatList({super.key});
+  MapsController mpController = Get.put(MapsController());
+  final TransactionController transactionController =
+      Get.put(TransactionController());
+
+  String formatDate(String dateStr) {
+    final date = DateTime.parse(dateStr).toLocal();
+    final DateFormat formatter = DateFormat('EEEE, dd MMM yyyy - HH:mm', 'id');
+    return formatter.format(date);
+  }
+
+  String capitalize(String s) => s[0].toUpperCase() + s.substring(1);
+
+  String translateRole(String role) {
+    if (role == 'recipient') {
+      return 'Sebagai Penerima';
+    } else if (role == 'donor') {
+      return 'Sebagai Pendonasi';
+    } else {
+      return role;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: const <Widget>[
-          ListTile(
-            leading: CircleAvatar(child: Text('A')),
-            title: Text('Bakso sisa Kemarin'),
-            subtitle: Text('10 Apr 2024 - 14.56'),
-            trailing: Icon(Icons.favorite_rounded),
-          ),
-          ListTile(
-            leading: CircleAvatar(child: Text('A')),
-            title: Text('Bakso sisa Kemarin'),
-            subtitle: Text('10 Apr 2024 - 14.56'),
-            trailing: Icon(Icons.favorite_rounded),
-          ),
-          ListTile(
-            leading: CircleAvatar(child: Text('A')),
-            title: Text('Bakso sisa Kemarin'),
-            subtitle: Text('10 Apr 2024 - 14.56'),
-            trailing: Icon(Icons.favorite_rounded),
-          ),
-          ListTile(
-            leading: CircleAvatar(child: Text('A')),
-            title: Text('Bakso sisa Kemarin'),
-            subtitle: Text('10 Apr 2024 - 14.56'),
-            trailing: Icon(Icons.favorite_rounded),
-          ),
-          ListTile(
-            leading: CircleAvatar(child: Text('A')),
-            title: Text('Bakso sisa Kemarin'),
-            subtitle: Text('10 Apr 2024 - 14.56'),
-            trailing: Icon(Icons.favorite_rounded),
-          ),
-        ],
-      ),
-    );
+    return Obx(() {
+      if (transactionController.isLoading.value) {
+        return Center(child: CircularProgressIndicator());
+      }
+
+      if (transactionController.transactions.isEmpty) {
+        return Center(child: Text('No transactions found.'));
+      }
+
+      return Container(
+        color: Colors.grey[200],
+        child: ListView.builder(
+          padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight),
+          itemCount: transactionController.transactions.length,
+          itemBuilder: (context, index) {
+            final transaction = transactionController.transactions[index];
+            final postMediaUrls =
+                (transaction['postMedia'] as List<dynamic>).map((media) {
+              return media['url'].toString().replaceFirst(
+                  'http://localhost:3000',
+                  '${Ip().getType()}://${Ip().getIp()}');
+            }).toList();
+            final postTitle = transaction['postTitle'];
+            final totalJumlah = transaction['detail'].fold<int>(
+                0, (int sum, dynamic item) => sum + (item['jumlah'] as int));
+            final updatedAt = formatDate(transaction['updatedAt']);
+            final review = transaction['review'] != null
+                ? transaction['review'].toString() + '/5'
+                : 'No review';
+            final role = translateRole(transaction['role']);
+            final status = capitalize(transaction['status']);
+
+            return Card(
+              margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+              color: Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          role,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        Text(
+                          updatedAt,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          postTitle,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              review,
+                              style: TextStyle(
+                                fontSize: 14,
+                              ),
+                            ),
+                            if (transaction['review'] != null)
+                              Icon(Icons.star, color: Colors.yellow, size: 16),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: postMediaUrls.map((url) {
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8.0),
+                              child: Image.network(
+                                url,
+                                fit: BoxFit.cover,
+                                width: 100,
+                                height: 100,
+                                loadingBuilder: (BuildContext context,
+                                    Widget child,
+                                    ImageChunkEvent? loadingProgress) {
+                                  if (loadingProgress == null) {
+                                    return child;
+                                  } else {
+                                    return Center(
+                                      child: SpinKitCircle(
+                                        color: Color.fromRGBO(48, 122, 99, 1),
+                                        size: 50.0,
+                                      ),
+                                    );
+                                  }
+                                },
+                                errorBuilder: (BuildContext context,
+                                    Object exception, StackTrace? stackTrace) {
+                                  return Icon(
+                                    Icons.error,
+                                    color: Colors.red,
+                                  );
+                                },
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          status,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                        Text(
+                          'Jumlah: $totalJumlah',
+                          style: TextStyle(
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (role == 'Sebagai Penerima' &&
+                        status.toLowerCase() == 'ongoing')
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: IconButton(
+                          icon: Icon(Icons.arrow_forward),
+                          onPressed: () {
+                            mpController.map_dataTarget['url'] =
+                                transaction['postMedia'][0]['url'];
+                            mpController.map_dataTarget['id'] =
+                                transaction['postId'];
+                            mpController.map_dataTarget['title'] =
+                                transaction['postTitle'];
+                            mpController.target_lat = double.parse(
+                                transaction['postBody']['coordinate']
+                                    .toString()
+                                    .split(",")[0]);
+                            mpController.target_long = double.parse(
+                                transaction['postBody']['coordinate']
+                                    .toString()
+                                    .split(",")[1]);
+                            mpController.map_dataTarget['donatur_name'] =
+                                transaction['otherUserName'];
+                            mpController.map_dataTarget['userId'] =
+                                transaction['otherUserId'];
+                            Navigator.pushNamed(context, "/onmap");
+                          },
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    });
   }
 }
 
@@ -401,63 +567,67 @@ class _ChatContentState extends State<ChatContent> {
       return Center(child: Text('No conversations found.'));
     }
 
-    return ListView.builder(
-      itemCount: conversations!.length,
-      itemBuilder: (context, index) {
-        final conversation = conversations![index];
-        final otherUser = conversation['otherUser'];
-        final lastMessage = conversation['lastMessage'];
-        final lastMessageTime = lastMessage['timestamp'] != null
-            ? DateFormat('hh:mm a')
-                .format(DateTime.parse(lastMessage['timestamp']).toLocal())
-            : '';
-        final truncatedMessage = formatMessage(lastMessage['message']);
+    return Padding(
+      padding: EdgeInsets.only(bottom: 20.h),
+      child: ListView.builder(
+        itemCount: conversations!.length,
+        itemBuilder: (context, index) {
+          final conversation = conversations![index];
+          final otherUser = conversation['otherUser'];
+          final lastMessage = conversation['lastMessage'];
+          final lastMessageTime = lastMessage['timestamp'] != null
+              ? DateFormat('hh:mm a')
+                  .format(DateTime.parse(lastMessage['timestamp']).toLocal())
+              : '';
+          final truncatedMessage = formatMessage(lastMessage['message']);
 
-        return ListTile(
-          leading: CircleAvatar(
-            backgroundImage: NetworkImage(otherUser['profile_picture']
-                .toString()
-                .replaceFirst('http://localhost:3000',
-                    '${ipAdd.getType()}://${ipAdd.getIp()}')),
-          ),
-          title: Text(otherUser['username']),
-          subtitle: Text(truncatedMessage),
-          trailing: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (conversation['unreadMessagesCount'] > 0)
-                Container(
-                  margin: const EdgeInsets.only(bottom: 4),
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: Colors.red,
-                    borderRadius: BorderRadius.circular(12),
+          return ListTile(
+            leading: CircleAvatar(
+              backgroundImage: NetworkImage(otherUser['profile_picture']
+                  .toString()
+                  .replaceFirst('http://localhost:3000',
+                      '${ipAdd.getType()}://${ipAdd.getIp()}')),
+            ),
+            title: Text(otherUser['username']),
+            subtitle: Text(truncatedMessage),
+            trailing: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (conversation['unreadMessagesCount'] > 0)
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 4),
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      conversation['unreadMessagesCount'].toString(),
+                      style: TextStyle(fontSize: 12, color: Colors.white),
+                    ),
                   ),
-                  child: Text(
-                    conversation['unreadMessagesCount'].toString(),
-                    style: TextStyle(fontSize: 12, color: Colors.white),
-                  ),
+                Text(
+                  lastMessageTime,
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
                 ),
-              Text(
-                lastMessageTime,
-                style: TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-            ],
-          ),
-          onTap: () {
-            mpController.map_dataTarget['userId'] = otherUser['id'];
-            mpController.map_dataTarget['donatur_name'] = otherUser['username'];
-            Navigator.pushNamed(
-              context,
-              "/chat",
-              arguments: {
-                'userId': otherUser['id'],
-                'donatur_name': otherUser['username'],
-              },
-            );
-          },
-        );
-      },
+              ],
+            ),
+            onTap: () {
+              mpController.map_dataTarget['userId'] = otherUser['id'];
+              mpController.map_dataTarget['donatur_name'] =
+                  otherUser['username'];
+              Navigator.pushNamed(
+                context,
+                "/chat",
+                arguments: {
+                  'userId': otherUser['id'],
+                  'donatur_name': otherUser['username'],
+                },
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }

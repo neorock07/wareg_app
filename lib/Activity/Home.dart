@@ -60,6 +60,10 @@ class _HomeState extends State<Home> {
           position.latitude, position.longitude);
 
       if (result1 == 401 || result2 == 401) {
+        // Clear all shared preferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.clear();
+
         Navigator.pushReplacementNamed(context, '/login');
       }
     } catch (e) {

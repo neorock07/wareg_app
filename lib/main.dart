@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wareg_app/Activity/SplashScreen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -9,6 +10,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:wareg_app/Routes/Route.dart';
 import 'Controller/message_controller.dart';
+import 'Services/transaction_service.dart';
 import 'firebase_options.dart';
 
 const AndroidNotificationChannel transactionChannel =
@@ -90,7 +92,8 @@ Future<void> main() async {
     android: initializationSettingsAndroid,
   );
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
-
+  Get.put(TransactionService());
+  await initializeDateFormatting('id', null);
   runApp(const MyApp());
 }
 
