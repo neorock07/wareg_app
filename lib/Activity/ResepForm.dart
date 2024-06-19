@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
+import '../Controller/FoodController.dart'; // Pastikan Anda menambahkan paket flutter_screenutil di pubspec.yaml
 
 class ResepForm extends StatefulWidget {
   @override
@@ -10,18 +13,32 @@ class _ResepFormState extends State<ResepForm> {
   List<TextEditingController> nameControllers = [];
   List<TextEditingController> quantityControllers = [];
   List<String> units = [];
+  var foodController = Get.put(FoodController());
 
   @override
   void initState() {
     super.initState();
-    addTextField();
+    addField();
   }
 
-  void addTextField() {
+  void addField() {
+    nameControllers.add(TextEditingController());
+    quantityControllers.add(TextEditingController());
+    units.add('kg'); // Default value for the DropdownButton
+    setState(() {});
+  }
+
+  void _removeTextFields(int index) {
     setState(() {
-      nameControllers.add(TextEditingController());
-      quantityControllers.add(TextEditingController());
-      units.add('kg');
+      nameControllers[index].dispose();
+      quantityControllers[index].dispose();
+      nameControllers.removeAt(index);
+      quantityControllers.removeAt(index);
+      units.removeAt(index);
+
+      foodController.jmlController.remove(index);
+      foodController.nameController.remove(index);
+      foodController.typeController.remove(index);
     });
   }
 
@@ -39,11 +56,42 @@ class _ResepFormState extends State<ResepForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Masukkan Bahan Baku', style: TextStyle(color: Colors.black, fontFamily: "Bree", ),)),
+      appBar: AppBar(
+        title: Text(
+          'Masukkan Bahan Baku',
+          style: TextStyle(
+            color: Colors.black,
+            fontFamily: "Bree",
+          ),
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              "DATA BAHAN BAKU MAKANAN",
+              style: TextStyle(
+                color: Colors.black,
+                fontFamily: "Poppins",
+                fontSize: 18.sp,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(5.0),
+              child: Text(
+                "Masukkan data bahan baku yang anda miliki",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    color: Colors.grey,
+                    fontFamily: "Poppins",
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.normal),
+              ),
+            ),
+            SizedBox(height: 16.0),
             Expanded(
               child: ListView.builder(
                 itemCount: nameControllers.length,
@@ -87,6 +135,12 @@ class _ResepFormState extends State<ResepForm> {
                             });
                           },
                         ),
+                        IconButton(
+                          onPressed: () {
+                            _removeTextFields(index);
+                          },
+                          icon: const Icon(Icons.cancel),
+                        ),
                       ],
                     ),
                   );
@@ -95,11 +149,27 @@ class _ResepFormState extends State<ResepForm> {
             ),
             SizedBox(height: 16.0),
             ElevatedButton.icon(
-              onPressed: addTextField,
+              onPressed: addField,
               icon: Icon(Icons.add),
               label: Text('Tambah Bahan Baku'),
               style: ElevatedButton.styleFrom(
                 primary: Colors.green,
+              ),
+            ),
+            SizedBox(height: 16.0),
+            Center(
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  // Tambahkan aksi yang diinginkan
+                },
+                icon: Icon(Icons.check, color: Color(0xFF307A59)),
+                label: Text(
+                  'Cari Rekomendasi',
+                  style: TextStyle(color: Color(0xFF307A59)),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: Color(0xFF307A59)),
+                ),
               ),
             ),
           ],

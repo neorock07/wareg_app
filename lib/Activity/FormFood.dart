@@ -504,14 +504,9 @@ class _FormFoodState extends State<FormFood> {
                             Container(
                                 height: 280.h,
                                 width: 200.h,
-                                child: MapBox(
-                                    context,
-                                    mapController.controller,
-                                    null,
-                                    marker_user, 
-                                    isPicker: true,
-                                    isTrack: false
-                                    )),
+                                child: MapBox(context, mapController.controller,
+                                    null, marker_user,
+                                    isPicker: true, isTrack: false)),
                             SizedBox(height: 10.h),
                             InkWell(
                                 onTap: () async {
