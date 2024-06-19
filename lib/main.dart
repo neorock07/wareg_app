@@ -99,33 +99,19 @@ class MyApp extends StatefulWidget {
 
   @override
   _MyAppState createState() => _MyAppState();
-
-  static void setChatActivityStatus(bool isActive, int? userId) {
-    _MyAppState.setChatActivityStatus(isActive, userId);
-  }
 }
 
 class _MyAppState extends State<MyApp> {
-  final ScrollController _scrollController = ScrollController();
-  static bool _isChatActivityActive = false;
-  static int? _currentChatUserId;
-
   final MessageController _messageController = Get.put(MessageController());
-
-  static void setChatActivityStatus(bool isActive, int? userId) {
-    _isChatActivityActive = isActive;
-    _currentChatUserId = userId;
-  }
 
   @override
   void initState() {
     super.initState();
     _checkAndSaveFcmToken();
-    if (!_isChatActivityActive) {
-      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-        _showLocalNotification(message);
-      });
-    }
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      _showLocalNotification(message);
+    });
   }
 
   Future<void> _checkAndSaveFcmToken() async {

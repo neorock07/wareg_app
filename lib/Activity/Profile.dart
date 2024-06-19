@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:wareg_app/Controller/PrefController.dart';
 import 'package:intl/intl.dart';
+import '../Controller/MapsController.dart';
 import '../Services/message_service.dart';
 import '../Util/Ip.dart';
 
@@ -356,6 +357,7 @@ class ChatContent extends StatefulWidget {
 }
 
 class _ChatContentState extends State<ChatContent> {
+  MapsController mpController = Get.put(MapsController());
   final MessageService _messageService = Get.put(MessageService());
   List<dynamic>? conversations;
   bool isLoading = true;
@@ -443,6 +445,8 @@ class _ChatContentState extends State<ChatContent> {
             ],
           ),
           onTap: () {
+            mpController.map_dataTarget['userId'] = otherUser['id'];
+            mpController.map_dataTarget['donatur_name'] = otherUser['username'];
             Navigator.pushNamed(
               context,
               "/chat",

@@ -17,8 +17,7 @@ class ChatActivity extends StatefulWidget {
 }
 
 class _ChatActivityState extends State<ChatActivity> {
-  late int userId;
-  late String donaturName;
+  MapsController mpController = Get.put(MapsController());
   final TextEditingController _controller = TextEditingController();
   final MessageController _messageController = Get.put(MessageController());
   final ScrollController _scrollController = ScrollController();
@@ -29,12 +28,6 @@ class _ChatActivityState extends State<ChatActivity> {
   @override
   void initState() {
     super.initState();
-    final Map<String, dynamic> args =
-        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-    userId = args['userId'];
-    donaturName = args['donatur_name'];
-    // Set ChatActivity status to active
-    MyApp.setChatActivityStatus(true, userId);
 
     _fetchMessages();
   }
@@ -43,20 +36,13 @@ class _ChatActivityState extends State<ChatActivity> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_isListenerInitialized) {
-      final Map<String, dynamic> args =
-          ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-      userId = args['userId'];
-      donaturName = args['donatur_name'];
-
-      // Now that we have the userId, we can fetch messages
-      _fetchMessages();
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
         print("Message received. ${message.notification?.body}");
 
         // Periksa apakah pesan dari user yang saat ini dibuka
         if (message.data['type'] == 'message') {
           int senderId = int.parse(message.data['userId']);
-          if (senderId == userId) {
+          if (senderId == mpController.map_dataTarget['userId']) {
             _messageController.appendMessage(message.data);
             _scrollToBottom();
           } else {
@@ -73,7 +59,8 @@ class _ChatActivityState extends State<ChatActivity> {
   }
 
   Future<void> _fetchMessages() async {
-    await _messageController.fetchMessages(userId);
+    await _messageController
+        .fetchMessages(mpController.map_dataTarget['userId']);
     _scrollToBottom();
   }
 
@@ -113,16 +100,11 @@ class _ChatActivityState extends State<ChatActivity> {
     }
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    // Set ChatActivity status to inactive
-    MyApp.setChatActivityStatus(false, null);
-  }
-
   void _sendMessage(String message) {
     if (message.isNotEmpty) {
-      _messageController.sendMessage(message, userId).then((_) {
+      _messageController
+          .sendMessage(message, mpController.map_dataTarget['userId'])
+          .then((_) {
         _fetchMessages();
       });
       _controller.clear();
@@ -130,7 +112,9 @@ class _ChatActivityState extends State<ChatActivity> {
   }
 
   void _sendFile(String filePath) {
-    _messageController.sendFile(filePath, userId).then((_) {
+    _messageController
+        .sendFile(filePath, mpController.map_dataTarget['userId'])
+        .then((_) {
       _fetchMessages();
     });
   }
@@ -209,7 +193,7 @@ class _ChatActivityState extends State<ChatActivity> {
         flexibleSpace: Align(
           alignment: Alignment.bottomCenter,
           child: Text(
-            donaturName,
+            mpController.map_dataTarget['donatur_name'],
             style: TextStyle(
                 fontFamily: "Bree", color: Colors.black, fontSize: 18.sp),
           ),
