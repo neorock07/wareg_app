@@ -36,11 +36,11 @@ class _ProfileState extends State<Profile> {
           ),
         ],
       ),
-      body: const SingleChildScrollView(
+      body: SingleChildScrollView(
         child: Column(
           children: [
-            CardExample(),
-            NavigationMenu(),
+            CardExample(), // Removed const
+            const NavigationMenu(),
           ],
         ),
       ),
@@ -49,61 +49,77 @@ class _ProfileState extends State<Profile> {
 }
 
 class CardExample extends StatelessWidget {
-  const CardExample({super.key});
+  CardExample({super.key}); // Removed const
+  final PrefController prefController = Get.put(PrefController());
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Card(
-        color: const Color(0xFF307A59),
-        margin: const EdgeInsets.all(13.0),
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Stack(
-                alignment: Alignment.topRight,
-                children: [
-                  const ListTile(
-                    leading: CircleAvatar(
-                      child: Text('G'),
-                      radius: 30,
-                    ),
-                    title: Text(
-                      'Ganjar Pranowo',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+    return FutureBuilder<Map<String, String>>(
+      future: prefController.getUserData(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error loading user data'));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(child: Text('No user data found'));
+        } else {
+          var userData = snapshot.data!;
+          return Center(
+            child: Card(
+              color: const Color(0xFF307A59),
+              margin: const EdgeInsets.all(13.0),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Stack(
+                      alignment: Alignment.topRight,
                       children: [
-                        Text(
-                          'Semarang, Jawa Tengah, Indonesia',
-                          style: TextStyle(color: Colors.white70),
+                        ListTile(
+                          leading: CircleAvatar(
+                            backgroundImage:
+                                NetworkImage(userData['profilePicture']!),
+                            radius: 30,
+                          ),
+                          title: Text(
+                            userData['name']!,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                userData['gender']!,
+                                style: TextStyle(color: Colors.white70),
+                              ),
+                              Text(
+                                userData['email']!,
+                                style: TextStyle(color: Colors.white70),
+                              ),
+                            ],
+                          ),
                         ),
-                        Text(
-                          '5 makanan terdonasikan',
-                          style: TextStyle(color: Colors.white70),
+                        IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.white),
+                          onPressed: () {
+                            // Handle edit button press
+                          },
                         ),
                       ],
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.edit, color: Colors.white),
-                    onPressed: () {
-                      // Handle edit button press
-                    },
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
+          );
+        }
+      },
     );
   }
 }

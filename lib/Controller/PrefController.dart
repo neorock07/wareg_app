@@ -21,6 +21,34 @@ class PrefController extends GetxController {
     }
   }
 
+  String getFullProfilePictureUrl(String profilePicture) {
+    return profilePicture.replaceFirst(
+        'http://localhost:3000', '${ipAdd.getType()}://${ipAdd.getIp()}');
+  }
+
+  Future<Map<String, String>> getUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String name = prefs.getString('user_name') ?? '';
+    String email = prefs.getString('user_email') ?? '';
+    String gender = prefs.getString('user_gender') ?? '';
+    String profilePicture = prefs.getString('profile_picture') ?? '';
+
+    // Update gender value
+    String genderDisplay = '';
+    if (gender == 'l') {
+      genderDisplay = 'Laki-Laki';
+    } else if (gender == 'p') {
+      genderDisplay = 'Perempuan';
+    }
+
+    return {
+      'name': name,
+      'email': email,
+      'gender': genderDisplay,
+      'profilePicture': getFullProfilePictureUrl(profilePicture),
+    };
+  }
+
   Future<void> saveData(Map<String, dynamic> data) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final user = data['user'];
@@ -32,7 +60,7 @@ class PrefController extends GetxController {
     await prefs.setString('profile_picture', user['profile_picture']);
   }
 
-  Future<bool> clearData()async {
+  Future<bool> clearData() async {
     final SharedPreferences pref = await SharedPreferences.getInstance();
     return pref.clear();
   }
