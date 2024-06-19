@@ -129,4 +129,29 @@ class MessageService extends GetxService {
       throw Exception('Failed to send message');
     }
   }
+
+  Future<List<dynamic>?> getConversations() async {
+    var ipAdd = Ip();
+    String? _baseUrl = '${ipAdd.getType()}://${ipAdd.getIp()}';
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var bearerToken = prefs.getString('token') ?? '';
+
+    Map<String, String> headers = {
+      'Authorization': 'Bearer $bearerToken',
+    };
+
+    final response = await http.get(
+      Uri.parse('$_baseUrl/conversations'),
+      headers: headers,
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as List<dynamic>;
+    } else {
+      // Handle errors
+      log("Failed to load conversations: ${response.statusCode}");
+      throw Exception('Failed to load conversations');
+    }
+  }
 }

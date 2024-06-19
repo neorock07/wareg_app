@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:wareg_app/Controller/PrefController.dart';
+import 'package:intl/intl.dart';
+import '../Services/message_service.dart';
+import '../Util/Ip.dart';
 
 class Profile extends StatefulWidget {
   const Profile({Key? key}) : super(key: key);
@@ -11,6 +14,12 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   var prefController = Get.put(PrefController());
+
+  @override
+  void initState() {
+    super.initState();
+    Get.put(MessageService()); // Ensure MessageService is initialized
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -133,7 +142,7 @@ class NavigationMenu extends StatefulWidget {
 
 class _NavigationMenuState extends State<NavigationMenu> {
   final PageController _pageController = PageController();
-  String _activeButton = 'Profil';
+  String _activeButton = 'Riwayat';
 
   void _onButtonPressed(String label) {
     setState(() {
@@ -144,14 +153,12 @@ class _NavigationMenuState extends State<NavigationMenu> {
 
   int _getPageIndex(String label) {
     switch (label) {
-      case 'Profil':
-        return 0;
       case 'Riwayat':
-        return 1;
+        return 0;
       case 'Point':
-        return 2;
+        return 1;
       case 'Pesan':
-        return 3;
+        return 2;
       default:
         return 0;
     }
@@ -160,16 +167,20 @@ class _NavigationMenuState extends State<NavigationMenu> {
   String _getPageLabel(int index) {
     switch (index) {
       case 0:
-        return 'Profil';
-      case 1:
         return 'Riwayat';
-      case 2:
+      case 1:
         return 'Point';
-      case 3:
+      case 2:
         return 'Pesan';
       default:
-        return 'Profil';
+        return 'Riwayat';
     }
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
@@ -192,30 +203,10 @@ class _NavigationMenuState extends State<NavigationMenu> {
                 _activeButton = _getPageLabel(index);
               });
             },
-            children: const <Widget>[
-              ProfilContent(
-                heading1: 'Deskripsi',
-                isi_heading1:
-                    'Lake Oeschinen lies at the foot of the Blüemlisalp in the '
-                    'Bernese Alps. Situated 1,578 meters above sea level, it '
-                    'is one of the larger Alpine Lakes. A gondola ride from '
-                    'Kandersteg, followed by a half-hour walk through pastures '
-                    'and pine forest, leads you to the lake, which warms to 20 '
-                    'degrees Celsius in the summer. Activities enjoyed here '
-                    'include rowing, and riding the summer toboggan run.',
-                heading2: 'Informasi',
-                isi_heading2:
-                    'Lake Oeschinen lies at the foot of the Blüemlisalp in the '
-                    'Bernese Alps. Situated 1,578 meters above sea level, it '
-                    'is one of the larger Alpine Lakes. A gondola ride from '
-                    'Kandersteg, followed by a half-hour walk through pastures '
-                    'and pine forest, leads you to the lake, which warms to 20 '
-                    'degrees Celsius in the summer. Activities enjoyed here '
-                    'include rowing, and riding the summer toboggan run.',
-              ),
-              RiwayatList(),
-              Center(child: Text('Content for Point')),
-              Center(child: Text('Content for Pesan')),
+            children: <Widget>[
+              const RiwayatList(),
+              const Center(child: Text('Content for Point')),
+              const ChatContent(),
             ],
           ),
         ),
@@ -243,12 +234,6 @@ class ButtonSection extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          ButtonWithText(
-            color: color,
-            label: 'Profil',
-            isActive: activeButton == 'Profil',
-            onPressed: () => onButtonPressed('Profil'),
-          ),
           ButtonWithText(
             color: color,
             label: 'Riwayat',
@@ -363,67 +348,112 @@ class RiwayatList extends StatelessWidget {
   }
 }
 
-class ProfilContent extends StatelessWidget {
-  const ProfilContent({
-    super.key,
-    required this.heading1,
-    required this.isi_heading1,
-    required this.heading2,
-    required this.isi_heading2,
-  });
+class ChatContent extends StatefulWidget {
+  const ChatContent({Key? key}) : super(key: key);
 
-  final String heading1;
-  final String isi_heading1;
-  final String heading2;
-  final String isi_heading2;
+  @override
+  _ChatContentState createState() => _ChatContentState();
+}
+
+class _ChatContentState extends State<ChatContent> {
+  final MessageService _messageService = Get.put(MessageService());
+  List<dynamic>? conversations;
+  bool isLoading = true;
+  final ipAdd = Ip();
+
+  @override
+  void initState() {
+    super.initState();
+    fetchConversations();
+  }
+
+  Future<void> fetchConversations() async {
+    try {
+      conversations = await _messageService.getConversations();
+    } catch (e) {
+      print('Failed to fetch conversations: $e');
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  String formatMessage(String? message) {
+    if (message == null) {
+      return "mengirim file";
+    }
+    if (message.length > 30) {
+      return message.substring(0, 30) + "...";
+    }
+    return message;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(32),
-      child: Row(
-        children: [
-          Expanded(
-            /*1*/
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                /*2*/
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Text(
-                    heading1,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                Text(
-                  isi_heading1,
-                  style: TextStyle(
-                    color: Colors.grey[500],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Text(
-                    heading2,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                Text(
-                  isi_heading2,
-                  style: TextStyle(
-                    color: Colors.grey[500],
-                  ),
-                ),
-              ],
-            ),
+    if (isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    if (conversations == null || conversations!.isEmpty) {
+      return Center(child: Text('No conversations found.'));
+    }
+
+    return ListView.builder(
+      itemCount: conversations!.length,
+      itemBuilder: (context, index) {
+        final conversation = conversations![index];
+        final otherUser = conversation['otherUser'];
+        final lastMessage = conversation['lastMessage'];
+        final lastMessageTime = lastMessage['timestamp'] != null
+            ? DateFormat('hh:mm a')
+                .format(DateTime.parse(lastMessage['timestamp']).toLocal())
+            : '';
+        final truncatedMessage = formatMessage(lastMessage['message']);
+
+        return ListTile(
+          leading: CircleAvatar(
+            backgroundImage: NetworkImage(otherUser['profile_picture']
+                .toString()
+                .replaceFirst('http://localhost:3000',
+                    '${ipAdd.getType()}://${ipAdd.getIp()}')),
           ),
-        ],
-      ),
+          title: Text(otherUser['username']),
+          subtitle: Text(truncatedMessage),
+          trailing: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (conversation['unreadMessagesCount'] > 0)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 4),
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    conversation['unreadMessagesCount'].toString(),
+                    style: TextStyle(fontSize: 12, color: Colors.white),
+                  ),
+                ),
+              Text(
+                lastMessageTime,
+                style: TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+            ],
+          ),
+          onTap: () {
+            Navigator.pushNamed(
+              context,
+              "/chat",
+              arguments: {
+                'userId': otherUser['id'],
+                'donatur_name': otherUser['username'],
+              },
+            );
+          },
+        );
+      },
     );
   }
 }

@@ -7,7 +7,9 @@ import '../services/message_service.dart';
 
 class MessageController extends GetxController {
   var messages = <Map<String, dynamic>>[].obs;
+  var conversations = [].obs;
   var isLoading = true.obs;
+  var isLoading2 = true.obs;
   final MessageService _messageService = MessageService();
   final ipAdd = Ip();
 

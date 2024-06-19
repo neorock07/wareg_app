@@ -131,15 +131,12 @@ class _MyAppState extends State<MyApp> {
   Future<void> _checkAndSaveFcmToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? savedToken = prefs.getString('fcm_token');
-
-    if (savedToken == null) {
+    if (savedToken != null) {
       FirebaseMessaging.instance.getToken().then((token) {
         if (token != null && token != savedToken) {
           _messageController.saveFcmToken(token);
         }
       });
-    } else {
-      print("FCM Token already exists: $savedToken");
     }
   }
 

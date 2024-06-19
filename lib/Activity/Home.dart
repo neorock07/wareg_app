@@ -126,8 +126,7 @@ class _HomeState extends State<Home> {
               ),
             ),
             Obx(() {
-              if (postController.isLoading.value &&
-                  postController.isLoading2.value &&
+              if (postController.isLoading.value ||
                   postController.posts.value == null) {
                 return Center(child: CircularProgressIndicator());
               } else if (postController.posts.isEmpty) {
