@@ -149,7 +149,9 @@ class _OnMapState extends State<OnMap> {
           iconTheme: IconThemeData(color: Colors.white),
           actions: [
             IconButton(
-                onPressed: () async {},
+                onPressed: () async {
+                  Navigator.pushNamed(context, "/notifications");
+                },
                 icon: const Icon(
                   LucideIcons.bell,
                   color: Colors.white,
@@ -353,20 +355,18 @@ class _OnMapState extends State<OnMap> {
                                                       fit: BoxFit.cover)),
                                             ),
                                           ),
-
                                           TimerCountdown(
-                                                format: CountDownTimerFormat
-                                                    .hoursMinutesSeconds,
-                                                endTime: timerController
-                                                    .endTime.value,
-                                                onTick: (value){
-                                                  log("countdown : ${value.toString()}");
-                                                },    
-                                                onEnd: () {
-                                                  print('Countdown ended');
-                                                },
-                                              ),
-
+                                            format: CountDownTimerFormat
+                                                .hoursMinutesSeconds,
+                                            endTime:
+                                                timerController.endTime.value,
+                                            onTick: (value) {
+                                              log("countdown : ${value.toString()}");
+                                            },
+                                            onEnd: () {
+                                              print('Countdown ended');
+                                            },
+                                          ),
                                           Padding(
                                             padding: EdgeInsets.only(
                                               top: 15.h,

@@ -10,50 +10,52 @@ import 'package:wareg_app/Activity/Inventory.dart';
 import 'package:wareg_app/Activity/LoginActivity.dart';
 import 'package:wareg_app/Activity/OnMap.dart';
 import 'package:wareg_app/Activity/PreviewFood.dart';
+import 'package:wareg_app/Activity/notification_page.dart';
 import 'package:wareg_app/Activity/RegisterActivity.dart';
 import 'package:wareg_app/Activity/ResultCheck.dart';
 
 import '../Activity/ResepForm.dart';
 
-class Routes{
-  static Route<dynamic> generateRoute(RouteSettings setting){
-    switch(setting.name){
+class Routes {
+  static Route<dynamic> generateRoute(RouteSettings setting) {
+    switch (setting.name) {
       case '/home':
-        return MaterialPageRoute(builder: (_)=> BottomNavPage());
+        return MaterialPageRoute(builder: (_) => BottomNavPage());
       case '/login':
-        return MaterialPageRoute(builder: (_)=> LoginActivity());
+        return MaterialPageRoute(builder: (_) => LoginActivity());
       case '/register':
-        return MaterialPageRoute(builder: (_)=> RegisterActivity());
+        return MaterialPageRoute(builder: (_) => RegisterActivity());
       case '/inventory':
-        return MaterialPageRoute(builder: (_)=> Inventory());
+        return MaterialPageRoute(builder: (_) => Inventory());
       case '/donasi':
-        return MaterialPageRoute(builder: (_)=> Donasi());
+        return MaterialPageRoute(builder: (_) => Donasi());
       case '/onmap':
-        return MaterialPageRoute(builder: (_)=> OnMap());
+        return MaterialPageRoute(builder: (_) => OnMap());
       case '/chat':
-        return MaterialPageRoute(builder: (_)=> ChatActivity());
+        return MaterialPageRoute(builder: (_) => ChatActivity());
       case '/picture':
-        return MaterialPageRoute(builder: (_)=> FoodPicture());
+        return MaterialPageRoute(builder: (_) => FoodPicture());
       case '/formfood':
-        return MaterialPageRoute(builder: (_)=> FormFood());
+        return MaterialPageRoute(builder: (_) => FormFood());
       case '/cek':
-        return MaterialPageRoute(builder: (_)=> CekLayak());
+        return MaterialPageRoute(builder: (_) => CekLayak());
       case '/form_resep':
-        return MaterialPageRoute(builder: (_)=> ResepForm());
+        return MaterialPageRoute(builder: (_) => ResepForm());
       case '/result_check':
-        return MaterialPageRoute(builder: (_)=> ResultCheck());
+        return MaterialPageRoute(builder: (_) => ResultCheck());
+      case '/notifications': // Add this line
+        return MaterialPageRoute(builder: (_) => NotificationsPage());
       default:
         return _errorRoute();
-
-    }   
+    }
   }
 
-  static Route<dynamic> _errorRoute(){
-    return MaterialPageRoute(builder: (_){
+  static Route<dynamic> _errorRoute() {
+    return MaterialPageRoute(builder: (_) {
       return const Scaffold(
-          body: Center(
-            child: Text("Error!"),
-          ),
+        body: Center(
+          child: Text("Error!"),
+        ),
       );
     });
   }

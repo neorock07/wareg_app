@@ -200,7 +200,9 @@ class _ChatActivityState extends State<ChatActivity> {
         ),
         actions: [
           IconButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.pushNamed(context, "/notifications");
+              },
               icon: const Icon(
                 LucideIcons.bell,
                 color: Colors.black,

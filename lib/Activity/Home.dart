@@ -90,7 +90,9 @@ class _HomeState extends State<Home> {
         ),
         actions: [
           IconButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.pushNamed(context, "/notifications");
+              },
               icon: const Icon(
                 LucideIcons.bell,
                 color: Colors.black,
@@ -275,69 +277,76 @@ class _HomeState extends State<Home> {
                               "http://localhost:3000", newBaseUrl);
                           return InkWell(
                             onTap: () {
-                              mpController.target_lat = double.parse(
-                                post2.body.coordinate.toString().split(",")[0]);
-                            mpController.target_long = double.parse(
-                                post2.body.coordinate.toString().split(",")[1]);
-                            mpController.map_dataTarget['title'] = post2.title;
-                            mpController.map_dataTarget['stok'] = post2.stok;
-                            mpController.map_dataTarget['alamat'] =
-                                post2.body.alamat;
-                            mpController.map_dataTarget['id'] = post2.id;
-                            mpController.map_dataTarget['userId'] = post2.userId;
-                            mpController.map_dataTarget['marker'] = MarkerIcon(
-                              iconWidget: IconMaker(
-                                  link: updatedUrl, title: post2.title),
-                            );
-                            mpController.map_dataTarget['url'] = mediaUrl;
-                            mpController.map_dataTarget['donatur_name'] =
-                                post2.userName;
-                            mpController.map_dataTarget['deskripsi'] =
-                                post2.body.deskripsi;
-                            mpController.map_dataTarget['rating'] =
-                                post2.averageReview;
-                            mpController.map_dataTarget['donatur_profile'] =
-                                post2.userProfilePicture;
-                            mpController.map_dataTarget['updateAt'] =
-                                post2.updatedAt;
-                            mpController.map_dataTarget['expiredAt'] =
-                                post2.expiredAt;
-
-                            print(
-                                "data : ${mpController.map_dataTarget['url']} | ${mpController.map_dataTarget['stok']}");
-
-                            if (post2.media == null || post2.media.isEmpty) {
-                              DialogPop(
-                                context,
-                                size: [180.h, 150.w],
-                                dismissable: false,
-                                icon: Container(
-                                  height: 180.h,
-                                  child: Column(
-                                    children: [
-                                      const SpinKitCircle(
-                                        color: Color.fromRGBO(48, 122, 99, 1),
-                                      ),
-                                      SizedBox(
-                                        height: 8.h,
-                                      ),
-                                      Text(
-                                        "Loading...",
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontFamily: "Poppins",
-                                          fontSize: 12.sp,
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                              mpController.target_lat = double.parse(post2
+                                  .body.coordinate
+                                  .toString()
+                                  .split(",")[0]);
+                              mpController.target_long = double.parse(post2
+                                  .body.coordinate
+                                  .toString()
+                                  .split(",")[1]);
+                              mpController.map_dataTarget['title'] =
+                                  post2.title;
+                              mpController.map_dataTarget['stok'] = post2.stok;
+                              mpController.map_dataTarget['alamat'] =
+                                  post2.body.alamat;
+                              mpController.map_dataTarget['id'] = post2.id;
+                              mpController.map_dataTarget['userId'] =
+                                  post2.userId;
+                              mpController.map_dataTarget['marker'] =
+                                  MarkerIcon(
+                                iconWidget: IconMaker(
+                                    link: updatedUrl, title: post2.title),
                               );
-                            } else {
-                              Navigator.pushNamed(context, "/onmap");
-                            }
+                              mpController.map_dataTarget['url'] = mediaUrl;
+                              mpController.map_dataTarget['donatur_name'] =
+                                  post2.userName;
+                              mpController.map_dataTarget['deskripsi'] =
+                                  post2.body.deskripsi;
+                              mpController.map_dataTarget['rating'] =
+                                  post2.averageReview;
+                              mpController.map_dataTarget['donatur_profile'] =
+                                  post2.userProfilePicture;
+                              mpController.map_dataTarget['updateAt'] =
+                                  post2.updatedAt;
+                              mpController.map_dataTarget['expiredAt'] =
+                                  post2.expiredAt;
+
+                              print(
+                                  "data : ${mpController.map_dataTarget['url']} | ${mpController.map_dataTarget['stok']}");
+
+                              if (post2.media == null || post2.media.isEmpty) {
+                                DialogPop(
+                                  context,
+                                  size: [180.h, 150.w],
+                                  dismissable: false,
+                                  icon: Container(
+                                    height: 180.h,
+                                    child: Column(
+                                      children: [
+                                        const SpinKitCircle(
+                                          color: Color.fromRGBO(48, 122, 99, 1),
+                                        ),
+                                        SizedBox(
+                                          height: 8.h,
+                                        ),
+                                        Text(
+                                          "Loading...",
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontFamily: "Poppins",
+                                            fontSize: 12.sp,
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                Navigator.pushNamed(context, "/onmap");
+                              }
                             },
                             child: CardFood(context,
                                 url: post2.media[0].url,

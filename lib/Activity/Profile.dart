@@ -43,7 +43,9 @@ class _ProfileState extends State<Profile> {
         ),
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushNamed(context, "/notifications");
+            },
             icon: const Icon(Icons.notifications),
             color: Colors.black,
           ),
