@@ -4,11 +4,13 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_timer_countdown/flutter_timer_countdown.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wareg_app/Controller/API/Transaksi/TransaksiController.dart';
 import 'package:wareg_app/Controller/MapsController.dart';
+import 'package:wareg_app/Controller/TimerController.dart';
 import 'package:wareg_app/Controller/transaction_controller.dart';
 import 'package:wareg_app/Partials/CardButton.dart';
 import 'package:wareg_app/Partials/DialogPop.dart';
@@ -36,6 +38,7 @@ class _OnMapState extends State<OnMap> {
   Timer? locationUpdateTimer;
   var postController = Get.put(GetPostController());
   var transController = Get.put(TransaksiController());
+  var timerController = Get.put(TimerController());
   List<StaticPositionGeoPoint>? koordinat;
   double? latUser, longUser;
   var variasi;
@@ -350,6 +353,20 @@ class _OnMapState extends State<OnMap> {
                                                       fit: BoxFit.cover)),
                                             ),
                                           ),
+
+                                          TimerCountdown(
+                                                format: CountDownTimerFormat
+                                                    .hoursMinutesSeconds,
+                                                endTime: timerController
+                                                    .endTime.value,
+                                                onTick: (value){
+                                                  log("countdown : ${value.toString()}");
+                                                },    
+                                                onEnd: () {
+                                                  print('Countdown ended');
+                                                },
+                                              ),
+
                                           Padding(
                                             padding: EdgeInsets.only(
                                               top: 15.h,
@@ -880,18 +897,33 @@ class _OnMapState extends State<OnMap> {
                                                               isPressedBtn2
                                                                   .value = true;
 
-                                                              for (int i=0; i < count.length; i++) {
-                                                                pickedVariants.add({
-                                                                  "variant_id":
-                                                                      postController
-                                                                            .posts3
-                                                                            .value['variants'][i]['id'],
-                                                                  "jumlah": count.value[i]
-                                                                }); 
+                                                              for (int i = 0;
+                                                                  i <
+                                                                      count
+                                                                          .length;
+                                                                  i++) {
+                                                                pickedVariants
+                                                                    .add({
+                                                                  "variant_id": postController
+                                                                          .posts3
+                                                                          .value['variants']
+                                                                      [i]['id'],
+                                                                  "jumlah": count
+                                                                      .value[i]
+                                                                });
                                                               }
-                                                              await transController.postTransaction(postController.posts3.value['id'], pickedVariants).then((value) {
-                                                                  log("reuslt e iki : ${value.keys}");
-                                                                  Navigator.pushReplacementNamed(context, "/onmap");
+                                                              await transController
+                                                                  .postTransaction(
+                                                                      postController
+                                                                          .posts3
+                                                                          .value['id'],
+                                                                      pickedVariants)
+                                                                  .then((value) {
+                                                                log("reuslt e iki : ${value.keys}");
+                                                                Navigator
+                                                                    .pushReplacementNamed(
+                                                                        context,
+                                                                        "/onmap");
                                                               });
                                                               // Navigator.pushNamed(context, "/formfood");
                                                             },

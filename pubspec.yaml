@@ -58,6 +58,7 @@ dependencies:
   firebase_core: ^2.24.2
   flutter_local_notifications: ^17.1.2
   flutter_dotenv: ^5.1.0
+  flutter_timer_countdown: ^1.0.7
 
 dev_dependencies:
   flutter_test:

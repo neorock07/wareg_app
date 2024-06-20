@@ -31,7 +31,7 @@ class PostFood extends GetxController {
         i.path,
       ));
     }
-    
+
     for (final entry in data.entries) {
       request.fields[entry.key] = entry.value.toString();
     }

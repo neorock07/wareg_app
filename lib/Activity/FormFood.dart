@@ -208,7 +208,7 @@ class _FormFoodState extends State<FormFood> {
   List<TextEditingController> variasi_items = [];
   List<TextEditingController> jumlah_items = [];
 
-  String? dropdownValue;
+  String? dropdownValue, treatmentValue;
   List<String>? variasi_item = [];
   bool _isVariasi = false;
 
@@ -222,6 +222,13 @@ class _FormFoodState extends State<FormFood> {
     "Karbohidrat",
     "Lauk Pauk",
     "Cemilan/Minuman",
+  ];
+
+  List<String> treatments = [
+    "Tidak ada",
+    "Disimpan di kulkas",
+    "Sudah Dipanaskan",
+    "Sudah dibuka/dikupas"
   ];
 
   List<dynamic> items_icon = [
@@ -287,7 +294,7 @@ class _FormFoodState extends State<FormFood> {
         ),
         body: WillPopScope(
           onWillPop: () async {
-            picController.arr_img.clear(); // Clear the images
+            picController.arr_img.value.clear(); // Clear the images
             return true; // Allow the back action
           },
           child: SingleChildScrollView(
@@ -362,10 +369,9 @@ class _FormFoodState extends State<FormFood> {
                       BoxDecoration(border: Border.all(color: Colors.grey)),
                   child: Padding(
                     padding: EdgeInsets.all(5.dm),
-                    child: Expanded(
-                        child: DropdownButton<String>(
+                    child: DropdownButton<String>(
                       underline: SizedBox(
-                        height: 5.h,
+                    height: 5.h,
                       ),
                       dropdownColor: Colors.white,
                       isExpanded: true,
@@ -375,48 +381,45 @@ class _FormFoodState extends State<FormFood> {
                       // value: (controller.current_value == null)? "" : controller.current_value!.value ,
                       value: dropdownValue,
                       hint: Text(
-                        "--pilih--",
-                        style: TextStyle(
-                          fontFamily: "Poppins",
-                          fontSize: 14.sp,
-                        ),
+                    "--pilih--",
+                    style: TextStyle(
+                      fontFamily: "Poppins",
+                      fontSize: 14.sp,
+                    ),
                       ),
                       icon: const Icon(LucideIcons.chevronDown),
                       onChanged: (String? newValue) {
-                        setState(() {
-                          dropdownValue = newValue!;
-                        });
+                    setState(() {
+                      dropdownValue = newValue!;
+                    });
                       },
 
                       items:
-                          items!.map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Row(
-                            children: [
-                              Text(
-                                "${value}",
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 12.sp,
-                                    fontFamily: "Poppins"),
-                              ),
-                              SizedBox(
-                                width: 10.w,
-                              ),
-                              Icon(
-                                items_icon[items.indexOf(value)],
-                                size: 20,
-                                color: Color.fromARGB(255, 204, 191, 90),
-                              )
-                            ],
+                      items!.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Row(
+                        children: [
+                          Text(
+                            "${value}",
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 12.sp,
+                                fontFamily: "Poppins"),
                           ),
-                        );
+                          SizedBox(
+                            width: 10.w,
+                          ),
+                          Icon(
+                            items_icon[items.indexOf(value)],
+                            size: 20,
+                            color: Color.fromARGB(255, 204, 191, 90),
+                          )
+                        ],
+                      ),
+                    );
                       }).toList(),
-                    )
-
-                        // Obx(() => )
-                        ),
+                    ),
                   ),
                 ),
                 SizedBox(height: 10.h),
@@ -567,6 +570,67 @@ class _FormFoodState extends State<FormFood> {
                   child: FormDate(context,
                       width: 0.9, hint: "0", controller: dateStart),
                 ),
+                SizedBox(height: 10.h),
+                Padding(
+                  padding: EdgeInsets.only(left: 10.w),
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: Text(
+                      "Perlakuan",
+                      style: TextStyle(
+                          fontFamily: "Poppins",
+                          fontSize: 12.sp,
+                          color: Colors.grey),
+                    ),
+                  ),
+                ),
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.9,
+                  decoration:
+                      BoxDecoration(border: Border.all(color: Colors.grey)),
+                  child: Padding(
+                    padding: EdgeInsets.all(5.dm),
+                    child: DropdownButton<String>(
+                      underline: SizedBox(
+                    height: 5.h,
+                      ),
+                      dropdownColor: Colors.white,
+                      isExpanded: true,
+
+                      borderRadius: BorderRadius.circular(10.dm),
+                      padding: EdgeInsets.only(left: 10.w, right: 10.w),
+                      // value: (controller.current_value == null)? "" : controller.current_value!.value ,
+                      value: treatmentValue,
+                      hint: Text(
+                    "--pilih--",
+                    style: TextStyle(
+                      fontFamily: "Poppins",
+                      fontSize: 14.sp,
+                    ),
+                      ),
+                      icon: const Icon(LucideIcons.chevronDown),
+                      onChanged: (String? newValue) {
+                    setState(() {
+                      treatmentValue = newValue!;
+                    });
+                      },
+
+                      items:
+                      treatments!.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(
+                        "${value}",
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 12.sp,
+                            fontFamily: "Poppins"),
+                      ),
+                    );
+                      }).toList(),
+                    ),
+                  ),
+                ),
                 (isActivate == false)
                     ? Column(
                         children: [
@@ -654,7 +718,7 @@ class _FormFoodState extends State<FormFood> {
                             foodController.data_food!['variants[0][startAt]'] =
                                 waktuISO_start;
                           }
-
+                          foodController.data_treatment = treatmentValue!;
                           foodController.data_food!['body[coordinate]'] =
                               koordinatController.text;
 

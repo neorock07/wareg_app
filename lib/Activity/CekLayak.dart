@@ -179,7 +179,7 @@ class _CekLayakState extends State<CekLayak> {
                           )),
                     );
                     log("there is a ${foodController.data_food!['title']} cook date ${foodController.data_food!['variants[0][startAt]']}, date now at ${DateTime.now()}, condition : ${foodController.data_food!['condition']} it is still allowed to consume?, please answer in Json Format like this");
-                    var kueri = "saya punya ${foodController.data_food!['title']} dimasak/beli tanggal ${foodController.data_food!['variants[0][startAt]']} WIB, kategori ${foodController.data_food!['categories[]']}, kondisi : ${foodController.data_food!['condition']}, apakah informasi tersebut valid? dan apakah layak konsumsi?";
+                    var kueri = "saya punya ${foodController.data_food!['title']} dimasak/beli tanggal ${foodController.data_food!['variants[0][startAt]']} WIB, kategori ${foodController.data_food!['categories[]']}, kondisi : ${foodController.data_food!['condition']}, treatment yang telah/sedang dilakukan : ${foodController.data_treatment}.  apakah informasi tersebut valid? dan apakah layak konsumsi?";
                     await query
                         // .cekQuality(
                         //     "there is a ${foodController.data_food!['title']} cook date ${foodController.data_food!['variants[0][startAt]']}, date now at ${DateTime.now()}, condition : ${foodController.data_food!['condition']} it is still allowed to consume?, please answer in Json Format like this  !!{'result' : {'scan:'#you should answer only true or false, 'expiredAt':#you should estimate expired time in ISO format, 'reason':#your_reason}}!!")

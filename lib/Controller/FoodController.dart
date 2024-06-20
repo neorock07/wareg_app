@@ -9,6 +9,7 @@ class FoodController extends GetxController {
   RxString? current_value;
   RxList<String> tag_items = <String>[].obs;
   Map<String, dynamic>? data_food = {};
+  var data_treatment = "";
   var quantityController = <int, TextEditingController>{};
   var valueController = <int, TextEditingController>{};
 

@@ -87,14 +87,14 @@ class _PreviewFoodState extends State<PreviewFood> {
               alignment: Alignment.bottomCenter,
               child: Obx(() => CardButton(context, isPressed, onTap: (_) {
                   isPressed.value = true;
-                  Navigator.pushNamed(context, "/formfood");
+                  Navigator.pushReplacementNamed(context, "/formfood");
                 },
                     width_a: 0.78,
                     width_b: 0.8,
                     height_a: 0.05,
                     height_b: 0.06,
                     borderRadius: 10.dm,
-                    gradient: LinearGradient(colors: [
+                    gradient: const LinearGradient(colors: [
                       Color.fromRGBO(52, 135, 98, 1),
                       Color.fromRGBO(48, 122, 99, 1),
                     ]),
