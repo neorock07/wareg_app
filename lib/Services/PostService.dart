@@ -14,7 +14,6 @@ class PostService extends GetxService {
 
   Future<dynamic> fetchPosts(var lat, var long) async {
     var ipAdd = Ip();
-
     String? _baseUrl = '${ipAdd.getType()}://${ipAdd.getIp()}';
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var token = prefs.getString('token') ?? '';
@@ -23,10 +22,34 @@ class PostService extends GetxService {
       'Authorization': 'Bearer $token',
     };
 
-    final response = await http.get(
-      Uri.parse('$_baseUrl/post?lat=$lat&lon=$long'),
-      headers: headers,
-    );
+    String url = '$_baseUrl/post?lat=$lat&lon=$long';
+
+    final response = await http.get(Uri.parse(url), headers: headers);
+
+    if (response.statusCode == 200) {
+      List<dynamic> body = jsonDecode(response.body);
+      return body.map((dynamic item) => Post.fromJson(item)).toList();
+    } else if (response.statusCode == 401) {
+      return 401;
+    } else {
+      log("response : ${response.statusCode}");
+      throw Exception('Failed to load posts');
+    }
+  }
+
+  Future<dynamic> fetchPostSearch(var lat, var long, String search) async {
+    var ipAdd = Ip();
+    String? _baseUrl = '${ipAdd.getType()}://${ipAdd.getIp()}';
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var token = prefs.getString('token') ?? '';
+
+    Map<String, String> headers = {
+      'Authorization': 'Bearer $token',
+    };
+
+    String url = '$_baseUrl/post?lat=$lat&lon=$long&search=$search';
+
+    final response = await http.get(Uri.parse(url), headers: headers);
 
     if (response.statusCode == 200) {
       List<dynamic> body = jsonDecode(response.body);

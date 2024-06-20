@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import '../Util/Ip.dart';
 
 var ipAdd = Ip();
 String newBaseUrl = "${ipAdd.getType()}://${ipAdd.getIp()}";
+
 Widget CardMenu(BuildContext context,
     {String? url, String? title, String? jarak, int? stok}) {
   String updatedUrl = url!.replaceFirst("http://localhost:3000", newBaseUrl);
@@ -19,11 +21,35 @@ Widget CardMenu(BuildContext context,
             height: 80.dm,
             width: 80.dm,
             decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10.dm),
-                image: DecorationImage(
-                  image: NetworkImage("$updatedUrl"),
-                  fit: BoxFit.cover,
-                )),
+              borderRadius: BorderRadius.circular(10.dm),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10.dm),
+              child: Image.network(
+                "$updatedUrl",
+                fit: BoxFit.cover,
+                loadingBuilder: (BuildContext context, Widget child,
+                    ImageChunkEvent? loadingProgress) {
+                  if (loadingProgress == null) {
+                    return child;
+                  } else {
+                    return Center(
+                      child: SpinKitCircle(
+                        color: Color.fromRGBO(48, 122, 99, 1),
+                        size: 50.0,
+                      ),
+                    );
+                  }
+                },
+                errorBuilder: (BuildContext context, Object exception,
+                    StackTrace? stackTrace) {
+                  return Icon(
+                    Icons.error,
+                    color: Colors.red,
+                  );
+                },
+              ),
+            ),
           ),
           Padding(
             padding: EdgeInsets.only(left: 10.dm),
@@ -33,9 +59,10 @@ Widget CardMenu(BuildContext context,
                 Text(
                   "$title",
                   style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 14.sp,
-                      fontFamily: "Poppins"),
+                    color: Colors.black,
+                    fontSize: 14.sp,
+                    fontFamily: "Poppins",
+                  ),
                 ),
                 Row(
                   children: [
@@ -50,18 +77,20 @@ Widget CardMenu(BuildContext context,
                     Text(
                       "Layak Makan",
                       style: TextStyle(
-                          fontFamily: "Poppins",
-                          fontSize: 12.sp,
-                          color: Colors.grey),
+                        fontFamily: "Poppins",
+                        fontSize: 12.sp,
+                        color: Colors.grey,
+                      ),
                     ),
                   ],
                 ),
                 Text(
                   "$stok Porsi",
                   style: TextStyle(
-                      fontFamily: "Poppins",
-                      fontSize: 12.sp,
-                      color: Colors.grey),
+                    fontFamily: "Poppins",
+                    fontSize: 12.sp,
+                    color: Colors.grey,
+                  ),
                 ),
                 Row(
                   children: [
@@ -69,28 +98,31 @@ Widget CardMenu(BuildContext context,
                       width: 20.dm,
                       height: 20.dm,
                       decoration: BoxDecoration(
-                          color: Color.fromRGBO(235, 242, 239, 1),
-                          borderRadius: BorderRadius.circular(10.dm)),
+                        color: Color.fromRGBO(235, 242, 239, 1),
+                        borderRadius: BorderRadius.circular(10.dm),
+                      ),
                       child: Center(
-                          child: Icon(
-                        Icons.location_on,
-                        color: Color.fromRGBO(42, 122, 89, 1),
-                        size: 15,
-                      )),
+                        child: Icon(
+                          Icons.location_on,
+                          color: Color.fromRGBO(42, 122, 89, 1),
+                          size: 15,
+                        ),
+                      ),
                     ),
                     SizedBox(width: 5.w),
                     Text(
                       "$jarak",
                       style: TextStyle(
-                          fontFamily: "Poppins",
-                          fontSize: 12.sp,
-                          color: Colors.grey),
-                    )
+                        fontFamily: "Poppins",
+                        fontSize: 12.sp,
+                        color: Colors.grey,
+                      ),
+                    ),
                   ],
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
     ),
