@@ -1,7 +1,10 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:wareg_app/Controller/API/PromptController.dart';
 
 import '../Controller/FoodController.dart';
 
@@ -15,6 +18,7 @@ class _ResepFormState extends State<ResepForm> {
   List<TextEditingController> quantityControllers = [];
   List<String> units = [];
   var foodController = Get.put(FoodController());
+  var promptController = Get.put(PromptController());
 
   @override
   void initState() {
@@ -41,6 +45,37 @@ class _ResepFormState extends State<ResepForm> {
       foodController.nameController.remove(index);
       foodController.typeController.remove(index);
     });
+  }
+
+  String _generatePrompt() {
+    List<String> bahanList = [];
+    for (int i = 0; i < nameControllers.length; i++) {
+      String bahan =
+          "${nameControllers[i].text} ${quantityControllers[i].text} ${units[i]}";
+      bahanList.add(bahan);
+    }
+    return "saya punya bahan baku : ${bahanList.join(', ')}. berikan 3 rekomendasi resep makanan";
+  }
+
+  bool _validateInputs() {
+    for (int i = 0; i < nameControllers.length; i++) {
+      if (nameControllers[i].text.isEmpty ||
+          quantityControllers[i].text.isEmpty ||
+          units[i].isEmpty) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  void _showWarning() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+            'Periksa kembali data yang anda masukkan, semua field harus diisi!'),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 
   @override
@@ -111,6 +146,9 @@ class _ResepFormState extends State<ResepForm> {
                               controller: nameControllers[index],
                               decoration: InputDecoration(
                                 labelText: 'Nama Bahan Baku ${index + 1}',
+                                // errorText: nameControllers[index].text.isEmpty
+                                //     ? 'Wajib diisi'
+                                //     : null,
                               ),
                             ),
                           ),
@@ -123,8 +161,12 @@ class _ResepFormState extends State<ResepForm> {
                                 border: Border.all(color: Colors.grey)),
                             child: TextField(
                               controller: quantityControllers[index],
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 labelText: 'Jumlah',
+                                // errorText:
+                                //     quantityControllers[index].text.isEmpty
+                                //         ? 'Wajib diisi'
+                                //         : null,
                               ),
                               keyboardType: TextInputType.number,
                             ),
@@ -188,7 +230,15 @@ class _ResepFormState extends State<ResepForm> {
             SizedBox(height: 15.h),
             Center(
               child: OutlinedButton.icon(
-                onPressed: () {},
+                onPressed: () async {
+                  if (_validateInputs()) {
+                    String prompt = _generatePrompt();
+                    log(prompt);
+                    await promptController.getRecipe(prompt);
+                  } else {
+                    _showWarning();
+                  }
+                },
                 icon:
                     const Icon(LucideIcons.sparkles, color: Color(0xFF307A59)),
                 label: const Text(

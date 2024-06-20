@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
@@ -16,18 +17,16 @@ class PromptController extends GetxController {
 
   Future<Map<String, dynamic>> cekQuality(String prompt) async {
     final Map<String, dynamic> payload = {
-  "model": "gpt-3.5-turbo",
-  "messages": [
-    {
-      "role": "system",
-      "content": "Anda adalah seorang analisis kesehatan, Anda bertugas mengecek apakah makanan tersebut layak konsumsi dan data yang diberikan valid atau tidak jawab dengan JSON format: {\"result\": {\"isValid\": true_or_false, \"isEdible\": true_or_false, \"reason\": \"alasan\", \"expiredAt\": \"expiration_date_in_ISO_format\"}}."
-    },
-    {
-      "role": "user",
-      "content": prompt
-    }
-  ]
-};
+      "model": "gpt-3.5-turbo",
+      "messages": [
+        {
+          "role": "system",
+          "content":
+              "Anda adalah seorang analisis kesehatan, Anda bertugas mengecek apakah makanan tersebut layak konsumsi dan data yang diberikan valid atau tidak jawab dengan JSON format: {\"result\": {\"isValid\": true_or_false, \"isEdible\": true_or_false, \"reason\": \"alasan\", \"expiredAt\": \"expiration_date_in_ISO_format\"}}."
+        },
+        {"role": "user", "content": prompt}
+      ]
+    };
 
     var result = {};
     var hasil;
@@ -63,7 +62,57 @@ class PromptController extends GetxController {
     }
     return json_hasil!;
   }
+
+  Future<void> getRecipe(String prompt) async {
+    final Map<String, dynamic> payload = {
+      "model": "gpt-3.5-turbo",
+      "messages": [
+        {
+          "role": "system",
+          "content":
+              "Saya punya bahan baku berikut dan saya ingin rekomendasi resep makanan jawab dalam json : {'result': [{'title' : #nama, 'bahan_baku': #bahan baku, 'step': #langkah masak}]}"
+        },
+        {"role": "user", "content": prompt}
+      ]
+    };
+
+    final response = await http.post(
+      Uri.parse(API_URL),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': authorizationHeader,
+      },
+      body: jsonEncode(payload),
+    );
+    if (response.statusCode == 200) {
+      var result = jsonDecode(response.body);
+      log("Response: ${result.toString()}");
+    } else {
+      log('Failed to get response from ChatGPT, status code: ${response.statusCode}');
+    }
+
+    // if (response.statusCode == 200) {
+    //   var result = jsonDecode(response.body);
+    //   log("Response: ${result.toString()}");
+
+    //   // Simpan hasil ke dalam file JSON
+    //   await saveToFile(result);
+    // } else {
+    //   log('Failed to get response from ChatGPT, status code: ${response.statusCode}');
+    // }
+  }
+
+  // Future<void> saveToFile(Map<String, dynamic> data) async {
+  //   final directory = Directory.systemTemp;
+  //   final file = File('${directory.path}/response.json');
+  //   await file.writeAsString(jsonEncode(data));
+  //   log('Response saved to ${file.path}');
+  // }
 }
+
+
+
+
 
 /**
  * 
