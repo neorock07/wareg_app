@@ -7,8 +7,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wareg_app/Controller/API/Transaksi/TransaksiController.dart';
 import 'package:wareg_app/Controller/MapsController.dart';
+import 'package:wareg_app/Controller/transaction_controller.dart';
 import 'package:wareg_app/Partials/CardButton.dart';
+import 'package:wareg_app/Partials/DialogPop.dart';
 import 'package:wareg_app/Partials/MapBox.dart';
 import 'package:wareg_app/Util/IconMaker.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -27,13 +30,17 @@ class _OnMapState extends State<OnMap> {
   MapsController mpController = Get.put(MapsController());
   RoadInfo? roadInfo;
   RxBool isPressed = false.obs;
+  RxBool isPressedBtn = false.obs;
+  RxBool isPressedBtn2 = false.obs;
   StreamController<GeoPoint>? streamController = StreamController<GeoPoint>();
   Timer? locationUpdateTimer;
   var postController = Get.put(GetPostController());
+  var transController = Get.put(TransaksiController());
   List<StaticPositionGeoPoint>? koordinat;
   double? latUser, longUser;
   var variasi;
   int a = 0;
+  List<Map<String, dynamic>> pickedVariants = [];
 
   var userProfile =
       "https://cdn.idntimes.com/content-images/duniaku/post/20230309/raw-06202016rf-1606-3d3997f53e6f3e9277cd5a67fbd8f31f-1a44de7c1e0085a4ec8d2e4cb9602659.jpg";
@@ -42,6 +49,7 @@ class _OnMapState extends State<OnMap> {
   String? updatedUrl;
   String? post_foto;
   String? donatur_foto;
+  RxList<int> count = <int>[].obs;
 
   Future<void> _loadProfile() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -73,32 +81,10 @@ class _OnMapState extends State<OnMap> {
     });
   }
 
-  Future<void> _fetchCurrentPost() async {
-    var latKi, lonKi;
-    try {
-      await mpController.controller.myLocation().then((value) {
-        latKi = value.latitude;
-        lonKi = value.longitude;
-      });
-      if (a <= 0) {
-        await postController
-            .fetchPostDetail(latKi, lonKi, mpController.map_dataTarget['id'])
-            .then((value) {
-          a++;
-        });
-      }
-
-      String newBaseUrl = "${ipAdd.getType()}://${ipAdd.getIp()}";
-    } catch (e) {
-      print('Could not fetch location: $e');
-    }
-  }
-
   @override
   void initState() {
     super.initState();
     _loadProfile();
-    // _fetchCurrentPost();
     startLocationUpdates();
   }
 
@@ -115,10 +101,15 @@ class _OnMapState extends State<OnMap> {
         latUser = value.latitude;
         longUser = value.longitude;
         if (a <= 0) {
-          await postController.fetchPostDetail(
-              latUser, longUser, mpController.map_dataTarget['id']).then((value) {
-                a++;
-              });
+          await postController
+              .fetchPostDetail(
+                  latUser, longUser, mpController.map_dataTarget['id'])
+              .then((value) {
+            count =
+                List.filled(postController.posts3.value['variants'].length, 0)
+                    .obs;
+            a++;
+          });
         }
       });
       if (latUser != null && longUser != null) {
@@ -260,59 +251,61 @@ class _OnMapState extends State<OnMap> {
                                                                       userProfile,
                                                                   scale: 1))),
                                                     ),
-                                                      SizedBox(width: 10.w),
-                                                  Column(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.start,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Text(
-                                                        // "${mpController.map_dataTarget['donatur_name']}",
-                                                        "${postController.posts3.value['userName']}",
-                                                        style: TextStyle(
-                                                            fontFamily:
-                                                                "Poppins",
-                                                            fontSize: 14.sp,
-                                                            color:
-                                                                Colors.black),
-                                                      ),
-                                                      Text(
-                                                        "donatur",
-                                                        style: TextStyle(
-                                                            fontFamily:
-                                                                "Poppins",
-                                                            fontSize: 12.sp,
-                                                            color: Colors.grey),
-                                                      ),
-                                                      Row(
-                                                        children: [
-                                                          Icon(Icons.star,
+                                                    SizedBox(width: 10.w),
+                                                    Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .start,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                          // "${mpController.map_dataTarget['donatur_name']}",
+                                                          "${postController.posts3.value['userName']}",
+                                                          style: TextStyle(
+                                                              fontFamily:
+                                                                  "Poppins",
+                                                              fontSize: 14.sp,
                                                               color:
-                                                                  Colors.amber,
-                                                              size: 10.dm),
-                                                          Text(
-                                                            (mpController.map_dataTarget[
-                                                                            'rating'] ==
-                                                                        0 ||
-                                                                    mpController
-                                                                            .map_dataTarget['rating'] ==
-                                                                        null)
-                                                                ? "Belum ada"
-                                                                : "${mpController.map_dataTarget['rating']}",
-                                                            style: TextStyle(
-                                                                fontFamily:
-                                                                    "Poppins",
-                                                                fontSize: 12.sp,
+                                                                  Colors.black),
+                                                        ),
+                                                        Text(
+                                                          "donatur",
+                                                          style: TextStyle(
+                                                              fontFamily:
+                                                                  "Poppins",
+                                                              fontSize: 12.sp,
+                                                              color:
+                                                                  Colors.grey),
+                                                        ),
+                                                        Row(
+                                                          children: [
+                                                            Icon(Icons.star,
                                                                 color: Colors
-                                                                    .amber),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ],
-                                                  )
-
+                                                                    .amber,
+                                                                size: 10.dm),
+                                                            Text(
+                                                              (mpController.map_dataTarget[
+                                                                              'rating'] ==
+                                                                          0 ||
+                                                                      mpController
+                                                                              .map_dataTarget['rating'] ==
+                                                                          null)
+                                                                  ? "Belum ada"
+                                                                  : "${mpController.map_dataTarget['rating']}",
+                                                              style: TextStyle(
+                                                                  fontFamily:
+                                                                      "Poppins",
+                                                                  fontSize:
+                                                                      12.sp,
+                                                                  color: Colors
+                                                                      .amber),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ],
+                                                    )
                                                   ],
                                                 ),
                                                 Column(
@@ -337,26 +330,26 @@ class _OnMapState extends State<OnMap> {
                                             ),
                                           ),
                                           Padding(
-                                          padding: EdgeInsets.only(
-                                              top: 10.h, left: 20.w),
-                                          child: Container(
-                                            height: 100.h,
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
-                                                0.9,
-                                            decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(5.dm),
-                                                image: DecorationImage(
-                                                    image: NetworkImage(
-                                                        // "${post_foto}"),
-                                                        "${postController.posts3.value['media'][0]['url'].toString().replaceFirst('http://localhost:3000', "${ipAdd.getType()}://${ipAdd.getIp()}")}"),
-                                                    scale: 1,
-                                                    fit: BoxFit.cover)),
+                                            padding: EdgeInsets.only(
+                                                top: 10.h, left: 20.w),
+                                            child: Container(
+                                              height: 100.h,
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  0.9,
+                                              decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          5.dm),
+                                                  image: DecorationImage(
+                                                      image: NetworkImage(
+                                                          // "${post_foto}"),
+                                                          "${postController.posts3.value['media'][0]['url'].toString().replaceFirst('http://localhost:3000', "${ipAdd.getType()}://${ipAdd.getIp()}")}"),
+                                                      scale: 1,
+                                                      fit: BoxFit.cover)),
+                                            ),
                                           ),
-                                        ),
-
                                           Padding(
                                             padding: EdgeInsets.only(
                                               top: 15.h,
@@ -442,7 +435,7 @@ class _OnMapState extends State<OnMap> {
                                                             ),
                                                             SizedBox(
                                                                 height: 5.h),
-                                                              Text(
+                                                            Text(
                                                               "${postController.posts3['stok']}",
                                                               style: TextStyle(
                                                                   color: Colors
@@ -454,7 +447,7 @@ class _OnMapState extends State<OnMap> {
                                                                   fontWeight:
                                                                       FontWeight
                                                                           .normal),
-                                                            ),  
+                                                            ),
                                                           ],
                                                         ),
                                                         Column(
@@ -516,65 +509,56 @@ class _OnMapState extends State<OnMap> {
                                                     ),
                                                     SizedBox(height: 5.h),
                                                     (postController.posts3[
-                                                              'variants'] ==
-                                                          null)
-                                                      ? Text("")
-                                                      : Container(
-                                                          height: 30.h *
-                                                              postController
-                                                                  .posts3[
-                                                                      'variants']
-                                                                  .length,
-                                                          width: MediaQuery.of(
-                                                                      context)
-                                                                  .size
-                                                                  .width *
-                                                              0.4,
-                                                          child:
-                                                              ListView.builder(
-                                                                  // scrollDirection: Axis.horizontal,
-                                                                  itemCount: postController
-                                                                      .posts3[
-                                                                          'variants']
-                                                                      .length,
-                                                                  itemBuilder:
-                                                                      (_, index) {
-                                                                    return Padding(
-                                                                      padding: EdgeInsets.only(
-                                                                          top: 5
-                                                                              .h),
-                                                                      child:
-                                                                          Container(
-                                                                        decoration: BoxDecoration(
-                                                                            borderRadius: BorderRadius.circular(5
-                                                                                .dm),
-                                                                            color: const Color.fromARGB(
-                                                                                255,
-                                                                                247,
-                                                                                247,
-                                                                                247)),
+                                                                'variants'] ==
+                                                            null)
+                                                        ? Text("")
+                                                        : Container(
+                                                            height: 30.h *
+                                                                postController
+                                                                    .posts3[
+                                                                        'variants']
+                                                                    .length,
+                                                            width: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                0.4,
+                                                            child: ListView
+                                                                .builder(
+                                                                    // scrollDirection: Axis.horizontal,
+                                                                    itemCount: postController
+                                                                        .posts3[
+                                                                            'variants']
+                                                                        .length,
+                                                                    itemBuilder:
+                                                                        (_, index) {
+                                                                      return Padding(
+                                                                        padding:
+                                                                            EdgeInsets.only(top: 5.h),
                                                                         child:
-                                                                            Padding(
-                                                                          padding:
-                                                                              EdgeInsets.all(3.dm),
+                                                                            Container(
+                                                                          decoration: BoxDecoration(
+                                                                              borderRadius: BorderRadius.circular(5.dm),
+                                                                              color: const Color.fromARGB(255, 247, 247, 247)),
                                                                           child:
-                                                                              Text(
-                                                                            "${postController.posts3['variants'][index]['name']}",
-                                                                            
-                                                                            style:
-                                                                                TextStyle(
-                                                                              color: Colors.black,
-                                                                              fontFamily: "Poppins",
-                                                                              fontSize: 12.sp,
-                                                                              fontWeight: FontWeight.normal,
+                                                                              Padding(
+                                                                            padding:
+                                                                                EdgeInsets.all(3.dm),
+                                                                            child:
+                                                                                Text(
+                                                                              "${postController.posts3['variants'][index]['name']}",
+                                                                              style: TextStyle(
+                                                                                color: Colors.black,
+                                                                                fontFamily: "Poppins",
+                                                                                fontSize: 12.sp,
+                                                                                fontWeight: FontWeight.normal,
+                                                                              ),
                                                                             ),
                                                                           ),
                                                                         ),
-                                                                      ),
-                                                                    );
-                                                                  }),
-                                                        ),
-
+                                                                      );
+                                                                    }),
+                                                          ),
                                                   ],
                                                 ),
                                                 Padding(
@@ -632,11 +616,351 @@ class _OnMapState extends State<OnMap> {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         Obx(() {
-                          return postController.posts3.value['transaction'] !=
+                          return postController.posts3.value['transaction'] ==
                                   null
                               ? CardButton(context, isPressed,
                                   onTap: (_) async {
                                   isPressed.value = true;
+                                  DialogPop(context,
+                                      size: [
+                                        MediaQuery.of(context).size.height *
+                                            0.6,
+                                        180.w
+                                      ],
+                                      dismissable: true,
+                                      icon: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceAround,
+                                            children: [
+                                              Text(
+                                                "Variasi Makanan",
+                                                style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontFamily: "Poppins",
+                                                  fontSize: 14.sp,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              SizedBox(width: 10.w),
+                                              IconButton(
+                                                onPressed: () {
+                                                  Navigator.of(context,
+                                                          rootNavigator: true)
+                                                      .pop();
+                                                },
+                                                icon: Icon(LucideIcons.x),
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(height: 20.h),
+                                          Text(
+                                            "${postController.posts3.value['title']}",
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontFamily: "Poppins",
+                                              fontSize: 18.sp,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Text(
+                                            "*Sesuaikan jumlah variasi makanan yang diambil",
+                                            style: TextStyle(
+                                              color: Colors.grey,
+                                              fontFamily: "Poppins",
+                                              fontSize: 12.sp,
+                                              fontWeight: FontWeight.normal,
+                                            ),
+                                          ),
+                                          SizedBox(height: 20.h),
+                                          Divider(height: 1.h),
+                                          SizedBox(height: 10.h),
+                                          Container(
+                                            height: 180.h,
+                                            child: Obx(() => ListView.builder(
+                                                  itemCount: postController
+                                                      .posts3
+                                                      .value['variants']
+                                                      .length,
+                                                  itemBuilder: (_, index) {
+                                                    return Padding(
+                                                      padding: EdgeInsets.only(
+                                                          top: 5.h),
+                                                      child: Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          Text(
+                                                            "${postController.posts3.value['variants'][index]['name']}",
+                                                          ),
+                                                          Row(
+                                                            children: [
+                                                              Material(
+                                                                color: Colors
+                                                                    .transparent,
+                                                                child: InkWell(
+                                                                  onTap: () {
+                                                                    if (count[
+                                                                            index]! >
+                                                                        1) {
+                                                                      count[
+                                                                          index]--;
+                                                                    }
+                                                                  },
+                                                                  splashColor:
+                                                                      Colors
+                                                                          .grey,
+                                                                  child:
+                                                                      Container(
+                                                                    height:
+                                                                        20.dm,
+                                                                    width:
+                                                                        20.dm,
+                                                                    decoration:
+                                                                        BoxDecoration(
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              2.dm),
+                                                                      border: Border.all(
+                                                                          color:
+                                                                              Colors.black),
+                                                                    ),
+                                                                    child: Icon(
+                                                                      LucideIcons
+                                                                          .minus,
+                                                                      size: 10,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              SizedBox(
+                                                                  width: 20.w),
+                                                              Obx(() => Text(
+                                                                    "${count[index]}",
+                                                                    style:
+                                                                        TextStyle(
+                                                                      color: Colors
+                                                                          .black,
+                                                                      fontFamily:
+                                                                          "Poppins",
+                                                                      fontSize:
+                                                                          14.sp,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold,
+                                                                    ),
+                                                                  )),
+                                                              SizedBox(
+                                                                  width: 20.w),
+                                                              Material(
+                                                                color: Colors
+                                                                    .transparent,
+                                                                child: InkWell(
+                                                                  onTap: () {
+                                                                    if (count[
+                                                                            index]! <
+                                                                        postController
+                                                                            .posts3
+                                                                            .value['variants'][index]['stok']) {
+                                                                      count[
+                                                                          index]++;
+                                                                    }
+                                                                  },
+                                                                  splashColor:
+                                                                      Colors
+                                                                          .grey,
+                                                                  child:
+                                                                      Container(
+                                                                    height:
+                                                                        20.dm,
+                                                                    width:
+                                                                        20.dm,
+                                                                    decoration:
+                                                                        BoxDecoration(
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              2.dm),
+                                                                      border: Border.all(
+                                                                          color:
+                                                                              Colors.black),
+                                                                    ),
+                                                                    child:
+                                                                        const Icon(
+                                                                      LucideIcons
+                                                                          .plus,
+                                                                      size: 10,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    );
+                                                  },
+                                                )),
+                                          ),
+                                          Center(
+                                            child: Text(
+                                              "Pengambilan donasi Anda tersisa 3/3",
+                                              style: TextStyle(
+                                                color: Colors.red,
+                                                fontFamily: "Poppins",
+                                                fontSize: 10.sp,
+                                                fontStyle: FontStyle.italic,
+                                              ),
+                                            ),
+                                          ),
+                                          Obx(() => Center(
+                                                child: CardButton(
+                                                    context, isPressedBtn,
+                                                    onTap: (_) {
+                                                  isPressedBtn.value = true;
+                                                  // Navigator.pushNamed(
+                                                  //     context, "/formfood");
+                                                  Navigator.of(context,
+                                                          rootNavigator: true)
+                                                      .pop();
+                                                  DialogPop(context,
+                                                      size: [
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .height *
+                                                            0.4,
+                                                        150.dm
+                                                      ],
+                                                      dismissable: false,
+                                                      icon: Column(children: [
+                                                        Center(
+                                                            child: Image.asset(
+                                                          "assets/image/load.png",
+                                                          fit: BoxFit.cover,
+                                                          height: 120.dm,
+                                                          width: 120.dm,
+                                                        )),
+                                                        SizedBox(height: 10.h),
+                                                        Text(
+                                                          "Pengambilan donasi Anda tersisa 3/3",
+                                                          style: TextStyle(
+                                                            color: Colors.red,
+                                                            fontFamily:
+                                                                "Poppins",
+                                                            fontSize: 10.sp,
+                                                            fontStyle: FontStyle
+                                                                .italic,
+                                                          ),
+                                                        ),
+                                                        SizedBox(height: 5.h),
+                                                        Text(
+                                                          "Segera ambil makanan donasi Anda sebelum waktu pengambilan berakhir",
+                                                          textAlign:
+                                                              TextAlign.center,
+                                                          style: TextStyle(
+                                                            color: Colors.grey,
+                                                            fontFamily:
+                                                                "Poppins",
+                                                            fontSize: 10.sp,
+                                                            fontStyle: FontStyle
+                                                                .normal,
+                                                          ),
+                                                        ),
+                                                        SizedBox(height: 20.h),
+                                                        Obx(() => CardButton(
+                                                                context,
+                                                                isPressedBtn2,
+                                                                onTap:
+                                                                    (_) async {
+                                                              isPressedBtn2
+                                                                  .value = true;
+
+                                                              for (int i=0; i < count.length; i++) {
+                                                                pickedVariants.add({
+                                                                  "variant_id":
+                                                                      postController
+                                                                            .posts3
+                                                                            .value['variants'][i]['id'],
+                                                                  "jumlah": count.value[i]
+                                                                }); 
+                                                              }
+                                                              await transController.postTransaction(postController.posts3.value['id'], pickedVariants).then((value) {
+                                                                  log("reuslt e iki : ${value.keys}");
+                                                                  Navigator.pushReplacementNamed(context, "/onmap");
+                                                              });
+                                                              // Navigator.pushNamed(context, "/formfood");
+                                                            },
+                                                                width_a: 0.38,
+                                                                width_b: 0.4,
+                                                                height_a: 0.05,
+                                                                height_b: 0.06,
+                                                                borderRadius:
+                                                                    10.dm,
+                                                                gradient:
+                                                                    const LinearGradient(
+                                                                        colors: [
+                                                                      Color.fromRGBO(
+                                                                          52,
+                                                                          135,
+                                                                          98,
+                                                                          1),
+                                                                      Color.fromRGBO(
+                                                                          48,
+                                                                          122,
+                                                                          99,
+                                                                          1),
+                                                                    ]),
+                                                                child: Center(
+                                                                  child: Text(
+                                                                    "Ambil Donasi",
+                                                                    style: TextStyle(
+                                                                        fontFamily:
+                                                                            "Poppins",
+                                                                        color: Colors
+                                                                            .white,
+                                                                        fontSize: 14
+                                                                            .sp,
+                                                                        fontWeight:
+                                                                            FontWeight.normal),
+                                                                  ),
+                                                                )))
+                                                      ]));
+                                                  log("yg diambil : ${count.value.toString()}");
+                                                },
+                                                    width_a: 0.4,
+                                                    width_b: 0.36,
+                                                    height_a: 0.05,
+                                                    height_b: 0.06,
+                                                    borderRadius: 10.dm,
+                                                    gradient:
+                                                        const LinearGradient(
+                                                            colors: [
+                                                          Color.fromRGBO(
+                                                              52, 135, 98, 1),
+                                                          Color.fromRGBO(
+                                                              48, 122, 99, 1),
+                                                        ]),
+                                                    child: Center(
+                                                      child: Text(
+                                                        "Konfirmasi",
+                                                        style: TextStyle(
+                                                            fontFamily:
+                                                                "Poppins",
+                                                            color: Colors.white,
+                                                            fontSize: 16.sp,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .normal),
+                                                      ),
+                                                    )),
+                                              ))
+                                        ],
+                                      ));
                                 },
                                   gradient: const LinearGradient(colors: [
                                     Color.fromRGBO(52, 135, 98, 1),

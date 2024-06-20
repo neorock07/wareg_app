@@ -92,6 +92,8 @@ flutter:
     - assets/image/gg.png
     - assets/image/bglogo.png
     - assets/image/cook.png
+    - assets/image/load.png
+    - assets/image/lgiki.png
     - .env
   #   - images/a_dot_ham.jpeg
 

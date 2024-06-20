@@ -42,14 +42,14 @@ class _LoginActivityState extends State<LoginActivity> {
               Center(
                 child: RichText(
                     text: TextSpan(
-                        text: "Re",
+                        text: "RE-",
                         style: TextStyle(
                             fontFamily: "Poppins",
                             fontSize: 25.sp,
                             color: Color.fromRGBO(48, 122, 89, 1)),
                         children: [
                       TextSpan(
-                        text: "Food",
+                        text: "food",
                         style: TextStyle(
                             fontFamily: "Poppins",
                             fontSize: 25.sp,

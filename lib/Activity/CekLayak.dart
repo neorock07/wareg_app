@@ -330,6 +330,7 @@ class _CekLayakState extends State<CekLayak> {
                                         child: CardButton(context, isPressed2,
                                             onTap: (_) {
                                           isPressed2.value = true;
+                                          picController.arr_img.value.clear();
                                           Navigator.pushNamed(
                                               context, "/home");
                                           // log("${foodController.data_food!.values}");

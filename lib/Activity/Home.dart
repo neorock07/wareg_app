@@ -74,7 +74,7 @@ class _HomeState extends State<Home> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Fetch new data when the widget reappears
+    // Fetch new data 
     _fetchLocationAndPosts();
   }
 
