@@ -1,9 +1,17 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wareg_app/Controller/PrefController.dart';
 import 'package:intl/intl.dart';
+import 'package:wareg_app/Controller/notification_controller.dart';
 import '../Controller/MapsController.dart';
 import '../Controller/transaction_controller.dart';
 import '../Services/message_service.dart';
@@ -18,11 +26,14 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   var prefController = Get.put(PrefController());
+  final NotificationController notificationController =
+      Get.put(NotificationController());
 
   @override
   void initState() {
     super.initState();
-    Get.put(MessageService()); // Ensure MessageService is initialized
+    Get.put(MessageService());
+    notificationController.checkNotification();
   }
 
   @override
@@ -42,13 +53,46 @@ class _ProfileState extends State<Profile> {
           ),
         ),
         actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.pushNamed(context, "/notifications");
-            },
-            icon: const Icon(Icons.notifications),
-            color: Colors.black,
-          ),
+          Obx(() => Stack(
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, "/notifications");
+                    },
+                    icon: const Icon(
+                      LucideIcons.bell,
+                      color: Colors.black,
+                    ),
+                  ),
+                  if (notificationController.hasUnread.value)
+                    Positioned(
+                      right: 11,
+                      top: 11,
+                      child: Container(
+                        padding: EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        constraints: BoxConstraints(
+                          minWidth: 12,
+                          minHeight: 12,
+                        ),
+                        child: Text(
+                          '',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 8,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
+              )),
+          SizedBox(
+            width: 5.dm,
+          )
         ],
       ),
       body: Column(
@@ -61,9 +105,120 @@ class _ProfileState extends State<Profile> {
   }
 }
 
-class CardExample extends StatelessWidget {
+class CardExample extends StatefulWidget {
   CardExample({super.key});
+
+  @override
+  _CardExampleState createState() => _CardExampleState();
+}
+
+class _CardExampleState extends State<CardExample> {
   final PrefController prefController = Get.put(PrefController());
+  final ImagePicker _picker = ImagePicker();
+  File? _imageFile;
+  final TextEditingController _nameController = TextEditingController();
+  bool _isEditingName = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    var userData = await prefController.getUserData();
+    if (userData.isNotEmpty) {
+      setState(() {
+        _nameController.text = userData['name'] ?? '';
+      });
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    setState(() {
+      _imageFile = pickedFile != null ? File(pickedFile.path) : null;
+    });
+    if (_imageFile != null) {
+      await _uploadProfilePicture(_imageFile!);
+    }
+  }
+
+  Future<void> _uploadProfilePicture(File image) async {
+    var ipAdd = Ip();
+    String? _baseUrl = '${ipAdd.getType()}://${ipAdd.getIp()}';
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var token = prefs.getString('token') ?? '';
+
+    var request = http.MultipartRequest(
+      'POST',
+      Uri.parse('$_baseUrl/users/profile/picture'),
+    );
+    request.headers['Authorization'] = 'Bearer $token';
+    request.files
+        .add(await http.MultipartFile.fromPath('profile_picture', image.path));
+
+    var response = await request.send();
+    if (response.statusCode == 201) {
+      var responseData = await response.stream.bytesToString();
+      var jsonResponse = jsonDecode(responseData);
+      if (jsonResponse['success']) {
+        String newProfilePicture = jsonResponse['newProfilePicture']
+            .toString()
+            .replaceFirst('http://localhost:3000',
+                '${ipAdd.getType()}://${ipAdd.getIp()}');
+        setState(() {
+          prefController.setProfilePicture(newProfilePicture);
+        });
+        await prefs.setString('profile_picture', newProfilePicture);
+        print('Profile picture updated successfully');
+      }
+    } else {
+      print('Failed to update profile picture');
+    }
+  }
+
+  Future<void> _updateUserName() async {
+    var ipAdd = Ip();
+    String? _baseUrl = '${ipAdd.getType()}://${ipAdd.getIp()}';
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var token = prefs.getString('token') ?? '';
+
+    var response = await http.put(
+      Uri.parse('$_baseUrl/users/update'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({'name': _nameController.text}),
+    );
+
+    if (response.statusCode == 200) {
+      var jsonResponse = jsonDecode(response.body);
+      setState(() {
+        prefController.setName(jsonResponse['name']);
+      });
+      await prefs.setString('user_name', jsonResponse['name']);
+      print('Name updated successfully');
+    } else {
+      print('Failed to update name');
+    }
+  }
+
+  Future<void> _logout() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    // Clear all stored data
+    var ipAdd = Ip();
+    String? _baseUrl = '${ipAdd.getType()}://${ipAdd.getIp()}';
+
+    // Send a POST request to logout endpoint
+    await http.post(
+      Uri.parse('$_baseUrl/auth/logout'),
+      headers: {'Authorization': 'Bearer ${prefs.getString('token')}'},
+    );
+    await prefs.clear();
+    Navigator.pushReplacementNamed(context, '/login');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,38 +245,106 @@ class CardExample extends StatelessWidget {
                     Stack(
                       alignment: Alignment.topRight,
                       children: [
-                        ListTile(
-                          leading: CircleAvatar(
-                            backgroundImage:
-                                NetworkImage(userData['profilePicture']!),
-                            radius: 30,
-                          ),
-                          title: Text(
-                            userData['name']!,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            GestureDetector(
+                              onTap: _pickImage,
+                              child: CircleAvatar(
+                                radius: 50,
+                                backgroundColor: Colors.white,
+                                child: ClipOval(
+                                  child: _imageFile != null
+                                      ? Image.file(
+                                          _imageFile!,
+                                          width: 100,
+                                          height: 100,
+                                          fit: BoxFit.cover,
+                                        )
+                                      : Image.network(
+                                          userData['profilePicture']!,
+                                          width: 100,
+                                          height: 100,
+                                          fit: BoxFit.cover,
+                                        ),
+                                ),
+                              ),
                             ),
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                userData['gender']!,
-                                style: TextStyle(color: Colors.white70),
+                            const SizedBox(height: 10),
+                            if (_isEditingName)
+                              TextField(
+                                controller: _nameController,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                                onSubmitted: (value) {
+                                  _updateUserName();
+                                  setState(() {
+                                    _isEditingName = false;
+                                  });
+                                },
+                                decoration: const InputDecoration(
+                                  border: InputBorder.none,
+                                ),
+                              )
+                            else
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _isEditingName = true;
+                                  });
+                                },
+                                child: Text(
+                                  _nameController.text,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
                               ),
-                              Text(
-                                userData['email']!,
-                                style: TextStyle(color: Colors.white70),
+                            const SizedBox(height: 5),
+                            Text(
+                              userData['gender']!,
+                              style: const TextStyle(color: Colors.white70),
+                              textAlign: TextAlign.center,
+                            ),
+                            Text(
+                              userData['email']!,
+                              style: const TextStyle(color: Colors.white70),
+                              textAlign: TextAlign.center,
+                            ),
+                            Center(
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 10.0),
+                                child: ElevatedButton(
+                                  onPressed: _logout,
+                                  style: ElevatedButton.styleFrom(
+                                    primary: Colors.red, // Background color
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 20, vertical: 10),
+                                  ),
+                                  child: const Text(
+                                    "Logout",
+                                    style: TextStyle(
+                                      color: Colors.white, // Text color
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                         IconButton(
                           icon: const Icon(Icons.edit, color: Colors.white),
                           onPressed: () {
-                            // Handle edit button press
+                            setState(() {
+                              _isEditingName = true;
+                            });
                           },
                         ),
                       ],

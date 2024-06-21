@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -121,10 +123,14 @@ class _MyAppState extends State<MyApp> {
   Future<void> _checkAndSaveFcmToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? savedToken = prefs.getString('fcm_token');
-    if (savedToken != null) {
+
+    if (savedToken == null) {
       FirebaseMessaging.instance.getToken().then((token) {
-        if (token != null && token != savedToken) {
-          _messageController.saveFcmToken(token);
+        if (token != null) {
+          if (token != savedToken) {
+            _messageController.saveFcmToken(token);
+          }
+          prefs.setString('fcm_token', token);
         }
       });
     }

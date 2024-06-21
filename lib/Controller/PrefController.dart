@@ -49,6 +49,16 @@ class PrefController extends GetxController {
     };
   }
 
+  Future<void> setProfilePicture(String profilePicture) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('profile_picture', profilePicture);
+  }
+
+  Future<void> setName(String name) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_name', name);
+  }
+
   Future<void> saveData(Map<String, dynamic> data) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final user = data['user'];

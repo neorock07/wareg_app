@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -10,6 +11,8 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wareg_app/Controller/API/Postingan/GetByLokasi.dart';
 import 'package:wareg_app/Controller/MapsController.dart';
+import 'package:wareg_app/Controller/message_controller.dart';
+import 'package:wareg_app/Controller/notification_controller.dart';
 import 'package:wareg_app/Partials/CardDonate.dart';
 import 'package:wareg_app/Partials/CardFood.dart';
 import 'package:wareg_app/Partials/CardSearch.dart';
@@ -27,11 +30,14 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  final MessageController _messageController = Get.put(MessageController());
   RxBool isPressed = false.obs;
   String userName = "Bento";
   var postController = Get.put(GetPostController());
   MapsController mpController = Get.put(MapsController());
   var lat, long;
+  final NotificationController notificationController =
+      Get.put(NotificationController());
 
   Future<void> _loadUserName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -40,11 +46,29 @@ class _HomeState extends State<Home> {
     });
   }
 
+  Future<void> _checkAndSaveFcmToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? savedToken = prefs.getString('fcm_token');
+
+    if (savedToken == null) {
+      FirebaseMessaging.instance.getToken().then((token) {
+        if (token != null) {
+          if (token != savedToken) {
+            _messageController.saveFcmToken(token);
+          }
+          prefs.setString('fcm_token', token);
+        }
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _loadUserName();
     _fetchLocationAndPosts();
+    notificationController.checkNotification();
+    _checkAndSaveFcmToken();
   }
 
   Future<void> _fetchLocationAndPosts() async {
@@ -89,14 +113,45 @@ class _HomeState extends State<Home> {
               fontFamily: "Bree", color: Colors.black, fontSize: 18.sp),
         ),
         actions: [
-          IconButton(
-              onPressed: () {
-                Navigator.pushNamed(context, "/notifications");
-              },
-              icon: const Icon(
-                LucideIcons.bell,
-                color: Colors.black,
-              )),
+          Obx(() {
+            return Stack(
+              children: [
+                IconButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, "/notifications");
+                  },
+                  icon: const Icon(
+                    LucideIcons.bell,
+                    color: Colors.black,
+                  ),
+                ),
+                if (notificationController.hasUnread.value)
+                  Positioned(
+                    right: 11,
+                    top: 11,
+                    child: Container(
+                      padding: EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      constraints: BoxConstraints(
+                        minWidth: 12,
+                        minHeight: 12,
+                      ),
+                      child: Text(
+                        '',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 8,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          }),
           SizedBox(
             width: 5.dm,
           )

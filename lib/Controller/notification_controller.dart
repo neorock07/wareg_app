@@ -8,6 +8,7 @@ import '../Util/Ip.dart';
 class NotificationController extends GetxController {
   var notifications = <dynamic>[].obs;
   var isLoading = true.obs;
+  var hasUnread = false.obs;
 
   Future<void> fetchNotifications() async {
     var ipAdd = Ip();
@@ -33,6 +34,36 @@ class NotificationController extends GetxController {
       }
     } catch (e) {
       print('Failed to fetch notifications: $e');
+    } finally {
+      isLoading(false);
+    }
+  }
+
+  Future<void> checkNotification() async {
+    var ipAdd = Ip();
+    String? _baseUrl = '${ipAdd.getType()}://${ipAdd.getIp()}';
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var bearerToken = prefs.getString('token') ?? '';
+
+    Map<String, String> headers = {
+      'Authorization': 'Bearer $bearerToken',
+    };
+
+    try {
+      isLoading(true);
+      final response = await http.get(
+        Uri.parse('$_baseUrl/notifications/unread-check'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        var data = json.decode(response.body);
+        hasUnread.value = data['hasUnread'];
+      } else {
+        throw Exception('Failed to check notifications');
+      }
+    } catch (e) {
+      print('Failed to check notifications: $e');
     } finally {
       isLoading(false);
     }

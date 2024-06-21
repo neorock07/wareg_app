@@ -9,6 +9,7 @@ import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wareg_app/Controller/API/Postingan/GetByLokasi.dart';
 import 'package:wareg_app/Controller/MapsController.dart';
+import 'package:wareg_app/Controller/notification_controller.dart';
 import 'package:wareg_app/Partials/CardMenu.dart';
 import 'package:wareg_app/Partials/CardSearch.dart';
 import 'package:wareg_app/Partials/MapBox.dart';
@@ -29,6 +30,8 @@ class _MenuState extends State<Menu> {
   MapsController mpController = Get.put(MapsController());
   RoadInfo? roadInfo;
   RxList<StaticPositionGeoPoint> koordinat = <StaticPositionGeoPoint>[].obs;
+  final NotificationController notificationController =
+      Get.put(NotificationController());
   var postController = Get.put(GetPostController());
   String userName = "Bento";
   var userProfile =
@@ -103,7 +106,7 @@ class _MenuState extends State<Menu> {
       _loadProfile();
       _fetchLocationAndPosts();
     });
-
+    notificationController.checkNotification();
     ScrollController scController = ScrollController();
   }
 
@@ -118,16 +121,38 @@ class _MenuState extends State<Menu> {
         ),
         actions: [
           IconButton(
-              onPressed: () async {
-                Navigator.pushNamed(context, "/notifications");
-              },
-              icon: Icon(
-                LucideIcons.bell,
-                color: Colors.black,
-              )),
-          SizedBox(
-            width: 5.dm,
-          )
+            onPressed: () {
+              Navigator.pushNamed(context, "/notifications");
+            },
+            icon: const Icon(
+              LucideIcons.bell,
+              color: Colors.black,
+            ),
+          ),
+          if (notificationController.hasUnread.value)
+            Positioned(
+              right: 11,
+              top: 11,
+              child: Container(
+                padding: EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: Colors.red,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                constraints: BoxConstraints(
+                  minWidth: 12,
+                  minHeight: 12,
+                ),
+                child: Text(
+                  '',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 8,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
         ],
       ),
       body: Stack(children: [

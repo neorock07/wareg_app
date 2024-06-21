@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:intl/intl.dart';
+import 'package:wareg_app/Controller/notification_controller.dart';
 import '../Controller/MapsController.dart';
 import '../Controller/message_controller.dart';
 import 'package:image_picker/image_picker.dart';
@@ -24,11 +25,13 @@ class _ChatActivityState extends State<ChatActivity> {
   final ImagePicker _picker = ImagePicker();
   final ipAdd = Ip();
   bool _isListenerInitialized = false;
+  final NotificationController notificationController =
+      Get.put(NotificationController());
 
   @override
   void initState() {
     super.initState();
-
+    notificationController.checkNotification();
     _fetchMessages();
   }
 
@@ -200,16 +203,38 @@ class _ChatActivityState extends State<ChatActivity> {
         ),
         actions: [
           IconButton(
-              onPressed: () {
-                Navigator.pushNamed(context, "/notifications");
-              },
-              icon: const Icon(
-                LucideIcons.bell,
-                color: Colors.black,
-              )),
-          SizedBox(
-            width: 5.dm,
-          )
+            onPressed: () {
+              Navigator.pushNamed(context, "/notifications");
+            },
+            icon: const Icon(
+              LucideIcons.bell,
+              color: Colors.black,
+            ),
+          ),
+          if (notificationController.hasUnread.value)
+            Positioned(
+              right: 11,
+              top: 11,
+              child: Container(
+                padding: EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: Colors.red,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                constraints: BoxConstraints(
+                  minWidth: 12,
+                  minHeight: 12,
+                ),
+                child: Text(
+                  '',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 8,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
         ],
       ),
       body: SafeArea(

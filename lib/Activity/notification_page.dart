@@ -21,6 +21,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
   void initState() {
     super.initState();
     notificationController.fetchNotifications();
+    notificationController.checkNotification();
   }
 
   String formatDate(String dateStr) {
@@ -40,10 +41,38 @@ class _NotificationsPageState extends State<NotificationsPage> {
         ),
         actions: [
           IconButton(
-            onPressed: () async {},
-            icon: Icon(LucideIcons.bell, color: Colors.black),
+            onPressed: () {
+              Navigator.pushNamed(context, "/notifications");
+            },
+            icon: const Icon(
+              LucideIcons.bell,
+              color: Colors.black,
+            ),
           ),
-          SizedBox(width: 5.w),
+          if (notificationController.hasUnread.value)
+            Positioned(
+              right: 11,
+              top: 11,
+              child: Container(
+                padding: EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: Colors.red,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                constraints: BoxConstraints(
+                  minWidth: 12,
+                  minHeight: 12,
+                ),
+                child: Text(
+                  '',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 8,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
         ],
       ),
       body: Obx(() {
