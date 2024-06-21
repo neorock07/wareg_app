@@ -10,6 +10,8 @@ class PromptController extends GetxController {
   static String API_URL = "https://api.openai.com/v1/chat/completions";
   static String apiKey = dotenv.env['API_KEY'] ?? 'Unknown API Key';
   static String authorizationHeader = "Bearer $apiKey";
+  var hasil_prompt = {}.obs;
+  var content = {}.obs;
   // static String API_URL =
   //     "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3";
   // static String authorizationHeader =
@@ -86,6 +88,10 @@ class PromptController extends GetxController {
     );
     if (response.statusCode == 200) {
       var result = jsonDecode(response.body);
+      hasil_prompt.value = result;
+      content.value =
+          jsonDecode(hasil_prompt.value['choices'][0]['message']['content']);
+      log("title: ${content['result'][0]['title']}");
       log("Response: ${result.toString()}");
     } else {
       log('Failed to get response from ChatGPT, status code: ${response.statusCode}');

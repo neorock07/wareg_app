@@ -4,9 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:wareg_app/Activity/ListHasilResep.dart';
 import 'package:wareg_app/Controller/API/PromptController.dart';
 
 import '../Controller/FoodController.dart';
+import '../Partials/DialogPop.dart';
 
 class ResepForm extends StatefulWidget {
   @override
@@ -78,6 +81,35 @@ class _ResepFormState extends State<ResepForm> {
     );
   }
 
+  void _showLoadingDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SpinKitCircle(
+                  color: Theme.of(context).primaryColor,
+                  size: 50.0,
+                ),
+                SizedBox(width: 20),
+                Text("Pencarian resep sedang berlangsung silahkan tunggu..."),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _hideLoadingDialog() {
+    Navigator.of(context).pop();
+  }
+
   @override
   void dispose() {
     for (var controller in nameControllers) {
@@ -108,7 +140,7 @@ class _ResepFormState extends State<ResepForm> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "DATA BAHAN BAKU MAKANAN",
+              "DATA BAHAN BAKU OLAHAN",
               style: TextStyle(
                 color: Colors.black,
                 fontFamily: "Poppins",
@@ -119,7 +151,7 @@ class _ResepFormState extends State<ResepForm> {
             Padding(
               padding: EdgeInsets.only(top: 5.dm),
               child: Text(
-                "Masukkan data bahan baku yang anda miliki",
+                "Masukkan data bahan baku olahan yang anda miliki",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     color: Colors.grey,
@@ -140,15 +172,15 @@ class _ResepFormState extends State<ResepForm> {
                         Expanded(
                           flex: 3,
                           child: Container(
+                            padding: EdgeInsets.symmetric(horizontal: 8.0),
                             decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey)),
+                                border: Border.all(color: Colors.grey),
+                                borderRadius: BorderRadius.circular(8.0)),
                             child: TextField(
                               controller: nameControllers[index],
                               decoration: InputDecoration(
                                 labelText: 'Nama Bahan Baku ${index + 1}',
-                                // errorText: nameControllers[index].text.isEmpty
-                                //     ? 'Wajib diisi'
-                                //     : null,
+                                border: InputBorder.none,
                               ),
                             ),
                           ),
@@ -157,16 +189,15 @@ class _ResepFormState extends State<ResepForm> {
                         Expanded(
                           flex: 1,
                           child: Container(
+                            padding: EdgeInsets.symmetric(horizontal: 8.0),
                             decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey)),
+                                border: Border.all(color: Colors.grey),
+                                borderRadius: BorderRadius.circular(8.0)),
                             child: TextField(
                               controller: quantityControllers[index],
                               decoration: InputDecoration(
                                 labelText: 'Jumlah',
-                                // errorText:
-                                //     quantityControllers[index].text.isEmpty
-                                //         ? 'Wajib diisi'
-                                //         : null,
+                                border: InputBorder.none,
                               ),
                               keyboardType: TextInputType.number,
                             ),
@@ -174,30 +205,25 @@ class _ResepFormState extends State<ResepForm> {
                         ),
                         SizedBox(width: 8.w),
                         Container(
+                          padding: EdgeInsets.symmetric(horizontal: 8.0),
                           decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey)),
-                          child: Padding(
-                            padding: EdgeInsets.only(top: 14.h),
-                            child: Expanded(
-                              child: DropdownButton<String>(
-                                underline: SizedBox(
-                                  height: 5.h,
-                                ),
-                                value: units[index],
-                                items: <String>['kg', 'g', 'l', 'pcs']
-                                    .map((String value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text(value),
-                                  );
-                                }).toList(),
-                                onChanged: (newValue) {
-                                  setState(() {
-                                    units[index] = newValue!;
-                                  });
-                                },
-                              ),
-                            ),
+                              border: Border.all(color: Colors.grey),
+                              borderRadius: BorderRadius.circular(8.0)),
+                          child: DropdownButton<String>(
+                            underline: SizedBox(),
+                            value: units[index],
+                            items: <String>['kg', 'g', 'l', 'pcs']
+                                .map((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
+                            onChanged: (newValue) {
+                              setState(() {
+                                units[index] = newValue!;
+                              });
+                            },
                           ),
                         ),
                         IconButton(
@@ -234,7 +260,41 @@ class _ResepFormState extends State<ResepForm> {
                   if (_validateInputs()) {
                     String prompt = _generatePrompt();
                     log(prompt);
+                    DialogPop(
+                      context,
+                      icon: Container(
+                          height: 100.h,
+                          child: Column(
+                            children: [
+                              SpinKitCircle(
+                                  color: Color.fromRGBO(48, 122, 89, 1)),
+                              Text(
+                                "MENCARI RESEP",
+                                style: TextStyle(
+                                    fontFamily: "Poppins",
+                                    fontSize: 14.sp,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                "proses pencarian resep sedang berlangsung\nmohon tunggu...",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    fontFamily: "Poppins",
+                                    fontSize: 10.sp,
+                                    color: Colors.grey,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          )),
+                    );
                     await promptController.getRecipe(prompt);
+                    _hideLoadingDialog();
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ListHasilResep(),
+                        ));
                   } else {
                     _showWarning();
                   }
