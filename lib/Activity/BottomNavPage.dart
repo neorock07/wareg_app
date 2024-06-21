@@ -21,7 +21,7 @@ class _BottomNavPageState extends State<BottomNavPage> {
     selectedTab.value = index;
   }
 
-  List _pages = [Home(), Menu(), Donasi(), Inventory(),Profile()];
+  List _pages = [Home(), Menu(), Donasi(), InventoryPage(), Profile()];
 
   @override
   Widget build(BuildContext context) {

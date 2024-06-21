@@ -10,6 +10,7 @@ import 'package:wareg_app/Activity/Inventory.dart';
 import 'package:wareg_app/Activity/LoginActivity.dart';
 import 'package:wareg_app/Activity/OnMap.dart';
 import 'package:wareg_app/Activity/PreviewFood.dart';
+import 'package:wareg_app/Activity/inventory_form_page.dart';
 import 'package:wareg_app/Activity/notification_page.dart';
 import 'package:wareg_app/Activity/RegisterActivity.dart';
 import 'package:wareg_app/Activity/ResultCheck.dart';
@@ -26,7 +27,7 @@ class Routes {
       case '/register':
         return MaterialPageRoute(builder: (_) => RegisterActivity());
       case '/inventory':
-        return MaterialPageRoute(builder: (_) => Inventory());
+        return MaterialPageRoute(builder: (_) => InventoryPage());
       case '/donasi':
         return MaterialPageRoute(builder: (_) => Donasi());
       case '/onmap':
