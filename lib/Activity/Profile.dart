@@ -431,7 +431,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
             },
             children: <Widget>[
               RiwayatList(),
-              const Center(child: Text('Content for Point')),
+              PointPage(),
               const ChatContent(),
             ],
           ),
@@ -530,8 +530,12 @@ class ButtonWithText extends StatelessWidget {
   }
 }
 
-class RiwayatList extends StatelessWidget {
-  RiwayatList({super.key});
+class RiwayatList extends StatefulWidget {
+  @override
+  _RiwayatListState createState() => _RiwayatListState();
+}
+
+class _RiwayatListState extends State<RiwayatList> {
   MapsController mpController = Get.put(MapsController());
   final TransactionController transactionController =
       Get.put(TransactionController());
@@ -552,6 +556,12 @@ class RiwayatList extends StatelessWidget {
     } else {
       return role;
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    transactionController.fetchTransactions();
   }
 
   @override
@@ -852,6 +862,276 @@ class _ChatContentState extends State<ChatContent> {
             },
           );
         },
+      ),
+    );
+  }
+}
+
+class PointPage extends StatefulWidget {
+  @override
+  _PointPageState createState() => _PointPageState();
+}
+
+class _PointPageState extends State<PointPage> {
+  int points = 0;
+  int initialLimit = 0;
+  int currentLimit = 0;
+  int todayLimit = 0;
+  int neededPoints = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchInitialData();
+  }
+
+  Future<void> fetchInitialData() async {
+    await fetchPoints();
+    await fetchInitialLimit();
+  }
+
+  Future<void> fetchPoints() async {
+    var ipAdd = Ip();
+    String? _baseUrl = '${ipAdd.getType()}://${ipAdd.getIp()}';
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var token = prefs.getString('token') ?? '';
+
+    final response = await http.get(
+      Uri.parse('$_baseUrl/points'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response.statusCode == 200) {
+      setState(() {
+        points = json.decode(response.body)['points'];
+      });
+    } else {
+      print('Failed to load points');
+    }
+  }
+
+  Future<void> fetchInitialLimit() async {
+    var ipAdd = Ip();
+    String? _baseUrl = '${ipAdd.getType()}://${ipAdd.getIp()}';
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var token = prefs.getString('token') ?? '';
+
+    final response = await http.get(
+      Uri.parse('$_baseUrl/points/extend'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response.statusCode == 200) {
+      setState(() {
+        initialLimit = json.decode(response.body)['message'];
+        currentLimit = initialLimit;
+        todayLimit = json.decode(response.body)['current'];
+      });
+    } else {
+      print('Failed to load initial limit');
+    }
+  }
+
+  Future<void> exchangePoints() async {
+    var ipAdd = Ip();
+    String? _baseUrl = '${ipAdd.getType()}://${ipAdd.getIp()}';
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var token = prefs.getString('token') ?? '';
+
+    for (int i = 0; i < (currentLimit - initialLimit); i++) {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/points/extend'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'amount': 20}),
+      );
+
+      if (response.statusCode == 201) {
+        print('Points exchanged successfully');
+      } else {
+        print('Failed to exchange points');
+        return;
+      }
+    }
+
+    // Fetch points and limit again to update UI
+    await fetchPoints();
+    await fetchInitialLimit();
+  }
+
+  Future<void> _showConfirmationDialog() async {
+    bool confirmed = await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Konfirmasi Tambah Limit'),
+          content: Text(
+              'Apakah anda yakin ingin menambah sebanyak ${currentLimit - initialLimit} limit?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text('Tidak'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text('Ya'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed) {
+      await exchangePoints();
+      setState(() {
+        neededPoints = 0;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      physics: AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Total Point Anda',
+                style: TextStyle(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Row(
+                children: [
+                  Text(
+                    '$points Point',
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      color: Colors.green,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+                  Icon(
+                    LucideIcons.checkCircle,
+                    color: Colors.green,
+                    size: 24.sp,
+                  ),
+                ],
+              ),
+            ],
+          ),
+          SizedBox(height: 16.h),
+          Text(
+            'Tambah limit pengambilan anda dengan tukarkan point yang didapat, per 1 kali kesempatan senilai 20 point.',
+            style: TextStyle(fontSize: 14.sp),
+          ),
+          SizedBox(height: 16.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Tambah Limit',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      if (currentLimit > initialLimit) {
+                        setState(() {
+                          currentLimit--;
+                          neededPoints -= 20;
+                        });
+                      }
+                    },
+                    icon: Icon(Icons.remove_circle_outline),
+                    color: Colors.black,
+                  ),
+                  Text(
+                    '$currentLimit',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        currentLimit++;
+                        neededPoints += 20;
+                      });
+                    },
+                    icon: Icon(Icons.add_circle_outline),
+                    color: Colors.black,
+                  ),
+                ],
+              ),
+            ],
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            'Jumlah limit pengambilan Anda saat ini : $initialLimit/hari',
+            style: TextStyle(fontSize: 14.sp),
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            'Limit pengambilan Anda hari ini : $todayLimit',
+            style: TextStyle(fontSize: 14.sp),
+          ),
+          SizedBox(height: 16.h),
+          Text(
+            '*Jumlah limit pengambilan yang bertambah hanya berlaku selama 1 minggu, setelahnya akan kembali ke jumlah pengambilan default yaitu 3 kali.',
+            style: TextStyle(
+              fontSize: 14.sp,
+              color: Colors.red,
+            ),
+          ),
+          SizedBox(height: 16.h),
+          Column(
+            children: [
+              Text(
+                'Total point yang dibutuhkan : $neededPoints',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                ),
+              ),
+              SizedBox(height: 8.h),
+              ElevatedButton.icon(
+                onPressed: points >= neededPoints && neededPoints > 0
+                    ? () async {
+                        await _showConfirmationDialog();
+                      }
+                    : null,
+                icon: Icon(
+                  LucideIcons.checkCircle,
+                  size: 20.sp,
+                ),
+                label: Text(
+                  'Tukarkan Point',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  primary: Color(0xFF307A59), // Background color
+                  onPrimary: Colors.white, // Text color
+                  minimumSize: Size(double.infinity, 36.h), // Full width button
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

@@ -5,11 +5,6 @@ class TransactionController extends GetxController {
   var transactions = <dynamic>[].obs;
   var isLoading = true.obs;
   final TransactionService _transactionService = TransactionService();
-  @override
-  void onInit() {
-    super.onInit();
-    fetchTransactions();
-  }
 
   Future<void> fetchTransactions() async {
     try {

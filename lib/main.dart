@@ -13,7 +13,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:wareg_app/Routes/Route.dart';
 import 'Controller/message_controller.dart';
-import 'Services/transaction_service.dart';
 import 'firebase_options.dart';
 
 const AndroidNotificationChannel transactionChannel =
@@ -95,7 +94,7 @@ Future<void> main() async {
     android: initializationSettingsAndroid,
   );
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
-  Get.put(TransactionService());
+
   await initializeDateFormatting('id', null);
   runApp(const MyApp());
 }
