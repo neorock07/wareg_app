@@ -1,22 +1,23 @@
 import 'dart:async';
 import 'dart:developer';
-
+import 'dart:ui';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_timer_countdown/flutter_timer_countdown.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wareg_app/Controller/API/Transaksi/TransaksiController.dart';
 import 'package:wareg_app/Controller/MapsController.dart';
-import 'package:wareg_app/Controller/TimerController.dart';
-import 'package:wareg_app/Controller/transaction_controller.dart';
 import 'package:wareg_app/Partials/CardButton.dart';
 import 'package:wareg_app/Partials/DialogPop.dart';
+import 'package:wareg_app/Partials/FormText.dart';
 import 'package:wareg_app/Partials/MapBox.dart';
 import 'package:wareg_app/Util/IconMaker.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:wareg_app/Util/Ip.dart';
 
 import '../Controller/API/Postingan/GetByLokasi.dart';
@@ -32,13 +33,19 @@ class _OnMapState extends State<OnMap> {
   MapsController mpController = Get.put(MapsController());
   RoadInfo? roadInfo;
   RxBool isPressed = false.obs;
+  RxBool isPressedBtl = false.obs;
+  RxBool isPressedRec = false.obs;
   RxBool isPressedBtn = false.obs;
   RxBool isPressedBtn2 = false.obs;
+  RxBool isPressedRate = false.obs;
   StreamController<GeoPoint>? streamController = StreamController<GeoPoint>();
   Timer? locationUpdateTimer;
   var postController = Get.put(GetPostController());
   var transController = Get.put(TransaksiController());
-  var timerController = Get.put(TimerController());
+  //timer countdown
+  late Timer _timer;
+  int remainingTime = 0;
+
   List<StaticPositionGeoPoint>? koordinat;
   double? latUser, longUser;
   var variasi;
@@ -48,11 +55,15 @@ class _OnMapState extends State<OnMap> {
   var userProfile =
       "https://cdn.idntimes.com/content-images/duniaku/post/20230309/raw-06202016rf-1606-3d3997f53e6f3e9277cd5a67fbd8f31f-1a44de7c1e0085a4ec8d2e4cb9602659.jpg";
   var markerUser;
+  int? id_user;
   var ipAdd = Ip();
   String? updatedUrl;
   String? post_foto;
   String? donatur_foto;
   RxList<int> count = <int>[].obs;
+  List<Widget> widgetList = [];
+  double? rating_donasi;
+  var komenController = TextEditingController();
 
   Future<void> _loadProfile() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -79,6 +90,8 @@ class _OnMapState extends State<OnMap> {
     ];
     setState(() {
       userProfile = prefs.getString('profile_picture')!;
+      id_user = prefs.getInt('user_id')!;
+      log("user id : $id_user");
       markerUser =
           userProfile.replaceFirst("http://localhost:3000", newBaseUrl);
     });
@@ -89,12 +102,14 @@ class _OnMapState extends State<OnMap> {
     super.initState();
     _loadProfile();
     startLocationUpdates();
+    log("max time : ${transController.transCreate.value}");
   }
 
   @override
   void dispose() {
     locationUpdateTimer?.cancel();
     streamController?.close();
+    // _timer.cancel();
     super.dispose();
   }
 
@@ -111,6 +126,7 @@ class _OnMapState extends State<OnMap> {
             count =
                 List.filled(postController.posts3.value['variants'].length, 0)
                     .obs;
+
             a++;
           });
         }
@@ -150,7 +166,7 @@ class _OnMapState extends State<OnMap> {
           actions: [
             IconButton(
                 onPressed: () async {
-                  Navigator.pushNamed(context, "/notifications");
+                  Navigator.pushNamed(context, '/notifications');
                 },
                 icon: const Icon(
                   LucideIcons.bell,
@@ -193,6 +209,26 @@ class _OnMapState extends State<OnMap> {
                   maxChildSize: 0.9,
                   builder: ((context, scrollController) {
                     return Obx(() {
+                      if (postController.posts3.value['media'] != null) {
+                        widgetList = postController.posts3.value['media']
+                            .map<Widget>((item) {
+                          return Container(
+                            height: 100.h,
+                            width: MediaQuery.of(context).size.width * 0.9,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(5.dm),
+                                image: DecorationImage(
+                                    image: NetworkImage(
+                                        // "${post_foto}"),
+                                        "${item['url'].toString().replaceFirst('http://localhost:3000', "${ipAdd.getType()}://${ipAdd.getIp()}")}"),
+                                    scale: 1,
+                                    fit: BoxFit.cover)),
+                          );
+                        }).toList();
+
+                        //start countdown
+                      }
+
                       return Container(
                         color: Colors.white,
                         child: (postController.isLoading3.value)
@@ -211,6 +247,23 @@ class _OnMapState extends State<OnMap> {
                             : ListView(
                                 controller: scrollController,
                                 children: [
+                                  (postController.posts3.value['userId'] ==
+                                          id_user)
+                                      ? Container(
+                                          width:
+                                              MediaQuery.of(context).size.width,
+                                          height: 30.h,
+                                          color: Color.fromRGBO(0, 170, 19, 1),
+                                          child: Align(
+                                              alignment: Alignment.topLeft,
+                                              child: Padding(
+                                                padding: EdgeInsets.all(5.dm),
+                                                child: Text("Donasi Anda",
+                                                    style: TextStyle(
+                                                        fontFamily: 'Poppins',
+                                                        color: Colors.white)),
+                                              )))
+                                      : Text(""),
                                   Padding(
                                     padding: EdgeInsets.only(bottom: 10.h),
                                     child: Container(
@@ -334,39 +387,151 @@ class _OnMapState extends State<OnMap> {
                                               ],
                                             ),
                                           ),
+                                          SizedBox(height: 10.h),
                                           Padding(
-                                            padding: EdgeInsets.only(
-                                                top: 10.h, left: 20.w),
-                                            child: Container(
-                                              height: 100.h,
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.9,
-                                              decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          5.dm),
-                                                  image: DecorationImage(
-                                                      image: NetworkImage(
-                                                          // "${post_foto}"),
-                                                          "${postController.posts3.value['media'][0]['url'].toString().replaceFirst('http://localhost:3000', "${ipAdd.getType()}://${ipAdd.getIp()}")}"),
-                                                      scale: 1,
-                                                      fit: BoxFit.cover)),
-                                            ),
-                                          ),
-                                          TimerCountdown(
-                                            format: CountDownTimerFormat
-                                                .hoursMinutesSeconds,
-                                            endTime:
-                                                timerController.endTime.value,
-                                            onTick: (value) {
-                                              log("countdown : ${value.toString()}");
-                                            },
-                                            onEnd: () {
-                                              print('Countdown ended');
-                                            },
-                                          ),
+                                              padding: EdgeInsets.only(
+                                                  top: 10.h, left: 20.w),
+                                              child: Stack(children: [
+                                                CarouselSlider(
+                                                    items: widgetList,
+                                                    options: CarouselOptions(
+                                                      height: 100.h,
+                                                      aspectRatio: 16 / 9,
+                                                      viewportFraction: 0.8,
+                                                      initialPage: 0,
+                                                      enableInfiniteScroll:
+                                                          true,
+                                                      reverse: false,
+                                                      autoPlay: true,
+                                                      autoPlayInterval:
+                                                          Duration(seconds: 3),
+                                                      autoPlayAnimationDuration:
+                                                          Duration(
+                                                              milliseconds:
+                                                                  800),
+                                                      autoPlayCurve:
+                                                          Curves.fastOutSlowIn,
+                                                      enlargeCenterPage: true,
+                                                      enlargeFactor: 0.3,
+                                                      scrollDirection:
+                                                          Axis.horizontal,
+                                                    )),
+                                                (postController.posts3.value[
+                                                            'transaction'] ==
+                                                        null)
+                                                    ? Text("")
+                                                    : Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                right: 10.w,
+                                                                top: 10.h),
+                                                        child: Align(
+                                                          alignment: Alignment
+                                                              .topRight,
+                                                          child: Container(
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          10),
+                                                              color: Colors
+                                                                  .transparent,
+                                                            ),
+                                                            child: ClipRRect(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          10),
+                                                              child:
+                                                                  BackdropFilter(
+                                                                filter: ImageFilter
+                                                                    .blur(
+                                                                        sigmaX:
+                                                                            10,
+                                                                        sigmaY:
+                                                                            10),
+                                                                child:
+                                                                    Container(
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            10),
+                                                                    border: Border.all(
+                                                                        color: Colors
+                                                                            .white
+                                                                            .withOpacity(0.2)),
+                                                                    gradient:
+                                                                        LinearGradient(
+                                                                      colors: [
+                                                                        Colors
+                                                                            .white
+                                                                            .withOpacity(0.1),
+                                                                        Colors
+                                                                            .white
+                                                                            .withOpacity(0.05)
+                                                                      ],
+                                                                      begin: Alignment
+                                                                          .topLeft,
+                                                                      end: Alignment
+                                                                          .bottomRight,
+                                                                    ),
+                                                                  ),
+                                                                  child:
+                                                                      Padding(
+                                                                    padding: EdgeInsets
+                                                                        .all(10
+                                                                            .dm),
+                                                                    child:
+                                                                        TimerCountdown(
+                                                                      enableDescriptions:
+                                                                          false,
+                                                                      timeTextStyle: const TextStyle(
+                                                                          color: Colors
+                                                                              .red,
+                                                                          fontFamily:
+                                                                              "Poppins",
+                                                                          fontWeight:
+                                                                              FontWeight.bold),
+                                                                      format: CountDownTimerFormat
+                                                                          .hoursMinutesSeconds,
+                                                                      endTime: DateTime.parse(postController
+                                                                          .posts3
+                                                                          .value['transaction']['detail']['maks_pengambilan']),
+                                                                      onTick:
+                                                                          (value) {
+                                                                        print(
+                                                                            "countdown : ${value.toString()}");
+                                                                      },
+                                                                      onEnd:
+                                                                          () {
+                                                                        print(
+                                                                            'Countdown ended');
+                                                                      },
+                                                                    ),
+
+                                                                    // Text(
+                                                                    //   _formatRemainingTime(
+                                                                    //       remainingTime),
+                                                                    //   style:
+                                                                    //       TextStyle(
+                                                                    //     color: Colors
+                                                                    //         .red,
+                                                                    //     fontFamily:
+                                                                    //         "Poppins",
+                                                                    //     fontWeight:
+                                                                    //         FontWeight.bold,
+                                                                    //   ),
+                                                                    // ),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                              ])),
                                           Padding(
                                             padding: EdgeInsets.only(
                                               top: 15.h,
@@ -633,465 +798,912 @@ class _OnMapState extends State<OnMap> {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         Obx(() {
-                          return postController.posts3.value['transaction'] ==
-                                  null
-                              ? CardButton(context, isPressed,
-                                  onTap: (_) async {
-                                  isPressed.value = true;
-                                  DialogPop(context,
-                                      size: [
-                                        MediaQuery.of(context).size.height *
-                                            0.6,
-                                        180.w
-                                      ],
-                                      dismissable: true,
-                                      icon: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceAround,
-                                            children: [
-                                              Text(
-                                                "Variasi Makanan",
-                                                style: TextStyle(
-                                                  color: Colors.black,
-                                                  fontFamily: "Poppins",
-                                                  fontSize: 14.sp,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                              SizedBox(width: 10.w),
-                                              IconButton(
-                                                onPressed: () {
-                                                  Navigator.of(context,
-                                                          rootNavigator: true)
-                                                      .pop();
-                                                },
-                                                icon: Icon(LucideIcons.x),
-                                              ),
-                                            ],
-                                          ),
-                                          SizedBox(height: 20.h),
-                                          Text(
-                                            "${postController.posts3.value['title']}",
-                                            style: TextStyle(
-                                              color: Colors.black,
-                                              fontFamily: "Poppins",
-                                              fontSize: 18.sp,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          Text(
-                                            "*Sesuaikan jumlah variasi makanan yang diambil",
-                                            style: TextStyle(
-                                              color: Colors.grey,
-                                              fontFamily: "Poppins",
-                                              fontSize: 12.sp,
-                                              fontWeight: FontWeight.normal,
-                                            ),
-                                          ),
-                                          SizedBox(height: 20.h),
-                                          Divider(height: 1.h),
-                                          SizedBox(height: 10.h),
-                                          Container(
-                                            height: 180.h,
-                                            child: Obx(() => ListView.builder(
-                                                  itemCount: postController
-                                                      .posts3
-                                                      .value['variants']
-                                                      .length,
-                                                  itemBuilder: (_, index) {
-                                                    return Padding(
-                                                      padding: EdgeInsets.only(
-                                                          top: 5.h),
-                                                      child: Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                        children: [
-                                                          Text(
-                                                            "${postController.posts3.value['variants'][index]['name']}",
-                                                          ),
-                                                          Row(
-                                                            children: [
-                                                              Material(
-                                                                color: Colors
-                                                                    .transparent,
-                                                                child: InkWell(
-                                                                  onTap: () {
-                                                                    if (count[
-                                                                            index]! >
-                                                                        1) {
-                                                                      count[
-                                                                          index]--;
-                                                                    }
-                                                                  },
-                                                                  splashColor:
-                                                                      Colors
-                                                                          .grey,
-                                                                  child:
-                                                                      Container(
-                                                                    height:
-                                                                        20.dm,
-                                                                    width:
-                                                                        20.dm,
-                                                                    decoration:
-                                                                        BoxDecoration(
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              2.dm),
-                                                                      border: Border.all(
-                                                                          color:
-                                                                              Colors.black),
-                                                                    ),
-                                                                    child: Icon(
-                                                                      LucideIcons
-                                                                          .minus,
-                                                                      size: 10,
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                              SizedBox(
-                                                                  width: 20.w),
-                                                              Obx(() => Text(
-                                                                    "${count[index]}",
-                                                                    style:
-                                                                        TextStyle(
-                                                                      color: Colors
-                                                                          .black,
-                                                                      fontFamily:
-                                                                          "Poppins",
-                                                                      fontSize:
-                                                                          14.sp,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .bold,
-                                                                    ),
-                                                                  )),
-                                                              SizedBox(
-                                                                  width: 20.w),
-                                                              Material(
-                                                                color: Colors
-                                                                    .transparent,
-                                                                child: InkWell(
-                                                                  onTap: () {
-                                                                    if (count[
-                                                                            index]! <
-                                                                        postController
-                                                                            .posts3
-                                                                            .value['variants'][index]['stok']) {
-                                                                      count[
-                                                                          index]++;
-                                                                    }
-                                                                  },
-                                                                  splashColor:
-                                                                      Colors
-                                                                          .grey,
-                                                                  child:
-                                                                      Container(
-                                                                    height:
-                                                                        20.dm,
-                                                                    width:
-                                                                        20.dm,
-                                                                    decoration:
-                                                                        BoxDecoration(
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              2.dm),
-                                                                      border: Border.all(
-                                                                          color:
-                                                                              Colors.black),
-                                                                    ),
-                                                                    child:
-                                                                        const Icon(
-                                                                      LucideIcons
-                                                                          .plus,
-                                                                      size: 10,
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ],
+                          return (postController.posts3.value['userId'] ==
+                                  id_user)
+                              ? Text("")
+                              : (postController.isLoading3.value)
+                                  ? Center(child: CircularProgressIndicator())
+                                  : postController
+                                              .posts3.value['transaction'] ==
+                                          null
+                                      ? CardButton(context, isPressed,
+                                          onTap: (_) async {
+                                          isPressed.value = true;
+                                          DialogPop(context,
+                                              size: [
+                                                MediaQuery.of(context)
+                                                        .size
+                                                        .height *
+                                                    0.6,
+                                                180.w
+                                              ],
+                                              dismissable: true,
+                                              icon: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceAround,
+                                                    children: [
+                                                      Text(
+                                                        "Variasi Makanan",
+                                                        style: TextStyle(
+                                                          color: Colors.black,
+                                                          fontFamily: "Poppins",
+                                                          fontSize: 14.sp,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
                                                       ),
-                                                    );
-                                                  },
-                                                )),
-                                          ),
-                                          Center(
-                                            child: Text(
-                                              "Pengambilan donasi Anda tersisa 3/3",
-                                              style: TextStyle(
-                                                color: Colors.red,
-                                                fontFamily: "Poppins",
-                                                fontSize: 10.sp,
-                                                fontStyle: FontStyle.italic,
-                                              ),
-                                            ),
-                                          ),
-                                          Obx(() => Center(
-                                                child: CardButton(
-                                                    context, isPressedBtn,
-                                                    onTap: (_) {
-                                                  isPressedBtn.value = true;
-                                                  // Navigator.pushNamed(
-                                                  //     context, "/formfood");
-                                                  Navigator.of(context,
-                                                          rootNavigator: true)
-                                                      .pop();
-                                                  DialogPop(context,
-                                                      size: [
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .height *
-                                                            0.4,
-                                                        150.dm
-                                                      ],
-                                                      dismissable: false,
-                                                      icon: Column(children: [
-                                                        Center(
-                                                            child: Image.asset(
-                                                          "assets/image/load.png",
-                                                          fit: BoxFit.cover,
-                                                          height: 120.dm,
-                                                          width: 120.dm,
-                                                        )),
-                                                        SizedBox(height: 10.h),
-                                                        Text(
-                                                          "Pengambilan donasi Anda tersisa 3/3",
-                                                          style: TextStyle(
-                                                            color: Colors.red,
-                                                            fontFamily:
-                                                                "Poppins",
-                                                            fontSize: 10.sp,
-                                                            fontStyle: FontStyle
-                                                                .italic,
-                                                          ),
-                                                        ),
-                                                        SizedBox(height: 5.h),
-                                                        Text(
-                                                          "Segera ambil makanan donasi Anda sebelum waktu pengambilan berakhir",
-                                                          textAlign:
-                                                              TextAlign.center,
-                                                          style: TextStyle(
-                                                            color: Colors.grey,
-                                                            fontFamily:
-                                                                "Poppins",
-                                                            fontSize: 10.sp,
-                                                            fontStyle: FontStyle
-                                                                .normal,
-                                                          ),
-                                                        ),
-                                                        SizedBox(height: 20.h),
-                                                        Obx(() => CardButton(
-                                                                context,
-                                                                isPressedBtn2,
-                                                                onTap:
-                                                                    (_) async {
-                                                              isPressedBtn2
-                                                                  .value = true;
+                                                      SizedBox(width: 10.w),
+                                                      IconButton(
+                                                        onPressed: () {
+                                                          Navigator.of(context,
+                                                                  rootNavigator:
+                                                                      true)
+                                                              .pop();
+                                                        },
+                                                        icon:
+                                                            Icon(LucideIcons.x),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  SizedBox(height: 20.h),
+                                                  Text(
+                                                    "${postController.posts3.value['title']}",
+                                                    style: TextStyle(
+                                                      color: Colors.black,
+                                                      fontFamily: "Poppins",
+                                                      fontSize: 18.sp,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    "*Sesuaikan jumlah variasi makanan yang diambil",
+                                                    style: TextStyle(
+                                                      color: Colors.grey,
+                                                      fontFamily: "Poppins",
+                                                      fontSize: 12.sp,
+                                                      fontWeight:
+                                                          FontWeight.normal,
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: 20.h),
+                                                  Divider(height: 1.h),
+                                                  SizedBox(height: 10.h),
+                                                  Container(
+                                                    height: 180.h,
+                                                    child:
+                                                        Obx(
+                                                            () => ListView
+                                                                    .builder(
+                                                                  itemCount: postController
+                                                                      .posts3
+                                                                      .value[
+                                                                          'variants']
+                                                                      .length,
+                                                                  itemBuilder:
+                                                                      (_, index) {
+                                                                    return Padding(
+                                                                      padding: EdgeInsets.only(
+                                                                          top: 5
+                                                                              .h),
+                                                                      child:
+                                                                          Row(
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.spaceBetween,
+                                                                        children: [
+                                                                          Text(
+                                                                            "${postController.posts3.value['variants'][index]['name']}",
+                                                                          ),
+                                                                          Row(
+                                                                            children: [
+                                                                              Material(
+                                                                                color: Colors.transparent,
+                                                                                child: InkWell(
+                                                                                  onTap: () {
+                                                                                    if (count[index]! > 1) {
+                                                                                      count[index]--;
+                                                                                    }
+                                                                                  },
+                                                                                  splashColor: Colors.grey,
+                                                                                  child: Container(
+                                                                                    height: 20.dm,
+                                                                                    width: 20.dm,
+                                                                                    decoration: BoxDecoration(
+                                                                                      borderRadius: BorderRadius.circular(2.dm),
+                                                                                      border: Border.all(color: Colors.black),
+                                                                                    ),
+                                                                                    child: Icon(
+                                                                                      LucideIcons.minus,
+                                                                                      size: 10,
+                                                                                    ),
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                              SizedBox(width: 20.w),
+                                                                              Obx(() => Text(
+                                                                                    "${count[index]}",
+                                                                                    style: TextStyle(
+                                                                                      color: Colors.black,
+                                                                                      fontFamily: "Poppins",
+                                                                                      fontSize: 14.sp,
+                                                                                      fontWeight: FontWeight.bold,
+                                                                                    ),
+                                                                                  )),
+                                                                              SizedBox(width: 20.w),
+                                                                              Material(
+                                                                                color: Colors.transparent,
+                                                                                child: InkWell(
+                                                                                  onTap: () {
+                                                                                    if (count[index]! < postController.posts3.value['variants'][index]['stok']) {
+                                                                                      count[index]++;
+                                                                                    }
+                                                                                  },
+                                                                                  splashColor: Colors.grey,
+                                                                                  child: Container(
+                                                                                    height: 20.dm,
+                                                                                    width: 20.dm,
+                                                                                    decoration: BoxDecoration(
+                                                                                      borderRadius: BorderRadius.circular(2.dm),
+                                                                                      border: Border.all(color: Colors.black),
+                                                                                    ),
+                                                                                    child: const Icon(
+                                                                                      LucideIcons.plus,
+                                                                                      size: 10,
+                                                                                    ),
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    );
+                                                                  },
+                                                                )),
+                                                  ),
+                                                  Center(
+                                                    child: Text(
+                                                      "Pengambilan donasi Anda tersisa ${postController.posts3.value['sisa_pengambilan']}/${postController.posts3.value['max_pengambilan']}",
+                                                      style: TextStyle(
+                                                        color: Colors.red,
+                                                        fontFamily: "Poppins",
+                                                        fontSize: 10.sp,
+                                                        fontStyle:
+                                                            FontStyle.italic,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  Obx(() => Center(
+                                                        child: CardButton(
+                                                            context,
+                                                            isPressedBtn,
+                                                            onTap: (_) {
+                                                          isPressedBtn.value =
+                                                              true;
+                                                          // Navigator.pushNamed(
+                                                          //     context, "/formfood");
+                                                          Navigator.of(context,
+                                                                  rootNavigator:
+                                                                      true)
+                                                              .pop();
+                                                          DialogPop(context,
+                                                              size: [
+                                                                MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .height *
+                                                                    0.4,
+                                                                150.dm
+                                                              ],
+                                                              dismissable:
+                                                                  false,
+                                                              icon: Column(
+                                                                  children: [
+                                                                    Center(
+                                                                        child: Image
+                                                                            .asset(
+                                                                      "assets/image/load.png",
+                                                                      fit: BoxFit
+                                                                          .cover,
+                                                                      height:
+                                                                          120.dm,
+                                                                      width: 120
+                                                                          .dm,
+                                                                    )),
+                                                                    SizedBox(
+                                                                        height:
+                                                                            10.h),
+                                                                    Text(
+                                                                      "Pengambilan donasi Anda tersisa ${postController.posts3.value['sisa_pengambilan']}/${postController.posts3.value['max_pengambilan']}",
+                                                                      style:
+                                                                          TextStyle(
+                                                                        color: Colors
+                                                                            .red,
+                                                                        fontFamily:
+                                                                            "Poppins",
+                                                                        fontSize:
+                                                                            10.sp,
+                                                                        fontStyle:
+                                                                            FontStyle.italic,
+                                                                      ),
+                                                                    ),
+                                                                    SizedBox(
+                                                                        height:
+                                                                            5.h),
+                                                                    Text(
+                                                                      "Segera ambil makanan donasi Anda sebelum waktu pengambilan berakhir",
+                                                                      textAlign:
+                                                                          TextAlign
+                                                                              .center,
+                                                                      style:
+                                                                          TextStyle(
+                                                                        color: Colors
+                                                                            .grey,
+                                                                        fontFamily:
+                                                                            "Poppins",
+                                                                        fontSize:
+                                                                            10.sp,
+                                                                        fontStyle:
+                                                                            FontStyle.normal,
+                                                                      ),
+                                                                    ),
+                                                                    SizedBox(
+                                                                        height:
+                                                                            20.h),
+                                                                    Obx(() =>
+                                                                        CardButton(
+                                                                            context,
+                                                                            isPressedBtn2,
+                                                                            onTap:
+                                                                                (_) async {
+                                                                          isPressedBtn2.value =
+                                                                              true;
 
-                                                              for (int i = 0;
-                                                                  i <
-                                                                      count
-                                                                          .length;
-                                                                  i++) {
-                                                                pickedVariants
-                                                                    .add({
-                                                                  "variant_id": postController
-                                                                          .posts3
-                                                                          .value['variants']
-                                                                      [i]['id'],
-                                                                  "jumlah": count
-                                                                      .value[i]
-                                                                });
-                                                              }
-                                                              await transController
-                                                                  .postTransaction(
-                                                                      postController
-                                                                          .posts3
-                                                                          .value['id'],
-                                                                      pickedVariants)
-                                                                  .then((value) {
-                                                                log("reuslt e iki : ${value.keys}");
-                                                                Navigator
-                                                                    .pushReplacementNamed(
-                                                                        context,
-                                                                        "/onmap");
-                                                              });
-                                                              // Navigator.pushNamed(context, "/formfood");
-                                                            },
-                                                                width_a: 0.38,
-                                                                width_b: 0.4,
-                                                                height_a: 0.05,
-                                                                height_b: 0.06,
-                                                                borderRadius:
-                                                                    10.dm,
-                                                                gradient:
-                                                                    const LinearGradient(
-                                                                        colors: [
-                                                                      Color.fromRGBO(
+                                                                          for (int i = 0;
+                                                                              i < count.length;
+                                                                              i++) {
+                                                                            pickedVariants.add({
+                                                                              "variant_id": postController.posts3.value['variants'][i]['id'],
+                                                                              "jumlah": count.value[i]
+                                                                            });
+                                                                          }
+                                                                          await transController
+                                                                              .postTransaction(postController.posts3.value['id'], pickedVariants)
+                                                                              .then((value) {
+                                                                            log("reuslt e iki : ${value.keys}");
+
+                                                                            if (value['statusCode'] ==
+                                                                                400) {
+                                                                              Navigator.of(context, rootNavigator: true).pop();
+
+                                                                              DialogPop(
+                                                                                  context,
+                                                                                  size: [
+                                                                                    150.h,
+                                                                                    150.w
+                                                                                  ],
+                                                                                  icon: Column(children: [
+                                                                                    Center(
+                                                                                        child: Image.asset(
+                                                                                      "assets/image/full.png",
+                                                                                      fit: BoxFit.fill,
+                                                                                      height: 100.dm,
+                                                                                      width: 100.dm,
+                                                                                    )),
+                                                                                    SizedBox(height:20.h),
+                                                                                    Text("${value['message']}", style: TextStyle(fontFamily: "Poppins", fontSize: 12.sp))
+                                                                                  ]));
+                                                                            } else {
+                                                                              Navigator.of(context, rootNavigator: true).pop();
+
+                                                                              postController.isLoading3.value = true;
+                                                                              Navigator.pushReplacementNamed(context, "/onmap");
+                                                                            }
+                                                                          });
+                                                                          // Navigator.pushNamed(context, "/formfood");
+                                                                        },
+                                                                            width_a:
+                                                                                0.38,
+                                                                            width_b:
+                                                                                0.4,
+                                                                            height_a:
+                                                                                0.05,
+                                                                            height_b:
+                                                                                0.06,
+                                                                            borderRadius:
+                                                                                10.dm,
+                                                                            gradient: const LinearGradient(colors: [
+                                                                              Color.fromRGBO(52, 135, 98, 1),
+                                                                              Color.fromRGBO(48, 122, 99, 1),
+                                                                            ]),
+                                                                            child: Center(
+                                                                              child: Text(
+                                                                                "Ambil Donasi",
+                                                                                style: TextStyle(fontFamily: "Poppins", color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.normal),
+                                                                              ),
+                                                                            )))
+                                                                  ]));
+                                                          log("yg diambil : ${count.value.toString()}");
+                                                        },
+                                                            width_a: 0.4,
+                                                            width_b: 0.36,
+                                                            height_a: 0.05,
+                                                            height_b: 0.06,
+                                                            borderRadius: 10.dm,
+                                                            gradient:
+                                                                const LinearGradient(
+                                                                    colors: [
+                                                                  Color
+                                                                      .fromRGBO(
                                                                           52,
                                                                           135,
                                                                           98,
                                                                           1),
-                                                                      Color.fromRGBO(
+                                                                  Color
+                                                                      .fromRGBO(
                                                                           48,
                                                                           122,
                                                                           99,
                                                                           1),
-                                                                    ]),
-                                                                child: Center(
-                                                                  child: Text(
-                                                                    "Ambil Donasi",
-                                                                    style: TextStyle(
-                                                                        fontFamily:
-                                                                            "Poppins",
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontSize: 14
-                                                                            .sp,
-                                                                        fontWeight:
-                                                                            FontWeight.normal),
-                                                                  ),
-                                                                )))
-                                                      ]));
-                                                  log("yg diambil : ${count.value.toString()}");
-                                                },
-                                                    width_a: 0.4,
-                                                    width_b: 0.36,
-                                                    height_a: 0.05,
-                                                    height_b: 0.06,
-                                                    borderRadius: 10.dm,
-                                                    gradient:
-                                                        const LinearGradient(
-                                                            colors: [
-                                                          Color.fromRGBO(
-                                                              52, 135, 98, 1),
-                                                          Color.fromRGBO(
-                                                              48, 122, 99, 1),
-                                                        ]),
-                                                    child: Center(
-                                                      child: Text(
-                                                        "Konfirmasi",
+                                                                ]),
+                                                            child: Center(
+                                                              child: Text(
+                                                                "Konfirmasi",
+                                                                style: TextStyle(
+                                                                    fontFamily:
+                                                                        "Poppins",
+                                                                    color: Colors
+                                                                        .white,
+                                                                    fontSize:
+                                                                        16.sp,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .normal),
+                                                              ),
+                                                            )),
+                                                      ))
+                                                ],
+                                              ));
+                                        },
+                                          gradient:
+                                              const LinearGradient(colors: [
+                                            Color.fromRGBO(52, 135, 98, 1),
+                                            Color.fromRGBO(48, 122, 99, 1),
+                                          ]),
+                                          width_b: 0.7,
+                                          width_a: 0.6,
+                                          height_b: 40.h,
+                                          height_a: 38.h,
+                                          child: Center(
+                                            child: Padding(
+                                              padding: EdgeInsets.all(10.dm),
+                                              child: Center(
+                                                child: Text(
+                                                  "Ambil ini",
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontFamily: "Poppins",
+                                                    fontSize: 14.sp,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ))
+                                      : Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceAround,
+                                          mainAxisSize: MainAxisSize.max,
+                                          children: [
+                                            CardButton(context, isPressedBtl,
+                                                onTap: (_) async {
+                                              isPressedBtl.value = true;
+
+                                              DialogPop(context,
+                                                  size: [
+                                                    MediaQuery.of(context)
+                                                            .size
+                                                            .height *
+                                                        0.4,
+                                                    100.w
+                                                  ],
+                                                  icon: Column(children: [
+                                                    Align(
+                                                        alignment:
+                                                            Alignment.topRight,
+                                                        child: IconButton(
+                                                            onPressed: () {
+                                                              Navigator.of(
+                                                                      context,
+                                                                      rootNavigator:
+                                                                          true)
+                                                                  .pop();
+                                                            },
+                                                            icon: Icon(
+                                                                LucideIcons.x,
+                                                                size: 20))),
+                                                    Center(
+                                                        child: Image.asset(
+                                                      "assets/image/cancel_load.png",
+                                                      fit: BoxFit.fill,
+                                                      height: 80.dm,
+                                                      width: 80.dm,
+                                                    )),
+                                                    SizedBox(height: 10.h),
+                                                    Text(
+                                                        "Batalkan pengambilan donasi ?",
                                                         style: TextStyle(
+                                                            color: Colors.black,
                                                             fontFamily:
                                                                 "Poppins",
-                                                            color: Colors.white,
-                                                            fontSize: 16.sp,
                                                             fontWeight:
-                                                                FontWeight
-                                                                    .normal),
+                                                                FontWeight.bold,
+                                                            fontSize: 14.sp)),
+                                                    SizedBox(height: 20.h),
+                                                    InkWell(
+                                                      onTap: () async {
+                                                        await transController
+                                                            .cancelTransaksi(
+                                                                postController
+                                                                        .posts3
+                                                                        .value[
+                                                                    'transaction']['id'])
+                                                            .then((value) {
+                                                          Get.snackbar(
+                                                              "Pembatalan Pengambilan",
+                                                              "Pengambilan berhasil dibatalkan!");
+                                                          postController
+                                                              .isLoading3
+                                                              .value = true;
+                                                          Navigator
+                                                              .pushReplacementNamed(
+                                                                  context,
+                                                                  "/home");
+                                                        });
+                                                      },
+                                                      child: Container(
+                                                          height: 30.h,
+                                                          width: 120.w,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                    10.dm,
+                                                                  ),
+                                                                  color:
+                                                                      const Color
+                                                                              .fromRGBO(
+                                                                          48,
+                                                                          122,
+                                                                          89,
+                                                                          1)),
+                                                          child: Center(
+                                                              child: Text(
+                                                                  "Ya, Batalkan",
+                                                                  style: TextStyle(
+                                                                      fontFamily:
+                                                                          "Poppins",
+                                                                      color: Colors
+                                                                          .white,
+                                                                      fontSize:
+                                                                          12.sp)))),
+                                                    ),
+                                                    SizedBox(height: 10.h),
+                                                    InkWell(
+                                                      onTap: () {
+                                                        Navigator.of(context,
+                                                                rootNavigator:
+                                                                    true)
+                                                            .pop();
+                                                      },
+                                                      child: Container(
+                                                          height: 30.h,
+                                                          width: 120.w,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                                  border: Border.all(
+                                                                      color: const Color.fromRGBO(
+                                                                          48,
+                                                                          122,
+                                                                          89,
+                                                                          1)),
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                    10.dm,
+                                                                  ),
+                                                                  color: Colors
+                                                                      .white),
+                                                          child: Center(
+                                                              child: Text(
+                                                                  "Tidak",
+                                                                  style: TextStyle(
+                                                                      fontFamily:
+                                                                          "Poppins",
+                                                                      color: const Color.fromRGBO(
+                                                                          48,
+                                                                          122,
+                                                                          89,
+                                                                          1),
+                                                                      fontSize:
+                                                                          12.sp)))),
+                                                    ),
+                                                  ]));
+                                            },
+                                                color: Colors.red,
+                                                width_b: 0.35,
+                                                width_a: 0.32,
+                                                height_b: 40.h,
+                                                height_a: 38.h,
+                                                child: Center(
+                                                  child: Padding(
+                                                    padding:
+                                                        EdgeInsets.all(10.dm),
+                                                    child: Center(
+                                                      child: Text(
+                                                        "Batal",
+                                                        style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontFamily: "Poppins",
+                                                          fontSize: 14.sp,
+                                                        ),
                                                       ),
+                                                    ),
+                                                  ),
+                                                )),
+                                            SizedBox(width: 10.w),
+                                            CardButton(context, isPressedRec,
+                                                onTap: (_) async {
+                                              isPressedRec.value = true;
+                                              DialogPop(context,
+                                                  size: [
+                                                    MediaQuery.of(context)
+                                                            .size
+                                                            .height *
+                                                        0.5,
+                                                    100.w
+                                                  ],
+                                                  icon: Column(children: [
+                                                    Align(
+                                                        alignment:
+                                                            Alignment.topRight,
+                                                        child: IconButton(
+                                                            onPressed: () {
+                                                              Navigator.of(
+                                                                      context,
+                                                                      rootNavigator:
+                                                                          true)
+                                                                  .pop();
+                                                            },
+                                                            icon: Icon(
+                                                                LucideIcons.x,
+                                                                size: 20))),
+                                                    Center(
+                                                        child: Image.asset(
+                                                      "assets/image/terima_load.png",
+                                                      fit: BoxFit.fill,
+                                                      height: 100.dm,
+                                                      width: 100.dm,
                                                     )),
-                                              ))
-                                        ],
-                                      ));
-                                },
-                                  gradient: const LinearGradient(colors: [
-                                    Color.fromRGBO(52, 135, 98, 1),
-                                    Color.fromRGBO(48, 122, 99, 1),
-                                  ]),
-                                  width_b: 0.7,
-                                  width_a: 0.6,
-                                  height_b: 40.h,
-                                  height_a: 38.h,
-                                  child: Center(
-                                    child: Padding(
-                                      padding: EdgeInsets.all(10.dm),
-                                      child: Center(
-                                        child: Text(
-                                          "Ambil ini",
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontFamily: "Poppins",
-                                            fontSize: 14.sp,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ))
-                              : Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  mainAxisSize: MainAxisSize.max,
-                                  children: [
-                                    CardButton(context, isPressed,
-                                        onTap: (_) async {
-                                      isPressed.value = true;
-                                    },
-                                        color: Colors.red,
-                                        width_b: 0.35,
-                                        width_a: 0.32,
-                                        height_b: 40.h,
-                                        height_a: 38.h,
-                                        child: Center(
-                                          child: Padding(
-                                            padding: EdgeInsets.all(10.dm),
-                                            child: Center(
-                                              child: Text(
-                                                "Batal",
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontFamily: "Poppins",
-                                                  fontSize: 14.sp,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        )),
-                                    SizedBox(width: 10.w),
-                                    CardButton(context, isPressed,
-                                        onTap: (_) async {
-                                      isPressed.value = true;
-                                    },
-                                        gradient: const LinearGradient(colors: [
-                                          Color.fromRGBO(52, 135, 98, 1),
-                                          Color.fromRGBO(48, 122, 99, 1),
-                                        ]),
-                                        width_b: 0.4,
-                                        width_a: 0.37,
-                                        height_b: 40.h,
-                                        height_a: 38.h,
-                                        child: Center(
-                                          child: Padding(
-                                            padding: EdgeInsets.all(10.dm),
-                                            child: Center(
-                                              child: Text(
-                                                "Donasi Diterima",
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontFamily: "Poppins",
-                                                  fontSize: 12.sp,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        )),
-                                  ],
-                                );
+                                                    SizedBox(height: 10.h),
+                                                    Text(
+                                                        "Donasi telah diterima ?",
+                                                        style: TextStyle(
+                                                            color: Colors.black,
+                                                            fontFamily:
+                                                                "Poppins",
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontSize: 14.sp)),
+                                                    SizedBox(height: 20.h),
+                                                    InkWell(
+                                                      onTap: () async {
+                                                        Navigator.of(context,
+                                                                rootNavigator:
+                                                                    true)
+                                                            .pop();
+                                                        DialogPop(context,
+                                                            dismissable: false,
+                                                            size: [
+                                                              MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .height *
+                                                                  0.5,
+                                                              100.w
+                                                            ],
+                                                            icon: Column(
+                                                                children: [
+                                                                  Center(
+                                                                      child: Image
+                                                                          .asset(
+                                                                    "assets/image/thank_load.png",
+                                                                    fit: BoxFit
+                                                                        .fill,
+                                                                    height:
+                                                                        100.dm,
+                                                                    width:
+                                                                        100.dm,
+                                                                  )),
+                                                                  SizedBox(
+                                                                      height:
+                                                                          20.h),
+                                                                  Text(
+                                                                      "Terimakasih!\nDonasi telah diterima",
+                                                                      textAlign:
+                                                                          TextAlign
+                                                                              .center,
+                                                                      style: TextStyle(
+                                                                          color: Colors
+                                                                              .black,
+                                                                          fontFamily:
+                                                                              "Poppins",
+                                                                          fontWeight: FontWeight
+                                                                              .bold,
+                                                                          fontSize:
+                                                                              14.sp)),
+                                                                  SizedBox(
+                                                                      height:
+                                                                          10.h),
+                                                                  Text(
+                                                                      "Selamat menikmati donasi\nyang telah diterima, jangan lupa\nmengucapkan terimakasih ya ☺",
+                                                                      textAlign:
+                                                                          TextAlign
+                                                                              .center,
+                                                                      style: TextStyle(
+                                                                          color: Colors
+                                                                              .grey,
+                                                                          fontFamily:
+                                                                              "Poppins",
+                                                                          fontWeight: FontWeight
+                                                                              .normal,
+                                                                          fontSize:
+                                                                              12.sp)),
+                                                                  SizedBox(
+                                                                      height:
+                                                                          5.h),
+                                                                  Text(
+                                                                    "Pengambilan donasi Anda tersisa ${postController.posts3.value['sisa_pengambilan']}/${postController.posts3.value['max_pengambilan']}",
+                                                                    style:
+                                                                        TextStyle(
+                                                                      color: Colors
+                                                                          .red,
+                                                                      fontFamily:
+                                                                          "Poppins",
+                                                                      fontSize:
+                                                                          10.sp,
+                                                                      fontStyle:
+                                                                          FontStyle
+                                                                              .italic,
+                                                                    ),
+                                                                  ),
+                                                                  SizedBox(
+                                                                      height:
+                                                                          20.h),
+                                                                  const SpinKitCircle(
+                                                                      color: Colors
+                                                                          .green)
+                                                                ]));
+                                                        Future.delayed(Duration(
+                                                                seconds: 3))
+                                                            .then((value) {
+                                                          Navigator.of(context,
+                                                                  rootNavigator:
+                                                                      true)
+                                                              .pop();
+                                                          showModalBottomSheet(
+                                                              context: context,
+                                                              useSafeArea: true,
+                                                              isScrollControlled:
+                                                                  true,
+                                                              builder:
+                                                                  (context) {
+                                                                return Padding(
+                                                                  padding:
+                                                                      EdgeInsets
+                                                                          .only(
+                                                                    bottom: MediaQuery.of(
+                                                                            context)
+                                                                        .viewInsets
+                                                                        .bottom,
+                                                                  ),
+                                                                  child:
+                                                                      SingleChildScrollView(
+                                                                    child: Container(
+                                                                        height: MediaQuery.of(context).size.height * 0.7,
+                                                                        width: MediaQuery.of(context).size.height * 0.9,
+                                                                        decoration: BoxDecoration(
+                                                                          borderRadius:
+                                                                              BorderRadius.circular(10.dm),
+                                                                        ),
+                                                                        child: Column(children: [
+                                                                          SizedBox(
+                                                                              height: 20.h),
+                                                                          Text(
+                                                                              "Rate Donasi",
+                                                                              style: TextStyle(fontFamily: "Poppins", fontSize: 14.sp, fontWeight: FontWeight.bold)),
+                                                                          Text(
+                                                                              "Berikan rating makanan yang telah diterima",
+                                                                              style: TextStyle(fontFamily: "Poppins", fontSize: 14.sp, fontWeight: FontWeight.bold)),
+                                                                          RatingBar
+                                                                              .builder(
+                                                                            initialRating:
+                                                                                1,
+                                                                            minRating:
+                                                                                1,
+                                                                            direction:
+                                                                                Axis.horizontal,
+                                                                            allowHalfRating:
+                                                                                true,
+                                                                            itemCount:
+                                                                                5,
+                                                                            itemPadding:
+                                                                                EdgeInsets.symmetric(horizontal: 4.dm),
+                                                                            itemBuilder: (context, _) =>
+                                                                                const Icon(
+                                                                              Icons.star,
+                                                                              color: Colors.amber,
+                                                                            ),
+                                                                            onRatingUpdate:
+                                                                                (rating) {
+                                                                              rating_donasi = rating;
+                                                                              setState(() {});
+                                                                            },
+                                                                          ),
+                                                                          SizedBox(
+                                                                              height: 20.h),
+                                                                          FormText(
+                                                                              context,
+                                                                              label: "Komentar Anda terhadap  ",
+                                                                              hint: "deskripsi makanan...",
+                                                                              type: TextInputType.multiline,
+                                                                              controller: komenController),
+                                                                          SizedBox(
+                                                                              height: 30.h),
+                                                                          Center(
+                                                                            child: Obx(() =>
+                                                                                CardButton(context, isPressedRate, onTap: (_) {
+                                                                                  isPressedRate.value = true;
+                                                                                  // Navigator.pushReplacementNamed(context, "/formfood");
+                                                                                  log("rating : ${rating_donasi!.ceil()}");
+                                                                                  transController.postConfirmation(postController.posts3.value['transaction']['id'], rating_donasi!.ceil(), komenController.text).then((value) {
+                                                                                    Get.snackbar("Review berhasil dikirim", "Terima kasih Anda telah membantu menyelamatkan Bumi🙏🙏 ");
+                                                                                    Navigator.pushReplacementNamed(context, "/home");
+                                                                                  });
+                                                                                },
+                                                                                    width_a: 0.78,
+                                                                                    width_b: 0.8,
+                                                                                    height_a: 0.05,
+                                                                                    height_b: 0.06,
+                                                                                    borderRadius: 10.dm,
+                                                                                    gradient: const LinearGradient(colors: [
+                                                                                      Color.fromRGBO(52, 135, 98, 1),
+                                                                                      Color.fromRGBO(48, 122, 99, 1),
+                                                                                    ]),
+                                                                                    child: Center(
+                                                                                      child: Text(
+                                                                                        "Konfirmasi",
+                                                                                        style: TextStyle(fontFamily: "Poppins", color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold),
+                                                                                      ),
+                                                                                    ))),
+                                                                          )
+                                                                        ])),
+                                                                  ),
+                                                                );
+                                                              });
+                                                        });
+                                                      },
+                                                      child: Container(
+                                                          height: 30.h,
+                                                          width: 120.w,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                    10.dm,
+                                                                  ),
+                                                                  color:
+                                                                      const Color
+                                                                              .fromRGBO(
+                                                                          48,
+                                                                          122,
+                                                                          89,
+                                                                          1)),
+                                                          child: Center(
+                                                              child: Text(
+                                                                  "Donasi diterima",
+                                                                  style: TextStyle(
+                                                                      fontFamily:
+                                                                          "Poppins",
+                                                                      color: Colors
+                                                                          .white,
+                                                                      fontSize:
+                                                                          12.sp)))),
+                                                    ),
+                                                    SizedBox(height: 10.h),
+                                                    InkWell(
+                                                        onTap: () {
+                                                          Navigator.of(context,
+                                                                  rootNavigator:
+                                                                      true)
+                                                              .pop();
+                                                        },
+                                                        child: Text(
+                                                            "Laporkan Donasi",
+                                                            style: TextStyle(
+                                                                fontFamily:
+                                                                    "Poppins",
+                                                                fontStyle:
+                                                                    FontStyle
+                                                                        .italic,
+                                                                decoration:
+                                                                    TextDecoration
+                                                                        .underline,
+                                                                color: const Color
+                                                                        .fromRGBO(
+                                                                    48,
+                                                                    122,
+                                                                    89,
+                                                                    1),
+                                                                fontSize:
+                                                                    12.sp))),
+                                                  ]));
+                                            },
+                                                gradient: const LinearGradient(
+                                                    colors: [
+                                                      Color.fromRGBO(
+                                                          52, 135, 98, 1),
+                                                      Color.fromRGBO(
+                                                          48, 122, 99, 1),
+                                                    ]),
+                                                width_b: 0.4,
+                                                width_a: 0.37,
+                                                height_b: 40.h,
+                                                height_a: 38.h,
+                                                child: Center(
+                                                  child: Padding(
+                                                    padding:
+                                                        EdgeInsets.all(10.dm),
+                                                    child: Center(
+                                                      child: Text(
+                                                        "Donasi Diterima",
+                                                        style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontFamily: "Poppins",
+                                                          fontSize: 12.sp,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                )),
+                                          ],
+                                        );
                         }),
-                        IconButton(
-                            color: Colors.grey,
-                            onPressed: () async {
-                              Navigator.pushNamed(
-                                context,
-                                "/chat",
-                                arguments: {
-                                  'userId':
-                                      mpController.map_dataTarget['userId'],
-                                  'donatur_name': mpController
-                                      .map_dataTarget['donatur_name'],
+                        (postController.posts3.value['userId'] == id_user)
+                            ? Text("")
+                            : IconButton(
+                                color: Colors.grey,
+                                onPressed: () async {
+                                  Navigator.pushNamed(
+                                    context,
+                                    "/chat",
+                                    arguments: {
+                                      'userId':
+                                          mpController.map_dataTarget['userId'],
+                                      'donatur_name': mpController
+                                          .map_dataTarget['donatur_name'],
+                                    },
+                                  );
                                 },
-                              );
-                            },
-                            icon: const Icon(LucideIcons.messagesSquare))
+                                icon: const Icon(LucideIcons.messagesSquare))
                       ],
                     ),
                   ),
