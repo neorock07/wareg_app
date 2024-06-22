@@ -1091,7 +1091,7 @@ class _PointPageState extends State<PointPage> {
           ),
           SizedBox(height: 16.h),
           Text(
-            '*Jumlah limit pengambilan yang bertambah hanya berlaku selama 1 minggu, setelahnya akan kembali ke jumlah pengambilan default yaitu 3 kali.',
+            '*Jumlah limit pengambilan yang ditambah hanya berlaku selama 1 minggu.',
             style: TextStyle(
               fontSize: 14.sp,
               color: Colors.red,
