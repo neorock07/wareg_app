@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:wareg_app/Controller/MapsController.dart';
 import 'package:wareg_app/Controller/API/Postingan/GetByLokasi.dart';
+import 'package:wareg_app/Controller/notification_controller.dart';
 import 'package:wareg_app/Partials/CardMenu.dart';
 import 'package:wareg_app/Partials/CardSearch.dart';
 import 'package:wareg_app/Services/LocationService.dart';
@@ -28,10 +29,13 @@ class SearchResultsPage extends StatefulWidget {
 class _SearchResultsPageState extends State<SearchResultsPage> {
   final GetPostController postController = Get.put(GetPostController());
   final MapsController mpController = Get.put(MapsController());
+  final NotificationController notificationController =
+      Get.put(NotificationController());
 
   @override
   void initState() {
     super.initState();
+    notificationController.checkNotification();
     WidgetsBinding.instance.addPostFrameCallback((_) => _fetchSearchResults());
   }
 
@@ -54,11 +58,49 @@ class _SearchResultsPageState extends State<SearchResultsPage> {
               fontFamily: "Bree", color: Colors.black, fontSize: 18.sp),
         ),
         actions: [
-          IconButton(
-            onPressed: () async {},
-            icon: Icon(LucideIcons.bell, color: Colors.black),
-          ),
-          SizedBox(width: 5.w),
+          Obx(() {
+            return Stack(
+              alignment: Alignment.center,
+              children: [
+                IconButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, "/notifications");
+                  },
+                  icon: const Icon(
+                    LucideIcons.bell,
+                    color: Colors.black,
+                  ),
+                ),
+                if (notificationController.hasUnread.value)
+                  Positioned(
+                    right: 10,
+                    top: 10,
+                    child: Container(
+                      padding: EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      constraints: BoxConstraints(
+                        minWidth: 12,
+                        minHeight: 12,
+                      ),
+                      child: Text(
+                        '',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 8,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          }),
+          SizedBox(
+            width: 5.w,
+          )
         ],
       ),
       body: Column(

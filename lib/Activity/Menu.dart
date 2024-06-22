@@ -120,39 +120,49 @@ class _MenuState extends State<Menu> {
               fontFamily: "Bree", color: Colors.black, fontSize: 18.sp),
         ),
         actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.pushNamed(context, "/notifications");
-            },
-            icon: const Icon(
-              LucideIcons.bell,
-              color: Colors.black,
-            ),
-          ),
-          if (notificationController.hasUnread.value)
-            Positioned(
-              right: 11,
-              top: 11,
-              child: Container(
-                padding: EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  color: Colors.red,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                constraints: BoxConstraints(
-                  minWidth: 12,
-                  minHeight: 12,
-                ),
-                child: Text(
-                  '',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 8,
+          Obx(() {
+            return Stack(
+              alignment: Alignment.center,
+              children: [
+                IconButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, "/notifications");
+                  },
+                  icon: const Icon(
+                    LucideIcons.bell,
+                    color: Colors.black,
                   ),
-                  textAlign: TextAlign.center,
                 ),
-              ),
-            ),
+                if (notificationController.hasUnread.value)
+                  Positioned(
+                    right: 10,
+                    top: 10,
+                    child: Container(
+                      padding: EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      constraints: BoxConstraints(
+                        minWidth: 12,
+                        minHeight: 12,
+                      ),
+                      child: Text(
+                        '',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 8,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          }),
+          SizedBox(
+            width: 5.w,
+          )
         ],
       ),
       body: Stack(children: [

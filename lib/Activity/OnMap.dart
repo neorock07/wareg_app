@@ -17,6 +17,7 @@ import 'package:wareg_app/Partials/CardButton.dart';
 import 'package:wareg_app/Partials/DialogPop.dart';
 import 'package:wareg_app/Partials/FormText.dart';
 import 'package:wareg_app/Partials/MapBox.dart';
+import 'package:wareg_app/Controller/notification_controller.dart';
 import 'package:wareg_app/Util/IconMaker.dart';
 import 'package:wareg_app/Util/Ip.dart';
 
@@ -33,6 +34,8 @@ class _OnMapState extends State<OnMap> {
   MapsController mpController = Get.put(MapsController());
   RoadInfo? roadInfo;
   RxBool isPressed = false.obs;
+  final NotificationController notificationController =
+      Get.put(NotificationController());
   RxBool isPressedBtl = false.obs;
   RxBool isPressedRec = false.obs;
   RxBool isPressedBtn = false.obs;
@@ -102,6 +105,7 @@ class _OnMapState extends State<OnMap> {
     super.initState();
     _loadProfile();
     startLocationUpdates();
+    notificationController.checkNotification();
     log("max time : ${transController.transCreate.value}");
   }
 
@@ -164,17 +168,48 @@ class _OnMapState extends State<OnMap> {
           ),
           iconTheme: IconThemeData(color: Colors.white),
           actions: [
-            IconButton(
-                onPressed: () async {
-                  Navigator.pushNamed(context, '/notifications');
-                },
-                icon: const Icon(
-                  LucideIcons.bell,
-                  color: Colors.white,
-                )),
+            Obx(() {
+              return Stack(
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, "/notifications");
+                    },
+                    icon: const Icon(
+                      LucideIcons.bell,
+                      color: Colors.white,
+                    ),
+                  ),
+                  if (notificationController.hasUnread.value)
+                    Positioned(
+                      right: 11,
+                      top: 11,
+                      child: Container(
+                        padding: EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        constraints: BoxConstraints(
+                          minWidth: 12,
+                          minHeight: 12,
+                        ),
+                        child: Text(
+                          '',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 8,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            }),
             SizedBox(
               width: 5.dm,
-            ),
+            )
           ],
         ),
         body: WillPopScope(
@@ -1097,7 +1132,7 @@ class _OnMapState extends State<OnMap> {
                                                                                       height: 100.dm,
                                                                                       width: 100.dm,
                                                                                     )),
-                                                                                    SizedBox(height:20.h),
+                                                                                    SizedBox(height: 20.h),
                                                                                     Text("${value['message']}", style: TextStyle(fontFamily: "Poppins", fontSize: 12.sp))
                                                                                   ]));
                                                                             } else {
