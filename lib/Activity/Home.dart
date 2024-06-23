@@ -49,14 +49,14 @@ class _HomeState extends State<Home> {
   Future<void> _checkAndSaveFcmToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? savedToken = prefs.getString('fcm_token');
-
+    String? bearerToken = prefs.getString('token');
     if (savedToken == null) {
       FirebaseMessaging.instance.getToken().then((token) {
-        if (token != null) {
+        if (token != null && bearerToken != null) {
           if (token != savedToken) {
             _messageController.saveFcmToken(token);
+            prefs.setString('fcm_token', token);
           }
-          prefs.setString('fcm_token', token);
         }
       });
     }
