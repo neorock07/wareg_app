@@ -82,28 +82,47 @@ class _ResepFormState extends State<ResepForm> {
   }
 
   void _showLoadingDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return Dialog(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SpinKitCircle(
-                  color: Theme.of(context).primaryColor,
-                  size: 50.0,
-                ),
-                SizedBox(width: 20),
-                Text("Pencarian resep sedang berlangsung silahkan tunggu..."),
-              ],
+    DialogPop(
+      context,
+      size: [100.h, 100.w],
+      icon: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SpinKitCircle(
+              color: Theme.of(context).primaryColor,
+              size: 50.0,
             ),
-          ),
-        );
-      },
+            SizedBox(height: 10.h),
+            Text("Sedang mencari resep yang cocok untuk kamu...", style: TextStyle(fontFamily: "Poppins", fontSize: 12.sp),),
+          ],
+        ),
+      ),
     );
+
+    // showDialog(
+    //   context: context,
+    //   barrierDismissible: false,
+    //   builder: (BuildContext context) {
+    //     return Dialog(
+    //       child: Padding(
+    //         padding: const EdgeInsets.all(16.0),
+    //         child: Row(
+    //           mainAxisSize: MainAxisSize.min,
+    //           children: [
+    //             SpinKitCircle(
+    //               color: Theme.of(context).primaryColor,
+    //               size: 50.0,
+    //             ),
+    //             SizedBox(width: 20),
+    //             Text("Pencarian resep sedang berlangsung silahkan tunggu..."),
+    //           ],
+    //         ),
+    //       ),
+    //     );
+    //   },
+    // );
   }
 
   void _hideLoadingDialog() {
@@ -261,9 +280,11 @@ class _ResepFormState extends State<ResepForm> {
                     String prompt = _generatePrompt();
                     log(prompt);
                     DialogPop(
+                      
                       context,
+                      size: [150.h, 100.w],
                       icon: Container(
-                          height: 100.h,
+                          height: 150.h,
                           child: Column(
                             children: [
                               SpinKitCircle(

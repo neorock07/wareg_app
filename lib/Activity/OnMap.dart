@@ -113,6 +113,7 @@ class _OnMapState extends State<OnMap> {
   void dispose() {
     locationUpdateTimer?.cancel();
     streamController?.close();
+    mpController.controller.dispose();
     // _timer.cancel();
     super.dispose();
   }
@@ -155,6 +156,54 @@ class _OnMapState extends State<OnMap> {
             roadBorderColor: Color.fromRGBO(42, 122, 89, 1),
             zoomInto: true,
             roadWidth: 10));
+  }
+
+  Future<void> postAmbil() async {
+    for (int i = 0; i < count.length; i++) {
+      pickedVariants.add({
+        "variant_id": postController.posts3.value['variants'][i]['id'],
+        "jumlah": count.value[i]
+      });
+    }
+    await transController
+        .postTransaction(postController.posts3.value['id'], pickedVariants)
+        .then((value) {
+      log("reuslt e iki : ${value.keys}");
+
+      if (value['statusCode'] == 400) {
+        Navigator.of(context, rootNavigator: true).pop();
+
+        DialogPop(context,
+            size: [150.h, 150.w],
+            icon: Column(children: [
+              Center(
+                  child: Image.asset(
+                "assets/image/full.png",
+                fit: BoxFit.fill,
+                height: 100.dm,
+                width: 100.dm,
+              )),
+              SizedBox(height: 20.h),
+              Text("${value['message']}",
+                  style: TextStyle(fontFamily: "Poppins", fontSize: 12.sp))
+            ]));
+      } else {
+        Navigator.of(context, rootNavigator: true).pop();
+
+        postController.isLoading3.value = true;
+        // mpController = Get.put(MapsController());
+        // mpController.map_dataTarget['id'] = postController.posts3.value['id'];
+        
+        log("log current: ${mpController.controller}");
+
+        navigateToOnMap();
+      }
+    });
+  }
+
+  Future<void> navigateToOnMap() async {
+    locationUpdateTimer?.cancel();
+    Navigator.pushReplacementNamed(context, "/onmap");
   }
 
   @override
@@ -423,6 +472,119 @@ class _OnMapState extends State<OnMap> {
                                             ),
                                           ),
                                           SizedBox(height: 10.h),
+                                          (postController.posts3
+                                                      .value['transaction'] ==
+                                                  null)
+                                              ? Text("")
+                                              : Padding(
+                                                  padding: EdgeInsets.only(
+                                                      right: 10.w, top: 10.h),
+                                                  child: Align(
+                                                    alignment:
+                                                        Alignment.topRight,
+                                                    child: Container(
+                                                      decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(10),
+                                                        color:
+                                                            Colors.transparent,
+                                                      ),
+                                                      child: ClipRRect(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(10),
+                                                        child: BackdropFilter(
+                                                          filter:
+                                                              ImageFilter.blur(
+                                                                  sigmaX: 10,
+                                                                  sigmaY: 10),
+                                                          child: Container(
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          10),
+                                                              border: Border.all(
+                                                                  color: Colors
+                                                                      .white
+                                                                      .withOpacity(
+                                                                          0.2)),
+                                                              gradient:
+                                                                  LinearGradient(
+                                                                colors: [
+                                                                  Colors.white
+                                                                      .withOpacity(
+                                                                          0.1),
+                                                                  Colors.black
+                                                                      .withOpacity(
+                                                                          0.05)
+                                                                ],
+                                                                begin: Alignment
+                                                                    .topLeft,
+                                                                end: Alignment
+                                                                    .bottomRight,
+                                                              ),
+                                                            ),
+                                                            child: Padding(
+                                                              padding:
+                                                                  EdgeInsets
+                                                                      .all(10
+                                                                          .dm),
+                                                              child:
+                                                                  TimerCountdown(
+                                                                enableDescriptions:
+                                                                    false,
+                                                                timeTextStyle: const TextStyle(
+                                                                    color: Colors
+                                                                        .red,
+                                                                    fontFamily:
+                                                                        "Poppins",
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold),
+                                                                format: CountDownTimerFormat
+                                                                    .hoursMinutesSeconds,
+                                                                endTime: DateTime.parse(postController
+                                                                            .posts3
+                                                                            .value['transaction']
+                                                                        [
+                                                                        'detail']
+                                                                    [
+                                                                    'maks_pengambilan']),
+                                                                onTick:
+                                                                    (value) {
+                                                                  print(
+                                                                      "countdown : ${value.toString()}");
+                                                                },
+                                                                onEnd: () {
+                                                                  print(
+                                                                      'Countdown ended');
+                                                                },
+                                                              ),
+
+                                                              // Text(
+                                                              //   _formatRemainingTime(
+                                                              //       remainingTime),
+                                                              //   style:
+                                                              //       TextStyle(
+                                                              //     color: Colors
+                                                              //         .red,
+                                                              //     fontFamily:
+                                                              //         "Poppins",
+                                                              //     fontWeight:
+                                                              //         FontWeight.bold,
+                                                              //   ),
+                                                              // ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                          SizedBox(height: 10.h),
                                           Padding(
                                               padding: EdgeInsets.only(
                                                   top: 10.h, left: 20.w),
@@ -451,121 +613,6 @@ class _OnMapState extends State<OnMap> {
                                                       scrollDirection:
                                                           Axis.horizontal,
                                                     )),
-                                                (postController.posts3.value[
-                                                            'transaction'] ==
-                                                        null)
-                                                    ? Text("")
-                                                    : Padding(
-                                                        padding:
-                                                            EdgeInsets.only(
-                                                                right: 10.w,
-                                                                top: 10.h),
-                                                        child: Align(
-                                                          alignment: Alignment
-                                                              .topRight,
-                                                          child: Container(
-                                                            decoration:
-                                                                BoxDecoration(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          10),
-                                                              color: Colors
-                                                                  .transparent,
-                                                            ),
-                                                            child: ClipRRect(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          10),
-                                                              child:
-                                                                  BackdropFilter(
-                                                                filter: ImageFilter
-                                                                    .blur(
-                                                                        sigmaX:
-                                                                            10,
-                                                                        sigmaY:
-                                                                            10),
-                                                                child:
-                                                                    Container(
-                                                                  decoration:
-                                                                      BoxDecoration(
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            10),
-                                                                    border: Border.all(
-                                                                        color: Colors
-                                                                            .white
-                                                                            .withOpacity(0.2)),
-                                                                    gradient:
-                                                                        LinearGradient(
-                                                                      colors: [
-                                                                        Colors
-                                                                            .white
-                                                                            .withOpacity(0.1),
-                                                                        Colors
-                                                                            .white
-                                                                            .withOpacity(0.05)
-                                                                      ],
-                                                                      begin: Alignment
-                                                                          .topLeft,
-                                                                      end: Alignment
-                                                                          .bottomRight,
-                                                                    ),
-                                                                  ),
-                                                                  child:
-                                                                      Padding(
-                                                                    padding: EdgeInsets
-                                                                        .all(10
-                                                                            .dm),
-                                                                    child:
-                                                                        TimerCountdown(
-                                                                      enableDescriptions:
-                                                                          false,
-                                                                      timeTextStyle: const TextStyle(
-                                                                          color: Colors
-                                                                              .red,
-                                                                          fontFamily:
-                                                                              "Poppins",
-                                                                          fontWeight:
-                                                                              FontWeight.bold),
-                                                                      format: CountDownTimerFormat
-                                                                          .hoursMinutesSeconds,
-                                                                      endTime: DateTime.parse(postController
-                                                                          .posts3
-                                                                          .value['transaction']['detail']['maks_pengambilan']),
-                                                                      onTick:
-                                                                          (value) {
-                                                                        print(
-                                                                            "countdown : ${value.toString()}");
-                                                                      },
-                                                                      onEnd:
-                                                                          () {
-                                                                        print(
-                                                                            'Countdown ended');
-                                                                      },
-                                                                    ),
-
-                                                                    // Text(
-                                                                    //   _formatRemainingTime(
-                                                                    //       remainingTime),
-                                                                    //   style:
-                                                                    //       TextStyle(
-                                                                    //     color: Colors
-                                                                    //         .red,
-                                                                    //     fontFamily:
-                                                                    //         "Poppins",
-                                                                    //     fontWeight:
-                                                                    //         FontWeight.bold,
-                                                                    //   ),
-                                                                    // ),
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
                                               ])),
                                           Padding(
                                             padding: EdgeInsets.only(
@@ -823,7 +870,7 @@ class _OnMapState extends State<OnMap> {
               Align(
                 alignment: Alignment.bottomCenter,
                 child: Padding(
-                  padding: EdgeInsets.only(bottom: 10.h),
+                  padding: EdgeInsets.only(top: 5.dm, bottom: 5.dm),
                   child: Container(
                     height: 40.h,
                     decoration: BoxDecoration(
@@ -1101,47 +1148,7 @@ class _OnMapState extends State<OnMap> {
                                                                           isPressedBtn2.value =
                                                                               true;
 
-                                                                          for (int i = 0;
-                                                                              i < count.length;
-                                                                              i++) {
-                                                                            pickedVariants.add({
-                                                                              "variant_id": postController.posts3.value['variants'][i]['id'],
-                                                                              "jumlah": count.value[i]
-                                                                            });
-                                                                          }
-                                                                          await transController
-                                                                              .postTransaction(postController.posts3.value['id'], pickedVariants)
-                                                                              .then((value) {
-                                                                            log("reuslt e iki : ${value.keys}");
-
-                                                                            if (value['statusCode'] ==
-                                                                                400) {
-                                                                              Navigator.of(context, rootNavigator: true).pop();
-
-                                                                              DialogPop(
-                                                                                  context,
-                                                                                  size: [
-                                                                                    150.h,
-                                                                                    150.w
-                                                                                  ],
-                                                                                  icon: Column(children: [
-                                                                                    Center(
-                                                                                        child: Image.asset(
-                                                                                      "assets/image/full.png",
-                                                                                      fit: BoxFit.fill,
-                                                                                      height: 100.dm,
-                                                                                      width: 100.dm,
-                                                                                    )),
-                                                                                    SizedBox(height: 20.h),
-                                                                                    Text("${value['message']}", style: TextStyle(fontFamily: "Poppins", fontSize: 12.sp))
-                                                                                  ]));
-                                                                            } else {
-                                                                              Navigator.of(context, rootNavigator: true).pop();
-
-                                                                              postController.isLoading3.value = true;
-                                                                              Navigator.pushReplacementNamed(context, "/onmap");
-                                                                            }
-                                                                          });
+                                                                          postAmbil();
                                                                           // Navigator.pushNamed(context, "/formfood");
                                                                         },
                                                                             width_a:

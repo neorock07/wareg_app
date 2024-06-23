@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:wareg_app/Partials/CardButton.dart';
 import 'package:wareg_app/Util/Ip.dart';
 
 class InventoryFormPage extends StatefulWidget {
@@ -24,6 +25,8 @@ class _InventoryFormPageState extends State<InventoryFormPage> {
   final TextEditingController _expiredAtController = TextEditingController();
   File? _selectedImage;
   final ImagePicker _picker = ImagePicker();
+
+  RxBool isPressed = false.obs;
 
   Future<void> _pickImageFromGallery() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
@@ -99,7 +102,7 @@ class _InventoryFormPageState extends State<InventoryFormPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Inventory Item'),
+        title: Text('Add Inventory Item', style: TextStyle(fontFamily: "Poppins", fontSize: 12.sp),),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -108,16 +111,16 @@ class _InventoryFormPageState extends State<InventoryFormPage> {
             children: [
               TextField(
                 controller: _nameController,
-                decoration: InputDecoration(labelText: 'Name'),
+                decoration: InputDecoration(labelText: 'Nama', labelStyle: TextStyle(fontFamily: "Poppins")),
               ),
               TextField(
                 controller: _quantityController,
-                decoration: InputDecoration(labelText: 'Quantity'),
+                decoration: InputDecoration(labelText: 'Quantity', labelStyle: TextStyle(fontFamily: "Poppins")),
                 keyboardType: TextInputType.number,
               ),
               TextField(
                 controller: _expiredAtController,
-                decoration: InputDecoration(labelText: 'Expired At'),
+                decoration: InputDecoration(labelText: 'Expired At', labelStyle: TextStyle(fontFamily: "Poppins")),
                 onTap: _pickDateTime,
                 readOnly: true,
               ),
@@ -130,22 +133,46 @@ class _InventoryFormPageState extends State<InventoryFormPage> {
                 children: [
                   TextButton.icon(
                     icon: Icon(Icons.image),
-                    label: Text('Pick Image'),
+                    label: Text('Pick Image', style: TextStyle(fontFamily: "Poppins"),),
                     onPressed: _pickImageFromGallery,
                   ),
                   SizedBox(width: 10.w),
                   TextButton.icon(
                     icon: Icon(Icons.camera),
-                    label: Text('Take Photo'),
+                    label: Text('Take Photo', style: TextStyle(fontFamily: "Poppins")),
                     onPressed: _takePhoto,
                   ),
                 ],
               ),
               SizedBox(height: 20.h),
-              ElevatedButton(
-                onPressed: _submitForm,
-                child: Text('Submit'),
-              ),
+              // ElevatedButton(
+              //   onPressed: _submitForm,
+              //   child: Text('Submit'),
+              // ),
+              Obx(() => CardButton(context, isPressed, onTap: (_) {
+                  isPressed.value = true;
+                  // Navigator.pushReplacementNamed(context, "/formfood");
+                  _submitForm();
+                },
+                    width_a: 0.78,
+                    width_b: 0.8,
+                    height_a: 0.05,
+                    height_b: 0.06,
+                    borderRadius: 10.dm,
+                    gradient: const LinearGradient(colors: [
+                      Color.fromRGBO(52, 135, 98, 1),
+                      Color.fromRGBO(48, 122, 99, 1),
+                    ]),
+                    child: Center(
+                      child: Text(
+                        "Simpan",
+                        style: TextStyle(
+                            fontFamily: "Poppins",
+                            color: Colors.white,
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    )))
             ],
           ),
         ),

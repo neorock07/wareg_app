@@ -51,7 +51,7 @@ class _ListHasilResepState extends State<ListHasilResep> {
             Row(
               children: [
                 Text(
-                  "Berikut Rekomendasi Resep buat kamu",
+                  "Berikut Rekomendasi\nResep buat kamu",
                   style: TextStyle(
                       color: Colors.black,
                       fontFamily: "Poppins",
@@ -73,138 +73,131 @@ class _ListHasilResepState extends State<ListHasilResep> {
                   itemBuilder: (_, index) {
                     var recipe =
                         promptController.content.value['result'][index];
-                    return Container(
-                      margin: EdgeInsets.only(bottom: 20.h),
-                      height: 150.h,
-                      decoration: BoxDecoration(
-                        border:
-                            Border.all(color: Color.fromRGBO(48, 122, 89, 1)),
-                        borderRadius: BorderRadius.circular(6.dm),
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.all(10.dm),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "${recipe['title']}",
+                    return IntrinsicHeight(
+  child: Container(
+    margin: EdgeInsets.only(bottom: 20.h),
+    decoration: BoxDecoration(
+      border: Border.all(color: Color.fromRGBO(48, 122, 89, 1)),
+      borderRadius: BorderRadius.circular(6.dm),
+    ),
+    child: Padding(
+      padding: EdgeInsets.all(10.dm),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "${recipe['title']}",
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 5.h),
+          Text(
+            "${recipe['step'].toString().substring(0, recipe['step'].toString().length - 30)}...",
+            style: TextStyle(
+              fontSize: 12.sp,
+              color: Colors.grey[600],
+            ),
+          ),
+          SizedBox(height: 10.h),
+          Align(
+            alignment: Alignment.bottomRight,
+            child: TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: Color.fromRGBO(48, 122, 89, 1),
+                primary: Colors.white,
+              ),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              recipe['title'],
                               style: TextStyle(
-                                fontSize: 16.sp,
+                                fontSize: 18.sp,
                                 fontWeight: FontWeight.bold,
+                                fontFamily: 'Poppins',
                               ),
                             ),
-                            SizedBox(height: 5.h),
-                            Text(
-                              "${recipe['step'].toString().substring(0, 127)}...",
-                              style: TextStyle(
-                                fontSize: 12.sp,
-                                color: Colors.grey[600],
-                              ),
+                          ),
+                          IconButton(
+                            icon: Icon(
+                              LucideIcons.bookmark,
+                              color: Color.fromRGBO(48, 122, 89, 1),
                             ),
-                            SizedBox(height: 10.h),
-                            Align(
-                              alignment: Alignment.bottomRight,
-                              child: TextButton(
-                                style: TextButton.styleFrom(
-                                  backgroundColor:
-                                      Color.fromRGBO(48, 122, 89, 1),
-                                  primary: Colors.white,
-                                ),
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Expanded(
-                                              child: Text(
-                                                recipe['title'],
-                                                style: TextStyle(
-                                                  fontSize: 18.sp,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontFamily: 'Poppins',
-                                                ),
-                                              ),
-                                            ),
-                                            IconButton(
-                                              icon: Icon(
-                                                LucideIcons.bookmark,
-                                                color: Color.fromRGBO(
-                                                    48, 122, 89, 1),
-                                              ),
-                                              onPressed: () {
-                                                saveRecipe(recipe);
-                                              },
-                                            ),
-                                          ],
-                                        ),
-                                        content: Container(
-                                          width: double.maxFinite,
-                                          child: SingleChildScrollView(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  "Bahan:\n" +
-                                                      recipe['bahan_baku']
-                                                          .toString(),
-                                                  style: TextStyle(
-                                                    fontSize: 14.sp,
-                                                    color: Colors.grey[600],
-                                                    fontFamily: 'Poppins',
-                                                  ),
-                                                ),
-                                                SizedBox(height: 10.h),
-                                                Text(
-                                                  "Langkah-langkah:\n" +
-                                                      recipe['step'].toString(),
-                                                  style: TextStyle(
-                                                    fontSize: 14.sp,
-                                                    color: Colors.grey[600],
-                                                    fontFamily: 'Poppins',
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: Text(
-                                              'Tutup',
-                                              style: TextStyle(
-                                                color: Color.fromRGBO(
-                                                    48, 122, 89, 1),
-                                                fontFamily: 'Poppins',
-                                                fontSize: 14.sp,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
-                                },
-                                child: Text(
-                                  'Selengkapnya',
-                                  style: TextStyle(
-                                    fontSize: 12.sp,
-                                    fontFamily: 'Poppins',
-                                  ),
+                            onPressed: () {
+                              saveRecipe(recipe);
+                            },
+                          ),
+                        ],
+                      ),
+                      content: Container(
+                        width: double.maxFinite,
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Bahan:\n" + recipe['bahan_baku'].toString(),
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  color: Colors.grey[600],
+                                  fontFamily: 'Poppins',
                                 ),
                               ),
-                            ),
-                          ],
+                              SizedBox(height: 10.h),
+                              Text(
+                                "Langkah-langkah:\n" + recipe['step'].toString(),
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  color: Colors.grey[600],
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: Text(
+                            'Tutup',
+                            style: TextStyle(
+                              color: Color.fromRGBO(48, 122, 89, 1),
+                              fontFamily: 'Poppins',
+                              fontSize: 14.sp,
+                            ),
+                          ),
+                        ),
+                      ],
                     );
+                  },
+                );
+              },
+              child: Text(
+                'Selengkapnya',
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontFamily: 'Poppins',
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  ),
+);
+
                   },
                 ),
               ),

@@ -10,6 +10,14 @@ class MapsController extends GetxController {
   Rx<RoadInfo>? roadInfo;
   var isLoading = true.obs;
   Map<String, dynamic> map_dataTarget = {};
+  
+  @override
+  void onInit() {
+    // TODO: implement onInit
+    controller;
+    super.onInit();
+  }
+
   MapController controller = MapController(
     initPosition: GeoPoint(latitude: 47.4358055, longitude: 8.4737324),
     areaLimit: BoundingBox(

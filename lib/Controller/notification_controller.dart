@@ -27,7 +27,7 @@ class NotificationController extends GetxController {
         headers: headers,
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         notifications.value = json.decode(response.body) as List<dynamic>;
       } else {
         throw Exception('Failed to load notifications');
