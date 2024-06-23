@@ -28,7 +28,7 @@ class MessageService extends GetxService {
       body: jsonEncode({'fcmToken': token}),
     );
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 201) {
       await prefs.setString('fcm_token', token);
       log('FCM token saved successfully');
     } else {
