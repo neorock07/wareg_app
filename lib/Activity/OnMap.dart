@@ -14,6 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wareg_app/Controller/API/Transaksi/TransaksiController.dart';
 import 'package:wareg_app/Controller/MapsController.dart';
 import 'package:wareg_app/Partials/CardButton.dart';
+import 'package:wareg_app/Partials/CardCheckBox.dart';
 import 'package:wareg_app/Partials/DialogPop.dart';
 import 'package:wareg_app/Partials/FormText.dart';
 import 'package:wareg_app/Partials/MapBox.dart';
@@ -41,6 +42,7 @@ class _OnMapState extends State<OnMap> {
   RxBool isPressedBtn = false.obs;
   RxBool isPressedBtn2 = false.obs;
   RxBool isPressedRate = false.obs;
+  RxBool isPressedRpt = false.obs;
   StreamController<GeoPoint>? streamController = StreamController<GeoPoint>();
   Timer? locationUpdateTimer;
   var postController = Get.put(GetPostController());
@@ -48,6 +50,9 @@ class _OnMapState extends State<OnMap> {
   //timer countdown
   late Timer _timer;
   int remainingTime = 0;
+  RxBool selectReport = false.obs;
+  RxBool selectReport2 = false.obs;
+  RxBool selectReport3 = false.obs;
 
   List<StaticPositionGeoPoint>? koordinat;
   double? latUser, longUser;
@@ -193,12 +198,104 @@ class _OnMapState extends State<OnMap> {
         postController.isLoading3.value = true;
         // mpController = Get.put(MapsController());
         // mpController.map_dataTarget['id'] = postController.posts3.value['id'];
-        
+
         log("log current: ${mpController.controller}");
 
         navigateToOnMap();
       }
     });
+  }
+
+  Future<void> reportDialog() async {
+    Map<int, String> map_item = {
+      1: "Makanan berbau busuk atau berlendir",
+      2: "Makanan tidak higienis telah terkontaminasi kotoran",
+      3: "Warna makanan terlihat normal seperti aslinya",
+    };
+    var toSelect = {};
+
+    DialogPop(context,
+        size: [380.h, 150.w],
+        icon: Column(children: [
+          Align(
+              alignment: Alignment.topRight,
+              child: IconButton(
+                onPressed: () {
+                  Navigator.of(context, rootNavigator: true).pop();
+                },
+                icon: Icon(LucideIcons.x, size: 20.dm),
+              )),
+          Obx(() => Padding(
+                padding: EdgeInsets.only(bottom: 5.h),
+                child: CardCheckBox(context,
+                    text: "${map_item[1]}", count: selectReport),
+              )),
+          Obx(() => Padding(
+                padding: EdgeInsets.only(bottom: 5.h),
+                child: CardCheckBox(context,
+                    text: "${map_item[2]}", count: selectReport2),
+              )),
+          Obx(() => Padding(
+                padding: EdgeInsets.only(bottom: 5.h),
+                child: CardCheckBox(context,
+                    text: "${map_item[3]}", count: selectReport3),
+              )),
+          SizedBox(height: 20.h),
+          Obx(() => CardButton(context, isPressedRpt, onTap: (_) async {
+                isPressedRpt.value = true;
+                
+                if(selectReport.value == true){
+                  toSelect[1] = map_item[1];   
+                }else{
+                  toSelect[1] = "";
+                }
+
+                if(selectReport2.value == true){
+                  toSelect[2] = map_item[2];   
+                }else{
+                  toSelect[2] = "";
+                }
+
+                if(selectReport3.value == true){
+                  toSelect[3] = map_item[3];   
+                }else{
+                  toSelect[3] = "";
+                }
+
+                String reason = toSelect.toString();
+
+                await transController
+                    .reportTransaksi(
+                        postController.posts3.value['id'],
+                        postController.posts3.value['transaction']['id'],
+                        reason)
+                    .then((value) {
+                  log("reuslt e iki : ${value.keys} | reason : $reason");
+                Navigator.pushReplacementNamed(context, "/home");
+                Get.snackbar("Laporan berhasil", "Baiklah kami sudah menerima laporan Anda");
+
+                });
+              },
+                  width_a: 0.37,
+                  width_b: 0.4,
+                  height_a: 0.05,
+                  height_b: 0.06,
+                  borderRadius: 10.dm,
+                  gradient: const LinearGradient(colors: [
+                    Color.fromRGBO(52, 135, 98, 1),
+                    Color.fromRGBO(48, 122, 99, 1),
+                  ]),
+                  child: Center(
+                    child: Text(
+                      "Kirim",
+                      style: TextStyle(
+                          fontFamily: "Poppins",
+                          color: Colors.white,
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  )))
+        ]));
   }
 
   Future<void> navigateToOnMap() async {
@@ -1677,6 +1774,7 @@ class _OnMapState extends State<OnMap> {
                                                                   rootNavigator:
                                                                       true)
                                                               .pop();
+                                                          reportDialog();
                                                         },
                                                         child: Text(
                                                             "Laporkan Donasi",

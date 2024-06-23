@@ -60,7 +60,9 @@ class _CekLayakState extends State<CekLayak> {
         ),
         actions: [
           IconButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.pushNamed(context, "/notifications");
+              },
               icon: const Icon(
                 LucideIcons.bell,
                 color: Colors.black,
@@ -193,6 +195,7 @@ class _CekLayakState extends State<CekLayak> {
                       expired_time = presiden!.value['result']['expiredAt'];
                       DateTime dateTimeUtc = DateTime.parse(expired_time!);
                       DateTime dateTimeLocal = dateTimeUtc.toLocal();
+                      DateTime sekarang = DateTime.now().toLocal();
                       String formattedLocalTimeIso = dateTimeLocal.toIso8601String();
                       reason = presiden!.value['result']['reason'];
 
@@ -213,7 +216,8 @@ class _CekLayakState extends State<CekLayak> {
                         files_img.add(File(i));
                       }
 
-                      if (result_check == true) {
+                      // if (result_check == true) {
+                      if (dateTimeLocal.isAfter(sekarang)) {
                         Navigator.of(context, rootNavigator: true).pop();
                         DialogPop(
                           context,
