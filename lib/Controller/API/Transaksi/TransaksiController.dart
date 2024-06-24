@@ -15,6 +15,9 @@ class TransaksiController extends GetxController {
   RxMap<String, dynamic> transCreate = <String, dynamic>{}.obs;
   RxMap<String, dynamic> transConf = <String, dynamic>{}.obs;
   RxMap<String, dynamic> transCancel = <String, dynamic>{}.obs;
+  RxMap<String, dynamic> transDonor = <String, dynamic>{}.obs;
+  /* variable untuk simpan trans_id dari page lain -- intent */
+  int transaksi_id = 0;
 
   Future<Map<String, dynamic>> postTransaction(
       int postId, List<Map<String, dynamic>> detail) async {
@@ -90,16 +93,17 @@ class TransaksiController extends GetxController {
     String authorizationHeader = "Bearer $token";
 
     Map<String, dynamic>? result = {};
-    final response = await http.delete(Uri.parse(
+    final response = await http.delete(
+      Uri.parse(
         "${ipAdd.getType()}://${ipAdd.getIp()}/transactions/cancel/$transId"), 
         headers: {
-          "Authorization": authorizationHeader
-        },
+           "Authorization": authorizationHeader
+        } 
         );
 
     if (response.statusCode == 200) {
       result = jsonDecode(response.body);
-      transCancel.value = result!;
+      transDonor.value = result!;
       log("lha iki respon 200");
       log("${result}");
     } else {
@@ -109,7 +113,8 @@ class TransaksiController extends GetxController {
     return result!;
   }
 
-  Future<Map<String, dynamic>> reportTransaksi(int? postId, int? transId, String? reason) async {
+  Future<Map<String, dynamic>> reportTransaksi(
+      int? postId, int? transId, String? reason) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var token = prefs.getString('token') ?? '';
     String authorizationHeader = "Bearer $token";
@@ -126,6 +131,32 @@ class TransaksiController extends GetxController {
           "Content-Type": "application/json"
         },
         body: jsonEncode(payload));
+
+    if (response.statusCode == 200) {
+      result = jsonDecode(response.body);
+      log("lha iki respon 200");
+      log("${result}");
+    } else {
+      result = jsonDecode(response.body);
+      log("response : ${response.statusCode} | ${result}");
+    }
+    return result!;
+  }
+
+  Future<Map<String, dynamic>> getTransaksiDonor(int? transId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var token = prefs.getString('token') ?? '';
+    String authorizationHeader = "Bearer $token";
+
+    Map<String, dynamic>? result = {};
+
+    final response = await http.get(
+        Uri.parse(
+            "${ipAdd.getType()}://${ipAdd.getIp()}/transactions/donor/$transId"),
+        headers: {
+          "Authorization": authorizationHeader,
+          "Content-Type": "application/json"
+        });
 
     if (response.statusCode == 200) {
       result = jsonDecode(response.body);

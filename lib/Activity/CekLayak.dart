@@ -216,7 +216,7 @@ class _CekLayakState extends State<CekLayak> {
                         files_img.add(File(i));
                       }
 
-                      // if (result_check == true) {
+                      // cek tanggal kadaluarsa
                       if (dateTimeLocal.isAfter(sekarang)) {
                         Navigator.of(context, rootNavigator: true).pop();
                         DialogPop(
@@ -290,8 +290,88 @@ class _CekLayakState extends State<CekLayak> {
                                 ],
                               )),
                         );
-                      } else {
+                      }
+                      else if(result_check == true && dateTimeLocal.isBefore(sekarang)){
                         Navigator.of(context, rootNavigator: true).pop();
+                        
+                        DialogPop(
+                          context,
+                          size: [300.h, 150.w],
+                          dismissable: false,
+                          icon: Container(
+                              height: 220.h,
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    LucideIcons.shieldOff,
+                                    color: Color.fromRGBO(48, 122, 99, 1),
+                                    size: 30.dm,
+                                  ),
+                                  SizedBox(
+                                    height: 8.h,
+                                  ),
+                                  Text(
+                                    "MAKANAN ANDA\n TIDAK LAYAK UNTUK KONSUMSI",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        fontFamily: "Poppins",
+                                        fontSize: 14.sp,
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  SizedBox(height: 10.h,),
+                                  
+                                  Text(
+                                    // "${presiden!['result']['reason']}",
+                                    "Menurut sistem kami makanan Anda telah kadaluarsa\nsehingga tidak layak untuk dikonsumsi oleh orang lain",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        fontFamily: "Poppins",
+                                        fontSize: 12.sp,
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  Obx(() => Padding(
+                                        padding: EdgeInsets.only(
+                                            bottom: 20.h, top: 20.h),
+                                        child: CardButton(context, isPressed2,
+                                            onTap: (_) {
+                                          isPressed2.value = true;
+                                          picController.arr_img.value.clear();
+                                          Navigator.pushNamed(
+                                              context, "/home");
+                                          // log("${foodController.data_food!.values}");
+                                          // log("${foodController.data_food!['date_donate']}");
+                                        },
+                                            width_a: 0.25,
+                                            width_b: 0.3,
+                                            height_a: 0.05,
+                                            height_b: 0.06,
+                                            borderRadius: 10.dm,
+                                            gradient:
+                                                const LinearGradient(colors: [
+                                              Color.fromRGBO(52, 135, 98, 1),
+                                              Color.fromRGBO(48, 122, 99, 1),
+                                            ]),
+                                            child: Center(
+                                              child: Text(
+                                                "Kembali",
+                                                style: TextStyle(
+                                                    fontFamily: "Poppins",
+                                                    color: Colors.white,
+                                                    fontSize: 14.sp,
+                                                    fontWeight:
+                                                        FontWeight.normal),
+                                              ),
+                                            )),
+                                      ))
+                                ],
+                              )),
+                        );
+                      } 
+                      else {
+                        Navigator.of(context, rootNavigator: true).pop();
+                        
                         DialogPop(
                           context,
                           size: [250.h, 150.w],

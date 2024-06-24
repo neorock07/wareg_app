@@ -11,6 +11,7 @@ import 'package:flutter_timer_countdown/flutter_timer_countdown.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wareg_app/Controller/API/Lokasi/LocationController.dart';
 import 'package:wareg_app/Controller/API/Transaksi/TransaksiController.dart';
 import 'package:wareg_app/Controller/MapsController.dart';
 import 'package:wareg_app/Partials/CardButton.dart';
@@ -47,9 +48,9 @@ class _OnMapState extends State<OnMap> {
   Timer? locationUpdateTimer;
   var postController = Get.put(GetPostController());
   var transController = Get.put(TransaksiController());
-  //timer countdown
-  late Timer _timer;
-  int remainingTime = 0;
+  var updateLocationController = Get.put(LocationController());
+
+  //button state checkbock report
   RxBool selectReport = false.obs;
   RxBool selectReport2 = false.obs;
   RxBool selectReport3 = false.obs;
@@ -73,6 +74,7 @@ class _OnMapState extends State<OnMap> {
   double? rating_donasi;
   var komenController = TextEditingController();
 
+  /*  function to load user profile from preferences and get data from previous map */
   Future<void> _loadProfile() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String newBaseUrl = "${ipAdd.getType()}://${ipAdd.getIp()}";
@@ -118,7 +120,7 @@ class _OnMapState extends State<OnMap> {
   void dispose() {
     locationUpdateTimer?.cancel();
     streamController?.close();
-    mpController.controller.dispose();
+    mpController.dispose();
     // _timer.cancel();
     super.dispose();
   }
@@ -128,6 +130,20 @@ class _OnMapState extends State<OnMap> {
       await mpController.controller.myLocation().then((value) async {
         latUser = value.latitude;
         longUser = value.longitude;
+        log("data : ${postController.posts3.value}");
+
+        if (postController.posts3.value['transaction'] != null) {
+          log("tipe data id : ${postController.posts3.value['transaction']['id'].runtimeType}");
+          await updateLocationController
+              .updateLocation(
+                  postController.posts3.value['transaction']['id'].toString(),
+                  latUser!,
+                  longUser!)
+              .then((value) {
+            log("lokasi pengambil terkirim ke donatur | $latUser , $longUser");
+          });
+        }
+
         if (a <= 0) {
           await postController
               .fetchPostDetail(
@@ -136,7 +152,6 @@ class _OnMapState extends State<OnMap> {
             count =
                 List.filled(postController.posts3.value['variants'].length, 0)
                     .obs;
-
             a++;
           });
         }
@@ -164,46 +179,78 @@ class _OnMapState extends State<OnMap> {
   }
 
   Future<void> postAmbil() async {
-    for (int i = 0; i < count.length; i++) {
-      pickedVariants.add({
-        "variant_id": postController.posts3.value['variants'][i]['id'],
-        "jumlah": count.value[i]
-      });
-    }
-    await transController
-        .postTransaction(postController.posts3.value['id'], pickedVariants)
-        .then((value) {
-      log("reuslt e iki : ${value.keys}");
-
-      if (value['statusCode'] == 400) {
-        Navigator.of(context, rootNavigator: true).pop();
-
-        DialogPop(context,
-            size: [150.h, 150.w],
-            icon: Column(children: [
-              Center(
-                  child: Image.asset(
-                "assets/image/full.png",
-                fit: BoxFit.fill,
-                height: 100.dm,
-                width: 100.dm,
-              )),
-              SizedBox(height: 20.h),
-              Text("${value['message']}",
-                  style: TextStyle(fontFamily: "Poppins", fontSize: 12.sp))
-            ]));
-      } else {
-        Navigator.of(context, rootNavigator: true).pop();
-
-        postController.isLoading3.value = true;
-        // mpController = Get.put(MapsController());
-        // mpController.map_dataTarget['id'] = postController.posts3.value['id'];
-
-        log("log current: ${mpController.controller}");
-
-        navigateToOnMap();
+    if (count.value != null || count.value != []) {
+      for (int i = 0; i < count.length; i++) {
+        pickedVariants.add({
+          "variant_id": postController.posts3.value['variants'][i]['id'],
+          "jumlah": count.value[i]
+        });
       }
-    });
+
+      await transController
+          .postTransaction(postController.posts3.value['id'], pickedVariants)
+          .then((value) async {
+        log("reuslt e iki : ${value.keys}");
+
+        if (value['statusCode'] == 400) {
+          Navigator.of(context, rootNavigator: true).pop();
+
+          DialogPop(context,
+              size: [180.h, 150.w],
+              icon: Column(children: [
+                Center(
+                    child: Image.asset(
+                  "assets/image/full.png",
+                  fit: BoxFit.fill,
+                  height: 100.dm,
+                  width: 100.dm,
+                )),
+                SizedBox(height: 20.h),
+                Text("${value['message']}",
+                    style: TextStyle(fontFamily: "Poppins", fontSize: 12.sp))
+              ]));
+        } else {
+          Navigator.of(context, rootNavigator: true).pop();
+
+          postController.isLoading3.value = true;
+          // mpController = Get.put(MapsController());
+          // mpController.map_dataTarget['id'] = postController.posts3.value['id'];
+
+          log("log current: ${value['statusCode']}");
+          // locationUpdateTimer!.cancel();
+          // startLocationUpdates();
+
+          await postController
+              .fetchPostDetail(
+                  latUser, longUser, mpController.map_dataTarget['id'])
+              .then((value) {
+            count =
+                List.filled(postController.posts3.value['variants'].length, 0)
+                    .obs;
+            a++;
+          });
+          setState(() {});
+          // navigateToOnMap();
+        }
+      });
+    } else {
+      Navigator.of(context, rootNavigator: true).pop();
+
+      DialogPop(context,
+          size: [180.h, 150.w],
+          icon: Column(children: [
+            Center(
+                child: Image.asset(
+              "assets/image/full.png",
+              fit: BoxFit.fill,
+              height: 100.dm,
+              width: 100.dm,
+            )),
+            SizedBox(height: 20.h),
+            Text("Makanan sudah habis atau\nkamu belum memilih sama sekali",
+                style: TextStyle(fontFamily: "Poppins", fontSize: 12.sp))
+          ]));
+    }
   }
 
   Future<void> reportDialog() async {
@@ -243,22 +290,22 @@ class _OnMapState extends State<OnMap> {
           SizedBox(height: 20.h),
           Obx(() => CardButton(context, isPressedRpt, onTap: (_) async {
                 isPressedRpt.value = true;
-                
-                if(selectReport.value == true){
-                  toSelect[1] = map_item[1];   
-                }else{
+
+                if (selectReport.value == true) {
+                  toSelect[1] = map_item[1];
+                } else {
                   toSelect[1] = "";
                 }
 
-                if(selectReport2.value == true){
-                  toSelect[2] = map_item[2];   
-                }else{
+                if (selectReport2.value == true) {
+                  toSelect[2] = map_item[2];
+                } else {
                   toSelect[2] = "";
                 }
 
-                if(selectReport3.value == true){
-                  toSelect[3] = map_item[3];   
-                }else{
+                if (selectReport3.value == true) {
+                  toSelect[3] = map_item[3];
+                } else {
                   toSelect[3] = "";
                 }
 
@@ -271,9 +318,9 @@ class _OnMapState extends State<OnMap> {
                         reason)
                     .then((value) {
                   log("reuslt e iki : ${value.keys} | reason : $reason");
-                Navigator.pushReplacementNamed(context, "/home");
-                Get.snackbar("Laporan berhasil", "Baiklah kami sudah menerima laporan Anda");
-
+                  Navigator.pushReplacementNamed(context, "/home");
+                  Get.snackbar("Laporan berhasil",
+                      "Baiklah kami sudah menerima laporan Anda");
                 });
               },
                   width_a: 0.37,
@@ -300,11 +347,14 @@ class _OnMapState extends State<OnMap> {
 
   Future<void> navigateToOnMap() async {
     locationUpdateTimer?.cancel();
-    Navigator.pushReplacementNamed(context, "/onmap");
+    Navigator.pushReplacementNamed(context, "/onmap").then((value) {
+      setState(() {});
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    var data_route;
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Color.fromRGBO(48, 122, 99, 1),
@@ -372,6 +422,7 @@ class _OnMapState extends State<OnMap> {
                       stream: streamController?.stream,
                       builder: (context, snapshot) {
                         if (snapshot.hasData) {
+                          data_route = snapshot.data;
                           drawRoute(snapshot.data!);
                         }
                         return MapBox(
@@ -660,20 +711,6 @@ class _OnMapState extends State<OnMap> {
                                                                       'Countdown ended');
                                                                 },
                                                               ),
-
-                                                              // Text(
-                                                              //   _formatRemainingTime(
-                                                              //       remainingTime),
-                                                              //   style:
-                                                              //       TextStyle(
-                                                              //     color: Colors
-                                                              //         .red,
-                                                              //     fontFamily:
-                                                              //         "Poppins",
-                                                              //     fontWeight:
-                                                              //         FontWeight.bold,
-                                                              //   ),
-                                                              // ),
                                                             ),
                                                           ),
                                                         ),
@@ -1080,67 +1117,69 @@ class _OnMapState extends State<OnMap> {
                                                                           Text(
                                                                             "${postController.posts3.value['variants'][index]['name']}",
                                                                           ),
-                                                                          Row(
-                                                                            children: [
-                                                                              Material(
-                                                                                color: Colors.transparent,
-                                                                                child: InkWell(
-                                                                                  onTap: () {
-                                                                                    if (count[index]! > 1) {
-                                                                                      count[index]--;
-                                                                                    }
-                                                                                  },
-                                                                                  splashColor: Colors.grey,
-                                                                                  child: Container(
-                                                                                    height: 20.dm,
-                                                                                    width: 20.dm,
-                                                                                    decoration: BoxDecoration(
-                                                                                      borderRadius: BorderRadius.circular(2.dm),
-                                                                                      border: Border.all(color: Colors.black),
+                                                                          (postController.posts3.value['variants'][index]['stok'] == 0)
+                                                                              ? Text("habis", style: TextStyle(color: Colors.red, fontFamily: "Poppins", fontSize: 12.sp, fontStyle: FontStyle.italic))
+                                                                              : Row(
+                                                                                  children: [
+                                                                                    Material(
+                                                                                      color: Colors.transparent,
+                                                                                      child: InkWell(
+                                                                                        onTap: () {
+                                                                                          if (count[index]! > 1) {
+                                                                                            count[index]--;
+                                                                                          }
+                                                                                        },
+                                                                                        splashColor: Colors.grey,
+                                                                                        child: Container(
+                                                                                          height: 20.dm,
+                                                                                          width: 20.dm,
+                                                                                          decoration: BoxDecoration(
+                                                                                            borderRadius: BorderRadius.circular(2.dm),
+                                                                                            border: Border.all(color: Colors.black),
+                                                                                          ),
+                                                                                          child: Icon(
+                                                                                            LucideIcons.minus,
+                                                                                            size: 10,
+                                                                                          ),
+                                                                                        ),
+                                                                                      ),
                                                                                     ),
-                                                                                    child: Icon(
-                                                                                      LucideIcons.minus,
-                                                                                      size: 10,
+                                                                                    SizedBox(width: 20.w),
+                                                                                    Obx(() => Text(
+                                                                                          "${count[index]}",
+                                                                                          style: TextStyle(
+                                                                                            color: Colors.black,
+                                                                                            fontFamily: "Poppins",
+                                                                                            fontSize: 14.sp,
+                                                                                            fontWeight: FontWeight.bold,
+                                                                                          ),
+                                                                                        )),
+                                                                                    SizedBox(width: 20.w),
+                                                                                    Material(
+                                                                                      color: Colors.transparent,
+                                                                                      child: InkWell(
+                                                                                        onTap: () {
+                                                                                          if (count[index]! < postController.posts3.value['variants'][index]['stok']) {
+                                                                                            count[index]++;
+                                                                                          }
+                                                                                        },
+                                                                                        splashColor: Colors.grey,
+                                                                                        child: Container(
+                                                                                          height: 20.dm,
+                                                                                          width: 20.dm,
+                                                                                          decoration: BoxDecoration(
+                                                                                            borderRadius: BorderRadius.circular(2.dm),
+                                                                                            border: Border.all(color: Colors.black),
+                                                                                          ),
+                                                                                          child: const Icon(
+                                                                                            LucideIcons.plus,
+                                                                                            size: 10,
+                                                                                          ),
+                                                                                        ),
+                                                                                      ),
                                                                                     ),
-                                                                                  ),
+                                                                                  ],
                                                                                 ),
-                                                                              ),
-                                                                              SizedBox(width: 20.w),
-                                                                              Obx(() => Text(
-                                                                                    "${count[index]}",
-                                                                                    style: TextStyle(
-                                                                                      color: Colors.black,
-                                                                                      fontFamily: "Poppins",
-                                                                                      fontSize: 14.sp,
-                                                                                      fontWeight: FontWeight.bold,
-                                                                                    ),
-                                                                                  )),
-                                                                              SizedBox(width: 20.w),
-                                                                              Material(
-                                                                                color: Colors.transparent,
-                                                                                child: InkWell(
-                                                                                  onTap: () {
-                                                                                    if (count[index]! < postController.posts3.value['variants'][index]['stok']) {
-                                                                                      count[index]++;
-                                                                                    }
-                                                                                  },
-                                                                                  splashColor: Colors.grey,
-                                                                                  child: Container(
-                                                                                    height: 20.dm,
-                                                                                    width: 20.dm,
-                                                                                    decoration: BoxDecoration(
-                                                                                      borderRadius: BorderRadius.circular(2.dm),
-                                                                                      border: Border.all(color: Colors.black),
-                                                                                    ),
-                                                                                    child: const Icon(
-                                                                                      LucideIcons.plus,
-                                                                                      size: 10,
-                                                                                    ),
-                                                                                  ),
-                                                                                ),
-                                                                              ),
-                                                                            ],
-                                                                          ),
                                                                         ],
                                                                       ),
                                                                     );
@@ -1246,6 +1285,7 @@ class _OnMapState extends State<OnMap> {
                                                                               true;
 
                                                                           postAmbil();
+                                                                          drawRoute(data_route);
                                                                           // Navigator.pushNamed(context, "/formfood");
                                                                         },
                                                                             width_a:
@@ -1387,6 +1427,7 @@ class _OnMapState extends State<OnMap> {
                                                     SizedBox(height: 20.h),
                                                     InkWell(
                                                       onTap: () async {
+                                                        log("posting id : ${postController.posts3.value['transaction']['id']}");
                                                         await transController
                                                             .cancelTransaksi(
                                                                 postController
@@ -1400,6 +1441,7 @@ class _OnMapState extends State<OnMap> {
                                                           postController
                                                               .isLoading3
                                                               .value = true;
+
                                                           Navigator
                                                               .pushReplacementNamed(
                                                                   context,
@@ -1708,13 +1750,16 @@ class _OnMapState extends State<OnMap> {
                                                                               height: 30.h),
                                                                           Center(
                                                                             child: Obx(() =>
-                                                                                CardButton(context, isPressedRate, onTap: (_) {
+                                                                                CardButton(context, isPressedRate, onTap: (_) async {
                                                                                   isPressedRate.value = true;
                                                                                   // Navigator.pushReplacementNamed(context, "/formfood");
                                                                                   log("rating : ${rating_donasi!.ceil()}");
-                                                                                  transController.postConfirmation(postController.posts3.value['transaction']['id'], rating_donasi!.ceil(), komenController.text).then((value) {
-                                                                                    Get.snackbar("Review berhasil dikirim", "Terima kasih Anda telah membantu menyelamatkan Bumi🙏🙏 ");
-                                                                                    Navigator.pushReplacementNamed(context, "/home");
+                                                                                  await transController.postConfirmation(postController.posts3.value['transaction']['id'], rating_donasi!.ceil(), komenController.text).then((value) {
+                                                                                    // Get.snackbar("Review berhasil dikirim", "Terima kasih Anda telah membantu menyelamatkan Bumi🙏🙏 ");
+                                                                                    // Navigator.pushReplacementNamed(context, "/home");
+                                                                                    log("pesan konfirmasi : ${value['message']}");
+                                                                                    postController.isLoading3.value = true;
+                                                                                    a = 0;
                                                                                   });
                                                                                 },
                                                                                     width_a: 0.78,

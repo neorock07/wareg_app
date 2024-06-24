@@ -14,6 +14,7 @@ import 'package:wareg_app/Activity/inventory_form_page.dart';
 import 'package:wareg_app/Activity/notification_page.dart';
 import 'package:wareg_app/Activity/RegisterActivity.dart';
 import 'package:wareg_app/Activity/ResultCheck.dart';
+import 'package:wareg_app/Activity/onMapDonatur.dart';
 
 import '../Activity/ResepForm.dart';
 
@@ -32,6 +33,8 @@ class Routes {
         return MaterialPageRoute(builder: (_) => Donasi());
       case '/onmap':
         return MaterialPageRoute(builder: (_) => OnMap());
+      case '/onmap_donor':
+        return MaterialPageRoute(builder: (_) => OnMapDonatur());
       case '/chat':
         return MaterialPageRoute(builder: (_) => ChatActivity());
       case '/picture':
