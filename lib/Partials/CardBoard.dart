@@ -49,7 +49,7 @@ Widget CardBoard(
                       children: [
                         Text.rich(
                           TextSpan(
-                              text: "Status Donasi",
+                              text: "Status Aktivitas",
                               style: TextStyle(
                                   fontFamily: "Poppins",
                                   fontSize: 14.sp,
@@ -57,7 +57,7 @@ Widget CardBoard(
                                   color: Colors.white),
                               children: [
                                 TextSpan(
-                                    text: "\nBakso sisa kemarin",
+                                    text: (status != null)? "\nSedang ada aktivitas" : "\nTidak ada aktivitas terkini",
                                     style: TextStyle(
                                         fontFamily: "Poppins",
                                         fontSize: 12.sp,
@@ -93,7 +93,7 @@ Widget CardBoard(
                   child: Padding(
                     padding: EdgeInsets.only(top: 15.h, left: 10.w, bottom: 15),
                     child: Text(
-                      "80 Points",
+                      (point != null)? "${point } Points": "80 Points",
                       style:
                           TextStyle(color: Colors.white, fontFamily: "Poppins"),
                     ),

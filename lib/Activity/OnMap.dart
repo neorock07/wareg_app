@@ -167,7 +167,6 @@ class _OnMapState extends State<OnMap> {
     await mpController.controller.removeLastRoad();
     roadInfo = await mpController.controller.drawRoad(
         userLocation,
-        
         GeoPoint(
             latitude: mpController.target_lat!,
             longitude: mpController.target_long!),
@@ -442,6 +441,7 @@ class _OnMapState extends State<OnMap> {
                   maxChildSize: 0.9,
                   builder: ((context, scrollController) {
                     return Obx(() {
+                      //buat banner untuk foto makanan
                       if (postController.posts3.value['media'] != null) {
                         widgetList = postController.posts3.value['media']
                             .map<Widget>((item) {
@@ -458,8 +458,6 @@ class _OnMapState extends State<OnMap> {
                                     fit: BoxFit.cover)),
                           );
                         }).toList();
-
-                        //start countdown
                       }
 
                       return Container(
@@ -620,6 +618,9 @@ class _OnMapState extends State<OnMap> {
                                               ],
                                             ),
                                           ),
+                                          SizedBox(height: 5.h),
+                                          Divider(
+                                              height: 1.h, color: Colors.grey),
                                           SizedBox(height: 10.h),
                                           (postController.posts3
                                                       .value['transaction'] ==
@@ -707,9 +708,29 @@ class _OnMapState extends State<OnMap> {
                                                                   print(
                                                                       "countdown : ${value.toString()}");
                                                                 },
-                                                                onEnd: () {
+                                                                onEnd:
+                                                                    () async {
                                                                   print(
                                                                       'Countdown ended');
+                                                                  await transController
+                                                                      .cancelTransaksi(postController
+                                                                              .posts3
+                                                                              .value['transaction']
+                                                                          [
+                                                                          'id'])
+                                                                      .then(
+                                                                          (value) {
+                                                                    Get.snackbar(
+                                                                        "Waktu habis",
+                                                                        "Waktu pengambilan sudah habis, Transaksi telah dibatalkan");
+                                                                    postController
+                                                                        .isLoading3
+                                                                        .value = true;
+
+                                                                    Navigator.pushReplacementNamed(
+                                                                        context,
+                                                                        "/home");
+                                                                  });
                                                                 },
                                                               ),
                                                             ),
@@ -1286,7 +1307,8 @@ class _OnMapState extends State<OnMap> {
                                                                               true;
 
                                                                           postAmbil();
-                                                                          drawRoute(data_route);
+                                                                          drawRoute(
+                                                                              data_route);
                                                                           // Navigator.pushNamed(context, "/formfood");
                                                                         },
                                                                             width_a:

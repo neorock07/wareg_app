@@ -299,7 +299,7 @@ class _CekLayakState extends State<CekLayak> {
                           size: [300.h, 150.w],
                           dismissable: false,
                           icon: Container(
-                              height: 220.h,
+                              height: 300.h,
                               child: Column(
                                 children: [
                                   Icon(
@@ -323,7 +323,7 @@ class _CekLayakState extends State<CekLayak> {
                                   
                                   Text(
                                     // "${presiden!['result']['reason']}",
-                                    "Menurut sistem kami makanan Anda telah kadaluarsa\nsehingga tidak layak untuk dikonsumsi oleh orang lain",
+                                    "Menurut sistem kami makanan Anda telah kadaluarsa sehingga tidak layak untuk dikonsumsi oleh orang lain",
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                         fontFamily: "Poppins",

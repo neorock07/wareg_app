@@ -10,6 +10,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wareg_app/Controller/API/Point/PointController.dart';
 import 'package:wareg_app/Controller/API/Postingan/GetByLokasi.dart';
 import 'package:wareg_app/Controller/MapsController.dart';
 import 'package:wareg_app/Controller/message_controller.dart';
@@ -20,6 +21,7 @@ import 'package:wareg_app/Partials/CardSearch.dart';
 import 'package:wareg_app/Partials/DialogPop.dart';
 import 'package:wareg_app/Services/LocationService.dart';
 import 'package:wareg_app/Util/IconMaker.dart';
+import 'package:wareg_app/Util/Ip.dart';
 
 import '../Partials/CardBoard.dart';
 
@@ -36,6 +38,8 @@ class _HomeState extends State<Home> {
   String userName = "Bento";
   var postController = Get.put(GetPostController());
   MapsController mpController = Get.put(MapsController());
+  var pointController = Get.put(PointController());
+
   var lat, long;
   final NotificationController notificationController =
       Get.put(NotificationController());
@@ -137,7 +141,7 @@ class _HomeState extends State<Home> {
           Obx(() {
             widgetList = banner_item.map<Widget>((item) {
               return InkWell(
-                onTap: (){
+                onTap: () {
                   Navigator.pushNamed(context, "/donasi");
                 },
                 child: Stack(children: [
@@ -172,18 +176,18 @@ class _HomeState extends State<Home> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text("${item['title']}", style: TextStyle(
-                                fontFamily: "Poppins", 
-                                fontWeight: FontWeight.bold, 
-                                fontSize: 14.sp, 
-                                color: Colors.white
-                              )),
-                              Text("${item['sub']}", style: TextStyle(
-                                fontFamily: "Poppins", 
-                                fontWeight: FontWeight.normal, 
-                                fontSize: 10.sp, 
-                                color: Colors.white
-                              )),
+                              Text("${item['title']}",
+                                  style: TextStyle(
+                                      fontFamily: "Poppins",
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14.sp,
+                                      color: Colors.white)),
+                              Text("${item['sub']}",
+                                  style: TextStyle(
+                                      fontFamily: "Poppins",
+                                      fontWeight: FontWeight.normal,
+                                      fontSize: 10.sp,
+                                      color: Colors.white)),
                             ],
                           ),
                         ),
@@ -244,7 +248,9 @@ class _HomeState extends State<Home> {
             SizedBox(
               height: 10.h,
             ),
-            CardBoard(context),
+            Obx(() => CardBoard(context,
+                status: (postController.posts3.value != null)? postController.posts3.value['transaction'].toString() : null,
+                point: pointController.point_result.value.toString())),
             SizedBox(
               height: 10.h,
             ),
