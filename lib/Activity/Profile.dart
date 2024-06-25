@@ -431,8 +431,8 @@ class _NavigationMenuState extends State<NavigationMenu> {
               });
             },
             children: <Widget>[
-              RiwayatList(),
-              PointPage(),
+              const RiwayatList(),
+              const PointPage(),
               const ChatContent(),
             ],
           ),
@@ -532,6 +532,7 @@ class ButtonWithText extends StatelessWidget {
 }
 
 class RiwayatList extends StatefulWidget {
+  const RiwayatList({Key? key}) : super(key: key);
   @override
   _RiwayatListState createState() => _RiwayatListState();
 }
@@ -540,7 +541,7 @@ class _RiwayatListState extends State<RiwayatList> {
   MapsController mpController = Get.put(MapsController());
   final TransactionController transactionController =
       Get.put(TransactionController());
-  var transaksiKon = Get.put(TransaksiController());    
+  var transaksiKon = Get.put(TransaksiController());
 
   String formatDate(String dateStr) {
     final date = DateTime.parse(dateStr).toLocal();
@@ -566,195 +567,208 @@ class _RiwayatListState extends State<RiwayatList> {
     transactionController.fetchTransactions();
   }
 
+  Future<void> _refreshTransactions() async {
+    await transactionController.fetchTransactions();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      if (transactionController.isLoading.value) {
-        return Center(child: CircularProgressIndicator());
-      }
+    return WillPopScope(
+      onWillPop: () async {
+        transactionController.fetchTransactions(); // Fetch data again
+        return true;
+      },
+      child: Obx(() {
+        if (transactionController.isLoading.value) {
+          return Center(child: CircularProgressIndicator());
+        }
 
-      if (transactionController.transactions.isEmpty) {
-        return Center(child: Text('No transactions found.'));
-      }
+        if (transactionController.transactions.isEmpty) {
+          return Center(child: Text('No transactions found.'));
+        }
 
-      return Container(
-        color: Colors.grey[200],
-        child: ListView.builder(
-          padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight),
-          itemCount: transactionController.transactions.length,
-          itemBuilder: (context, index) {
-            final transaction = transactionController.transactions[index];
-            final postMediaUrls =
-                (transaction['postMedia'] as List<dynamic>).map((media) {
-              return media['url'].toString().replaceFirst(
-                  'http://localhost:3000',
-                  '${Ip().getType()}://${Ip().getIp()}');
-            }).toList();
-            final postTitle = transaction['postTitle'];
-            final totalJumlah = transaction['detail'].fold<int>(
-                0, (int sum, dynamic item) => sum + (item['jumlah'] as int));
-            final updatedAt = formatDate(transaction['updatedAt']);
-            final review = transaction['review'] != null
-                ? transaction['review'].toString() + '/5'
-                : 'No review';
-            final role = translateRole(transaction['role']);
-            final status = capitalize(transaction['status']);
+        return RefreshIndicator(
+          onRefresh: _refreshTransactions,
+          child: Container(
+            color: Colors.grey[200],
+            child: ListView.builder(
+              padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight),
+              itemCount: transactionController.transactions.length,
+              itemBuilder: (context, index) {
+                final transaction = transactionController.transactions[index];
+                final postMediaUrls =
+                    (transaction['postMedia'] as List<dynamic>).map((media) {
+                  return media['url'].toString().replaceFirst(
+                      'http://localhost:3000',
+                      '${Ip().getType()}://${Ip().getIp()}');
+                }).toList();
+                final postTitle = transaction['postTitle'];
+                final totalJumlah = transaction['detail'].fold<int>(0,
+                    (int sum, dynamic item) => sum + (item['jumlah'] as int));
+                final updatedAt = formatDate(transaction['updatedAt']);
+                final review = transaction['review'] != null
+                    ? transaction['review'].toString() + '/5'
+                    : 'No review';
+                final role = translateRole(transaction['role']);
+                final status = capitalize(transaction['status']);
 
-            return InkWell(
-              onTap: (){
-                  transaksiKon.transaksi_id = transaction['id'];
-                  Navigator.pushNamed(context, "/onmap_donor");
-              },
-              child: Card(
-                margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-                color: Colors.white,
-                child: Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                return InkWell(
+                  onTap: () {
+                    if (role == 'Sebagai Penerima' &&
+                        status.toLowerCase() == 'ongoing') {
+                      mpController.map_dataTarget['url'] =
+                          transaction['postMedia'][0]['url'];
+                      mpController.map_dataTarget['id'] = transaction['postId'];
+                      mpController.map_dataTarget['title'] =
+                          transaction['postTitle'];
+                      mpController.target_lat = double.parse(
+                          transaction['postBody']['coordinate']
+                              .toString()
+                              .split(",")[0]);
+                      mpController.target_long = double.parse(
+                          transaction['postBody']['coordinate']
+                              .toString()
+                              .split(",")[1]);
+                      mpController.map_dataTarget['donatur_name'] =
+                          transaction['otherUserName'];
+                      mpController.map_dataTarget['userId'] =
+                          transaction['otherUserId'];
+                      Navigator.pushNamed(context, "/onmap").then(
+                          (_) => transactionController.fetchTransactions());
+                    } else if (role == 'Sebagai Pendonasi' &&
+                        status.toLowerCase() == 'ongoing') {
+                      transaksiKon.transaksi_id = transaction['id'];
+                      Navigator.pushNamed(context, "/onmap_donor").then(
+                          (_) => transactionController.fetchTransactions());
+                    }
+                  },
+                  child: Card(
+                    margin: const EdgeInsets.symmetric(
+                        vertical: 10, horizontal: 15),
+                    color: Colors.white,
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            role,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
-                          ),
-                          Text(
-                            updatedAt,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 5),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            postTitle,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                review,
+                                role,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              Text(
+                                updatedAt,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 5),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                postTitle,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    review,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  if (transaction['review'] != null)
+                                    Icon(Icons.star,
+                                        color: Colors.yellow, size: 16),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 5),
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: postMediaUrls.map((url) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(right: 8.0),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    child: Image.network(
+                                      url,
+                                      fit: BoxFit.cover,
+                                      width: 100,
+                                      height: 100,
+                                      loadingBuilder: (BuildContext context,
+                                          Widget child,
+                                          ImageChunkEvent? loadingProgress) {
+                                        if (loadingProgress == null) {
+                                          return child;
+                                        } else {
+                                          return Center(
+                                            child: SpinKitCircle(
+                                              color: Color.fromRGBO(
+                                                  48, 122, 99, 1),
+                                              size: 50.0,
+                                            ),
+                                          );
+                                        }
+                                      },
+                                      errorBuilder: (BuildContext context,
+                                          Object exception,
+                                          StackTrace? stackTrace) {
+                                        return Icon(
+                                          Icons.error,
+                                          color: Colors.red,
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                status,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              Text(
+                                'Jumlah: $totalJumlah',
                                 style: TextStyle(
                                   fontSize: 14,
                                 ),
                               ),
-                              if (transaction['review'] != null)
-                                Icon(Icons.star, color: Colors.yellow, size: 16),
                             ],
                           ),
                         ],
                       ),
-                      const SizedBox(height: 5),
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: postMediaUrls.map((url) {
-                            return Padding(
-                              padding: const EdgeInsets.only(right: 8.0),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0),
-                                child: Image.network(
-                                  url,
-                                  fit: BoxFit.cover,
-                                  width: 100,
-                                  height: 100,
-                                  loadingBuilder: (BuildContext context,
-                                      Widget child,
-                                      ImageChunkEvent? loadingProgress) {
-                                    if (loadingProgress == null) {
-                                      return child;
-                                    } else {
-                                      return Center(
-                                        child: SpinKitCircle(
-                                          color: Color.fromRGBO(48, 122, 99, 1),
-                                          size: 50.0,
-                                        ),
-                                      );
-                                    }
-                                  },
-                                  errorBuilder: (BuildContext context,
-                                      Object exception, StackTrace? stackTrace) {
-                                    return Icon(
-                                      Icons.error,
-                                      color: Colors.red,
-                                    );
-                                  },
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            status,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                          ),
-                          Text(
-                            'Jumlah: $totalJumlah',
-                            style: TextStyle(
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (role == 'Sebagai Penerima' &&
-                          status.toLowerCase() == 'ongoing')
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: IconButton(
-                            icon: Icon(Icons.arrow_forward),
-                            onPressed: () {
-                              mpController.map_dataTarget['url'] =
-                                  transaction['postMedia'][0]['url'];
-                              mpController.map_dataTarget['id'] =
-                                  transaction['postId'];
-                              mpController.map_dataTarget['title'] =
-                                  transaction['postTitle'];
-                              mpController.target_lat = double.parse(
-                                  transaction['postBody']['coordinate']
-                                      .toString()
-                                      .split(",")[0]);
-                              mpController.target_long = double.parse(
-                                  transaction['postBody']['coordinate']
-                                      .toString()
-                                      .split(",")[1]);
-                              mpController.map_dataTarget['donatur_name'] =
-                                  transaction['otherUserName'];
-                              mpController.map_dataTarget['userId'] =
-                                  transaction['otherUserId'];
-                              Navigator.pushNamed(context, "/onmap");
-                            },
-                          ),
-                        ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-            );
-          },
-        ),
-      );
-    });
+                );
+              },
+            ),
+          ),
+        );
+      }),
+    );
   }
 }
 
@@ -876,6 +890,7 @@ class _ChatContentState extends State<ChatContent> {
 }
 
 class PointPage extends StatefulWidget {
+  const PointPage({Key? key}) : super(key: key);
   @override
   _PointPageState createState() => _PointPageState();
 }

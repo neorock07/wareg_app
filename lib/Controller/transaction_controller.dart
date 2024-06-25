@@ -6,6 +6,12 @@ class TransactionController extends GetxController {
   var isLoading = true.obs;
   final TransactionService _transactionService = TransactionService();
 
+  @override
+  void onReady() {
+    super.onReady();
+    fetchTransactions();
+  }
+
   Future<void> fetchTransactions() async {
     try {
       isLoading(true);

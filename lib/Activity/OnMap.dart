@@ -574,25 +574,54 @@ class _OnMapState extends State<OnMap> {
                                                                 color: Colors
                                                                     .amber,
                                                                 size: 10.dm),
-                                                            Text(
-                                                              (mpController.map_dataTarget[
-                                                                              'rating'] ==
-                                                                          0 ||
-                                                                      mpController
-                                                                              .map_dataTarget['rating'] ==
-                                                                          null)
-                                                                  ? "Belum ada"
-                                                                  : "${mpController.map_dataTarget['rating']}",
-                                                              style: TextStyle(
-                                                                  fontFamily:
-                                                                      "Poppins",
-                                                                  fontSize:
-                                                                      12.sp,
-                                                                  color: Colors
-                                                                      .amber),
+                                                            GestureDetector(
+                                                              onTap: () {
+                                                                int userId =
+                                                                    mpController
+                                                                            .map_dataTarget[
+                                                                        'userId'];
+                                                                Navigator
+                                                                    .pushNamed(
+                                                                  context,
+                                                                  '/reviews',
+                                                                  arguments:
+                                                                      userId,
+                                                                );
+                                                              },
+                                                              child: Row(
+                                                                children: [
+                                                                  Text(
+                                                                    (mpController.map_dataTarget['rating'] ==
+                                                                                0 ||
+                                                                            mpController.map_dataTarget['rating'] ==
+                                                                                null)
+                                                                        ? "Belum ada"
+                                                                        : "${mpController.map_dataTarget['rating']}",
+                                                                    style:
+                                                                        TextStyle(
+                                                                      fontFamily:
+                                                                          "Poppins",
+                                                                      fontSize:
+                                                                          12.sp,
+                                                                      color: Colors
+                                                                          .amber,
+                                                                    ),
+                                                                  ),
+                                                                  Text(
+                                                                    '(${postController.posts3.value['reviewCount']})',
+                                                                    style: TextStyle(
+                                                                        fontFamily:
+                                                                            "Poppins",
+                                                                        fontSize: 12
+                                                                            .sp,
+                                                                        color: Colors
+                                                                            .black),
+                                                                  ),
+                                                                ],
+                                                              ),
                                                             ),
                                                           ],
-                                                        ),
+                                                        )
                                                       ],
                                                     )
                                                   ],
@@ -1900,6 +1929,8 @@ class _OnMapState extends State<OnMap> {
                             : IconButton(
                                 color: Colors.grey,
                                 onPressed: () async {
+                                  mpController.map_dataTarget['userId'] =
+                                      postController.posts3.value['userId'];
                                   Navigator.pushNamed(
                                     context,
                                     "/chat",

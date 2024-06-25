@@ -15,6 +15,7 @@ import 'package:wareg_app/Activity/notification_page.dart';
 import 'package:wareg_app/Activity/RegisterActivity.dart';
 import 'package:wareg_app/Activity/ResultCheck.dart';
 import 'package:wareg_app/Activity/onMapDonatur.dart';
+import 'package:wareg_app/Activity/review_page.dart';
 
 import '../Activity/ResepForm.dart';
 
@@ -49,6 +50,12 @@ class Routes {
         return MaterialPageRoute(builder: (_) => ResultCheck());
       case '/notifications': // Add this line
         return MaterialPageRoute(builder: (_) => NotificationsPage());
+      case '/reviews': // Add this line
+        return MaterialPageRoute(
+          builder: (_) => ReviewPage(
+            userId: setting.arguments as int,
+          ),
+        );
       default:
         return _errorRoute();
     }

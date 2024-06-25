@@ -118,9 +118,11 @@ class PrefController extends GetxController {
       if (isValid == true) {
         Navigator.pushReplacementNamed(context, '/home');
       } else {
+        await prefs.clear();
         Navigator.pushReplacementNamed(context, '/login');
       }
     } else {
+      await prefs.clear();
       Navigator.pushReplacementNamed(context, '/login');
     }
   }
