@@ -86,11 +86,11 @@ class _FormFoodState extends State<FormFood> {
       padding: EdgeInsets.only(left: 10.w, right: 10.w, bottom: 5.h),
       child: Card(
           color: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.dm),
-          ),
+          // shape: RoundedRectangleBorder(
+          //   borderRadius: BorderRadius.circular(2.dm),
+          // ),
           shadowColor: Colors.black,
-          elevation: 3,
+          // elevation: 3,
           child: Padding(
             padding: EdgeInsets.all(5.dm),
             child: Center(
@@ -159,7 +159,7 @@ class _FormFoodState extends State<FormFood> {
 
                         /// Textfield
                         SizedBox(
-                          width: 80.w,
+                          width: 100.w,
                           child: TextFormField(
                             controller: _valueController,
                             keyboardType: TextInputType.number,
@@ -371,7 +371,7 @@ class _FormFoodState extends State<FormFood> {
                     padding: EdgeInsets.all(5.dm),
                     child: DropdownButton<String>(
                       underline: SizedBox(
-                    height: 5.h,
+                        height: 5.h,
                       ),
                       dropdownColor: Colors.white,
                       isExpanded: true,
@@ -381,43 +381,43 @@ class _FormFoodState extends State<FormFood> {
                       // value: (controller.current_value == null)? "" : controller.current_value!.value ,
                       value: dropdownValue,
                       hint: Text(
-                    "--pilih--",
-                    style: TextStyle(
-                      fontFamily: "Poppins",
-                      fontSize: 14.sp,
-                    ),
+                        "--pilih--",
+                        style: TextStyle(
+                          fontFamily: "Poppins",
+                          fontSize: 14.sp,
+                        ),
                       ),
                       icon: const Icon(LucideIcons.chevronDown),
                       onChanged: (String? newValue) {
-                    setState(() {
-                      dropdownValue = newValue!;
-                    });
+                        setState(() {
+                          dropdownValue = newValue!;
+                        });
                       },
 
                       items:
-                      items!.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Row(
-                        children: [
-                          Text(
-                            "${value}",
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 12.sp,
-                                fontFamily: "Poppins"),
+                          items!.map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Row(
+                            children: [
+                              Text(
+                                "${value}",
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 12.sp,
+                                    fontFamily: "Poppins"),
+                              ),
+                              SizedBox(
+                                width: 10.w,
+                              ),
+                              Icon(
+                                items_icon[items.indexOf(value)],
+                                size: 20,
+                                color: Color.fromARGB(255, 204, 191, 90),
+                              )
+                            ],
                           ),
-                          SizedBox(
-                            width: 10.w,
-                          ),
-                          Icon(
-                            items_icon[items.indexOf(value)],
-                            size: 20,
-                            color: Color.fromARGB(255, 204, 191, 90),
-                          )
-                        ],
-                      ),
-                    );
+                        );
                       }).toList(),
                     ),
                   ),
@@ -469,17 +469,22 @@ class _FormFoodState extends State<FormFood> {
                                           return item.values.elementAt(index);
                                         }),
                                   ),
-                                  ElevatedButton(
-                                      onPressed: () {
-                                        // count.value += 1;
-                                        addCard();
-                                      },
-                                      child: Text(
-                                        "Tambah+",
-                                        style: TextStyle(
-                                            fontFamily: "Poppins",
-                                            fontSize: 12.sp),
-                                      ))
+                                  ElevatedButton.icon(
+                                    onPressed: addCard,
+                                    icon: const Icon(
+                                      Icons.add,
+                                      color: Colors.white,
+                                    ),
+                                    label: const Text(
+                                      'Tambah',
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontFamily: "Poppins"),
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      primary: Color.fromRGBO(48, 122, 89, 1),
+                                    ),
+                                  ),
                                 ],
                               )
                             : const Center(
@@ -592,7 +597,7 @@ class _FormFoodState extends State<FormFood> {
                     padding: EdgeInsets.all(5.dm),
                     child: DropdownButton<String>(
                       underline: SizedBox(
-                    height: 5.h,
+                        height: 5.h,
                       ),
                       dropdownColor: Colors.white,
                       isExpanded: true,
@@ -602,31 +607,31 @@ class _FormFoodState extends State<FormFood> {
                       // value: (controller.current_value == null)? "" : controller.current_value!.value ,
                       value: treatmentValue,
                       hint: Text(
-                    "--pilih--",
-                    style: TextStyle(
-                      fontFamily: "Poppins",
-                      fontSize: 14.sp,
-                    ),
+                        "--pilih--",
+                        style: TextStyle(
+                          fontFamily: "Poppins",
+                          fontSize: 14.sp,
+                        ),
                       ),
                       icon: const Icon(LucideIcons.chevronDown),
                       onChanged: (String? newValue) {
-                    setState(() {
-                      treatmentValue = newValue!;
-                    });
+                        setState(() {
+                          treatmentValue = newValue!;
+                        });
                       },
 
-                      items:
-                      treatments!.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(
-                        "${value}",
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 12.sp,
-                            fontFamily: "Poppins"),
-                      ),
-                    );
+                      items: treatments!
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(
+                            "${value}",
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 12.sp,
+                                fontFamily: "Poppins"),
+                          ),
+                        );
                       }).toList(),
                     ),
                   ),

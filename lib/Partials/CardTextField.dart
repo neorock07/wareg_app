@@ -31,9 +31,19 @@ Widget CardTextField(BuildContext context,
           padding: EdgeInsets.all(5.dm),
           child: TextFormField(
               validator: (String? sr) {
-                if (sr == null || sr.isEmpty) {
-                  return 'Tidak boleh kosong!';
+                String pattern =
+                    r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+";
+
+                RegExp regex = RegExp(pattern);
+
+                if (!regex.hasMatch(sr!) && label == "Email") {
+                  return 'Masukkan alamat email yang valid!';
+                } else {
+                  if (sr == null || sr.isEmpty) {
+                    return 'Tidak boleh kosong!';
+                  }
                 }
+
                 return null;
               },
               keyboardType: (type == null) ? null : type,

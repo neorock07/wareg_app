@@ -42,7 +42,7 @@ class _LoginActivityState extends State<LoginActivity> {
               Center(
                 child: RichText(
                     text: TextSpan(
-                        text: "RE-",
+                        text: "R3-",
                         style: TextStyle(
                             fontFamily: "Poppins",
                             fontSize: 25.sp,

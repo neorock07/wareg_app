@@ -39,6 +39,9 @@ class _MenuState extends State<Menu> {
   var marker_user;
   var ipAdd = Ip();
   String? updatedUrl;
+  List<String> title_menu_list = ["Makanan Terdekat", "Makanan Terbaru"];
+  RxString menu_title = "".obs;
+  var isSelected = false.obs;
 
   Future<void> _loadUserName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -66,6 +69,8 @@ class _MenuState extends State<Menu> {
     try {
       Position position = await locationService.getCurrentLocation();
       await postController.fetchPosts(position.latitude, position.longitude);
+      var result2 = await postController.fetchPostsNew(
+          position.latitude, position.longitude);
       String newBaseUrl = "${ipAdd.getType()}://${ipAdd.getIp()}";
 
       for (var post in postController.posts) {
@@ -102,6 +107,7 @@ class _MenuState extends State<Menu> {
   void initState() {
     super.initState();
     // prefController.loadData("profile_picture");
+    menu_title.value = title_menu_list[0];
     setState(() {
       _loadProfile();
       _fetchLocationAndPosts();
@@ -179,7 +185,7 @@ class _MenuState extends State<Menu> {
                     left: MediaQuery.of(context).size.width * 0.05,
                     bottom: 10.h),
                 child: Text(
-                  "Lihat makanan disekitar mu",
+                  "Peta Sebaran Donasi",
                   style: TextStyle(
                       color: Colors.black, fontFamily: "Bree", fontSize: 16.sp),
                 ),
@@ -212,6 +218,11 @@ class _MenuState extends State<Menu> {
             minChildSize: 0.45,
             maxChildSize: 0.9,
             builder: (context, scrollController) {
+              if (isSelected.value == false) {
+                menu_title.value = title_menu_list[0];
+              } else {
+                menu_title.value = title_menu_list[1];
+              }
               return Container(
                 decoration: BoxDecoration(
                     color: Colors.white,
@@ -223,55 +234,67 @@ class _MenuState extends State<Menu> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        Text(
-                          "Makanan Terdekat",
-                          style: TextStyle(
-                              fontFamily: "Bree",
-                              color: Colors.black,
-                              fontSize: 16.sp),
-                        ),
-                        Row(
-                          children: [
-                            ChoiceChip(
-                              label: const Center(
-                                child: Text(
-                                  "Terdekat",
+                        Obx(() => Text(
+                              // "Makanan Terdekat",
+                              "${menu_title.value}",
+                              style: TextStyle(
+                                  fontFamily: "Bree",
+                                  color: Colors.black,
+                                  fontSize: 16.sp),
+                            )),
+                        Obx(() => Row(
+                              children: [
+                                ChoiceChip(
+                                  label: const Center(
+                                    child: Text(
+                                      "Terdekat",
+                                    ),
+                                  ),
+                                  onSelected: (value) {
+                                    isSelected.value = false;
+                                  },
+                                  labelStyle: TextStyle(
+                                      color: Colors.black, fontSize: 10.sp),
+                                  selected: (isSelected.value == false)
+                                      ? true
+                                      : false,
+                                  side: BorderSide(
+                                    color: Color.fromRGBO(42, 122, 89, 1),
+                                    width: 2,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(20.dm)),
+                                  selectedColor: Colors.white,
                                 ),
-                              ),
-                              labelStyle: TextStyle(
-                                  color: Colors.black, fontSize: 10.sp),
-                              selected: true,
-                              side: BorderSide(
-                                color: Color.fromRGBO(42, 122, 89, 1),
-                                width: 2,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20.dm)),
-                              selectedColor: Colors.white,
-                            ),
-                            SizedBox(
-                              width: 5.w,
-                            ),
-                            ChoiceChip(
-                              label: Center(
-                                child: Text(
-                                  "Semua",
+                                SizedBox(
+                                  width: 5.w,
                                 ),
-                              ),
-                              labelStyle: TextStyle(
-                                  color: Colors.black, fontSize: 10.sp),
-                              selected: false,
-                              side: BorderSide(
-                                color: Color.fromRGBO(42, 122, 89, 1),
-                                width: 2,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20.dm)),
-                              selectedColor: Colors.white,
-                              disabledColor: Colors.white,
-                            ),
-                          ],
-                        )
+                                ChoiceChip(
+                                  label: Center(
+                                    child: Text(
+                                      "Terbaru",
+                                    ),
+                                  ),
+                                  labelStyle: TextStyle(
+                                      color: Colors.black, fontSize: 10.sp),
+                                  selected:
+                                      (isSelected.value == true) ? true : false,
+                                  onSelected: (value) {
+                                    isSelected.value = true;
+                                  },
+                                  side: BorderSide(
+                                    color: Color.fromRGBO(42, 122, 89, 1),
+                                    width: 2,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(20.dm)),
+                                  selectedColor: Colors.white,
+                                  disabledColor: Colors.white,
+                                ),
+                              ],
+                            ))
                       ],
                     ),
                     Obx(() {
@@ -279,10 +302,25 @@ class _MenuState extends State<Menu> {
                         return Center(
                             child: Padding(
                           padding: EdgeInsets.only(top: 10.h),
-                          child: CircularProgressIndicator(),
+                          child: const CircularProgressIndicator(),
                         ));
                       } else if (postController.posts.isEmpty) {
-                        return Center(child: Text('No posts found.'));
+                        return Center(
+                            child: Column(
+                          children: [
+                            Image.asset(
+                              "assets/image/full.png",
+                              fit: BoxFit.fill,
+                              height: 100.dm,
+                              width: 100.dm,
+                            ),
+                            Text("Oops..tidak ada data",
+                                style: TextStyle(
+                                    fontFamily: "Poppins",
+                                    fontSize: 12.sp,
+                                    color: Colors.black))
+                          ],
+                        ));
                       } else {
                         return Container(
                           height: MediaQuery.of(context).size.height,
@@ -291,10 +329,14 @@ class _MenuState extends State<Menu> {
                             padding: EdgeInsets.only(bottom: 40.h),
                             child: ListView.builder(
                                 controller: scrollController,
-                                itemCount: postController.posts.length,
+                                itemCount: (isSelected == false)
+                                    ? postController.posts.length
+                                    : postController.posts2.length,
                                 scrollDirection: Axis.vertical,
                                 itemBuilder: (context, index) {
-                                  final post = postController.posts[index];
+                                  final post = (isSelected == false)
+                                      ? postController.posts[index]
+                                      : postController.posts2[index];
                                   return InkWell(
                                     onTap: () {
                                       Navigator.pushNamed(context, "/onmap");

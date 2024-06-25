@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
@@ -38,6 +39,26 @@ class _HomeState extends State<Home> {
   var lat, long;
   final NotificationController notificationController =
       Get.put(NotificationController());
+  List<Widget> widgetList = [];
+  List<dynamic> banner_item = [
+    {
+      "img": "assets/image/banner1.png",
+      "title": "Sayangi Bumi,\nKurangi Limbah",
+      "sub": "Kurangi limbah makanan, Jaga bumi,\ndan lingkungan kita",
+    },
+    {
+      "img": "assets/image/banner2.png",
+      "title": "Hentikan Limbah Makanan",
+      "sub":
+          "Setiap gigitan berharga. Mari kita hentikan\nlimbah makanan bersama-sama.",
+    },
+    {
+      "img": "assets/image/banner3.png",
+      "title": "Berbagi Kebahagiaan\ndengan Makanan",
+      "sub":
+          "Satu porsi makananmu bisa membuat\nperubahan besar. Ayo berbagi kebahagiaan!",
+    },
+  ];
 
   Future<void> _loadUserName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -84,7 +105,7 @@ class _HomeState extends State<Home> {
           position.latitude, position.longitude);
 
       if (result1 == 401 || result2 == 401) {
-        // Clear all shared preferences
+        // jika not authorized maka hapus sharedPref data
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.clear();
 
@@ -114,6 +135,63 @@ class _HomeState extends State<Home> {
         ),
         actions: [
           Obx(() {
+            widgetList = banner_item.map<Widget>((item) {
+              return InkWell(
+                onTap: (){
+                  Navigator.pushNamed(context, "/donasi");
+                },
+                child: Stack(children: [
+                  Container(
+                      height: 100.h,
+                      width: MediaQuery.of(context).size.width * 0.9,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5.dm),
+                        image: DecorationImage(
+                          image: AssetImage("${item['img']}"),
+                          scale: 1,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      child: Container(
+                        height: 100.h,
+                        width: MediaQuery.of(context).size.width * 0.9,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(5.dm),
+                          gradient: LinearGradient(
+                            begin: Alignment.bottomCenter,
+                            end: Alignment.topCenter,
+                            colors: [
+                              Colors.black.withOpacity(0.7),
+                              Colors.transparent,
+                            ],
+                          ),
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.all(10.dm),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("${item['title']}", style: TextStyle(
+                                fontFamily: "Poppins", 
+                                fontWeight: FontWeight.bold, 
+                                fontSize: 14.sp, 
+                                color: Colors.white
+                              )),
+                              Text("${item['sub']}", style: TextStyle(
+                                fontFamily: "Poppins", 
+                                fontWeight: FontWeight.normal, 
+                                fontSize: 10.sp, 
+                                color: Colors.white
+                              )),
+                            ],
+                          ),
+                        ),
+                      )),
+                ]),
+              );
+            }).toList();
+
             return Stack(
               children: [
                 IconButton(
@@ -170,7 +248,24 @@ class _HomeState extends State<Home> {
             SizedBox(
               height: 10.h,
             ),
-            Obx(() => CardDonate(context, isPressed)),
+            CarouselSlider(
+                items: widgetList,
+                options: CarouselOptions(
+                  height: 100.h,
+                  aspectRatio: 16 / 9,
+                  viewportFraction: 0.8,
+                  initialPage: 0,
+                  enableInfiniteScroll: true,
+                  reverse: false,
+                  autoPlay: true,
+                  autoPlayInterval: Duration(seconds: 3),
+                  autoPlayAnimationDuration: Duration(milliseconds: 800),
+                  autoPlayCurve: Curves.fastOutSlowIn,
+                  enlargeCenterPage: true,
+                  enlargeFactor: 0.3,
+                  scrollDirection: Axis.horizontal,
+                )),
+            // Obx(() => CardDonate(context, isPressed)),
             SizedBox(
               height: 10.h,
             ),
@@ -191,7 +286,22 @@ class _HomeState extends State<Home> {
                   postController.posts.value == null) {
                 return Center(child: CircularProgressIndicator());
               } else if (postController.posts.isEmpty) {
-                return Center(child: Text('No posts found.'));
+                return Center(
+                    child: Column(
+                  children: [
+                    Image.asset(
+                      "assets/image/full.png",
+                      fit: BoxFit.fill,
+                      height: 100.dm,
+                      width: 100.dm,
+                    ),
+                    Text("Oops..tidak ada data",
+                        style: TextStyle(
+                            fontFamily: "Poppins",
+                            fontSize: 12.sp,
+                            color: Colors.black))
+                  ],
+                ));
               } else {
                 return Padding(
                   padding: EdgeInsets.only(left: 10.w),
@@ -310,7 +420,22 @@ class _HomeState extends State<Home> {
               if (postController.isLoading2.value) {
                 return Center(child: CircularProgressIndicator());
               } else if (postController.posts2.isEmpty) {
-                return Center(child: Text('No posts found.'));
+                return Center(
+                    child: Column(
+                  children: [
+                    Image.asset(
+                      "assets/image/full.png",
+                      fit: BoxFit.fill,
+                      height: 100.dm,
+                      width: 100.dm,
+                    ),
+                    Text("Oops..tidak ada data",
+                        style: TextStyle(
+                            fontFamily: "Poppins",
+                            fontSize: 12.sp,
+                            color: Colors.black))
+                  ],
+                ));
               } else {
                 return Padding(
                   padding: EdgeInsets.only(left: 10.w),
