@@ -10,6 +10,7 @@ import 'package:wareg_app/Activity/Inventory.dart';
 import 'package:wareg_app/Activity/LoginActivity.dart';
 import 'package:wareg_app/Activity/OnMap.dart';
 import 'package:wareg_app/Activity/PreviewFood.dart';
+import 'package:wareg_app/Activity/Profile.dart';
 import 'package:wareg_app/Activity/inventory_form_page.dart';
 import 'package:wareg_app/Activity/notification_page.dart';
 import 'package:wareg_app/Activity/RegisterActivity.dart';
@@ -50,6 +51,8 @@ class Routes {
         return MaterialPageRoute(builder: (_) => ResultCheck());
       case '/notifications': // Add this line
         return MaterialPageRoute(builder: (_) => NotificationsPage());
+      case '/profile': // Add this line
+        return MaterialPageRoute(builder: (_) => Profile());
       case '/reviews': // Add this line
         return MaterialPageRoute(
           builder: (_) => ReviewPage(

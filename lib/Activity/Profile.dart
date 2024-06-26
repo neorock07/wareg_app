@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -371,7 +371,7 @@ class NavigationMenu extends StatefulWidget {
 
 class _NavigationMenuState extends State<NavigationMenu> {
   final PageController _pageController = PageController();
-  String _activeButton = 'Riwayat';
+  String _activeButton = 'Post';
 
   void _onButtonPressed(String label) {
     setState(() {
@@ -1212,11 +1212,13 @@ class _UserPostsPageState extends State<UserPostsPage> {
                           .format(DateTime.parse(post['createdAt']).toLocal());
                       final expiredAt = DateFormat('dd/MM/yyyy HH:mm:ss')
                           .format(DateTime.parse(post['expiredAt']).toLocal());
-                      final mediaUrl = post['media'].isNotEmpty
-                          ? post['media'][0]['url'].replaceFirst(
-                              'http://localhost:3000',
-                              '${Ip().getType()}://${Ip().getIp()}')
-                          : 'https://via.placeholder.com/150';
+                      final mediaUrls = post['media'].isNotEmpty
+                          ? post['media']
+                              .map<String>((media) => media['url'].replaceFirst(
+                                  'http://localhost:3000',
+                                  '${Ip().getType()}://${Ip().getIp()}'))
+                              .toList()
+                          : ['https://via.placeholder.com/150'];
 
                       return Card(
                         margin: EdgeInsets.all(10.0),
@@ -1231,20 +1233,37 @@ class _UserPostsPageState extends State<UserPostsPage> {
                                     fontSize: 18, fontWeight: FontWeight.bold),
                               ),
                               SizedBox(height: 10),
-                              Image.network(
-                                mediaUrl,
-                                height: 150,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    Icon(Icons.error),
+                              CarouselSlider(
+                                options: CarouselOptions(
+                                  height: 150.0,
+                                  enlargeCenterPage: true,
+                                  autoPlay: true,
+                                ),
+                                items: mediaUrls.map((url) {
+                                  return Builder(
+                                    builder: (BuildContext context) {
+                                      return Container(
+                                        width:
+                                            MediaQuery.of(context).size.width,
+                                        margin: EdgeInsets.symmetric(
+                                            horizontal: 5.0),
+                                        child: Image.network(
+                                          url,
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) =>
+                                                  Icon(Icons.error),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                }).toList(),
                               ),
                               SizedBox(height: 10),
-                              Text('Address: ${post['body']['alamat']}'),
-                              Text(
-                                  'Description: ${post['body']['description']}'),
-                              Text('Created At: $createdAt'),
-                              Text('Expired At: $expiredAt'),
+                              Text('Alamat: ${post['body']['alamat']}'),
+                              Text('Deskripsi: ${post['body']['description']}'),
+                              Text('Dibuat: $createdAt'),
+                              Text('Kadaluarsa: $expiredAt'),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [

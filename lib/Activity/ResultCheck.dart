@@ -58,13 +58,15 @@ class _ResultCheckState extends State<ResultCheck> {
                   fontWeight: FontWeight.bold),
             ),
           ),
-          SizedBox(height: 20.h,),
+          SizedBox(
+            height: 20.h,
+          ),
           Obx(() => Padding(
-            padding: EdgeInsets.only(bottom: 120.h),
-            child: CardButton(context, isPressed2, onTap: (_) {
+                padding: EdgeInsets.only(bottom: 120.h),
+                child: CardButton(context, isPressed2, onTap: (_) {
                   isPressed2.value = true;
                   foodController.arr_img.value.clear();
-                  Navigator.pushNamed(context, "/home");
+                  Navigator.pushReplacementNamed(context, "/profile");
                   // log("${foodController.data_food!.values}");
                   // log("${foodController.data_food!['date_donate']}");
                 },
@@ -87,7 +89,7 @@ class _ResultCheckState extends State<ResultCheck> {
                             fontWeight: FontWeight.normal),
                       ),
                     )),
-          )),
+              )),
         ],
       ),
     );
