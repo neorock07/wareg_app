@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:ui';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -14,6 +16,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wareg_app/Controller/API/Lokasi/LocationController.dart';
 import 'package:wareg_app/Controller/API/Transaksi/TransaksiController.dart';
 import 'package:wareg_app/Controller/MapsController.dart';
+import 'package:wareg_app/Partials/ButtonBorder.dart';
 import 'package:wareg_app/Partials/CardButton.dart';
 import 'package:wareg_app/Partials/CardCheckBox.dart';
 import 'package:wareg_app/Partials/DialogPop.dart';
@@ -179,12 +182,17 @@ class _OnMapState extends State<OnMap> {
   }
 
   Future<void> postAmbil() async {
-    if (count.value != null || count.value != []) {
+    if (count.value.isNotEmpty && count.value.any((element) => element != 0)) {
+      // Clear the pickedVariants list first to avoid duplicate entries
+      pickedVariants.clear();
+
       for (int i = 0; i < count.length; i++) {
-        pickedVariants.add({
-          "variant_id": postController.posts3.value['variants'][i]['id'],
-          "jumlah": count.value[i]
-        });
+        if (count.value[i] > 0) {
+          pickedVariants.add({
+            "variant_id": postController.posts3.value['variants'][i]['id'],
+            "jumlah": count.value[i]
+          });
+        }
       }
 
       await transController
@@ -213,12 +221,7 @@ class _OnMapState extends State<OnMap> {
           Navigator.of(context, rootNavigator: true).pop();
 
           postController.isLoading3.value = true;
-          // mpController = Get.put(MapsController());
-          // mpController.map_dataTarget['id'] = postController.posts3.value['id'];
-
           log("log current: ${value['statusCode']}");
-          // locationUpdateTimer!.cancel();
-          // startLocationUpdates();
 
           await postController
               .fetchPostDetail(
@@ -230,7 +233,6 @@ class _OnMapState extends State<OnMap> {
             a++;
           });
           setState(() {});
-          // navigateToOnMap();
         }
       });
     } else {
@@ -1145,97 +1147,122 @@ class _OnMapState extends State<OnMap> {
                                                   SizedBox(height: 10.h),
                                                   Container(
                                                     height: 180.h,
-                                                    child:
-                                                        Obx(
-                                                            () => ListView
-                                                                    .builder(
-                                                                  itemCount: postController
-                                                                      .posts3
-                                                                      .value[
-                                                                          'variants']
-                                                                      .length,
-                                                                  itemBuilder:
-                                                                      (_, index) {
-                                                                    return Padding(
-                                                                      padding: EdgeInsets.only(
-                                                                          top: 5
-                                                                              .h),
-                                                                      child:
-                                                                          Row(
-                                                                        mainAxisAlignment:
-                                                                            MainAxisAlignment.spaceBetween,
+                                                    child: Obx(
+                                                      () => ListView.builder(
+                                                        itemCount:
+                                                            postController
+                                                                .posts3
+                                                                .value[
+                                                                    'variants']
+                                                                .length,
+                                                        itemBuilder:
+                                                            (_, index) {
+                                                          return Padding(
+                                                            padding:
+                                                                EdgeInsets.only(
+                                                                    top: 5.h),
+                                                            child: Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .spaceBetween,
+                                                              children: [
+                                                                Text(
+                                                                  "${postController.posts3.value['variants'][index]['name']}",
+                                                                ),
+                                                                (postController
+                                                                            .posts3
+                                                                            .value['variants'][index]['stok'] ==
+                                                                        0)
+                                                                    ? Text(
+                                                                        "habis",
+                                                                        style:
+                                                                            TextStyle(
+                                                                          color:
+                                                                              Colors.red,
+                                                                          fontFamily:
+                                                                              "Poppins",
+                                                                          fontSize:
+                                                                              12.sp,
+                                                                          fontStyle:
+                                                                              FontStyle.italic,
+                                                                        ),
+                                                                      )
+                                                                    : Row(
                                                                         children: [
-                                                                          Text(
-                                                                            "${postController.posts3.value['variants'][index]['name']}",
-                                                                          ),
-                                                                          (postController.posts3.value['variants'][index]['stok'] == 0)
-                                                                              ? Text("habis", style: TextStyle(color: Colors.red, fontFamily: "Poppins", fontSize: 12.sp, fontStyle: FontStyle.italic))
-                                                                              : Row(
-                                                                                  children: [
-                                                                                    Material(
-                                                                                      color: Colors.transparent,
-                                                                                      child: InkWell(
-                                                                                        onTap: () {
-                                                                                          if (count[index]! > 1) {
-                                                                                            count[index]--;
-                                                                                          }
-                                                                                        },
-                                                                                        splashColor: Colors.grey,
-                                                                                        child: Container(
-                                                                                          height: 20.dm,
-                                                                                          width: 20.dm,
-                                                                                          decoration: BoxDecoration(
-                                                                                            borderRadius: BorderRadius.circular(2.dm),
-                                                                                            border: Border.all(color: Colors.black),
-                                                                                          ),
-                                                                                          child: Icon(
-                                                                                            LucideIcons.minus,
-                                                                                            size: 10,
-                                                                                          ),
-                                                                                        ),
-                                                                                      ),
-                                                                                    ),
-                                                                                    SizedBox(width: 20.w),
-                                                                                    Obx(() => Text(
-                                                                                          "${count[index]}",
-                                                                                          style: TextStyle(
-                                                                                            color: Colors.black,
-                                                                                            fontFamily: "Poppins",
-                                                                                            fontSize: 14.sp,
-                                                                                            fontWeight: FontWeight.bold,
-                                                                                          ),
-                                                                                        )),
-                                                                                    SizedBox(width: 20.w),
-                                                                                    Material(
-                                                                                      color: Colors.transparent,
-                                                                                      child: InkWell(
-                                                                                        onTap: () {
-                                                                                          if (count[index]! < postController.posts3.value['variants'][index]['stok']) {
-                                                                                            count[index]++;
-                                                                                          }
-                                                                                        },
-                                                                                        splashColor: Colors.grey,
-                                                                                        child: Container(
-                                                                                          height: 20.dm,
-                                                                                          width: 20.dm,
-                                                                                          decoration: BoxDecoration(
-                                                                                            borderRadius: BorderRadius.circular(2.dm),
-                                                                                            border: Border.all(color: Colors.black),
-                                                                                          ),
-                                                                                          child: const Icon(
-                                                                                            LucideIcons.plus,
-                                                                                            size: 10,
-                                                                                          ),
-                                                                                        ),
-                                                                                      ),
-                                                                                    ),
-                                                                                  ],
+                                                                          Material(
+                                                                            color:
+                                                                                Colors.transparent,
+                                                                            child:
+                                                                                InkWell(
+                                                                              onTap: () {
+                                                                                if (count[index] > 0) {
+                                                                                  count[index]--;
+                                                                                }
+                                                                              },
+                                                                              splashColor: Colors.grey,
+                                                                              child: Container(
+                                                                                height: 20.dm,
+                                                                                width: 20.dm,
+                                                                                decoration: BoxDecoration(
+                                                                                  borderRadius: BorderRadius.circular(2.dm),
+                                                                                  border: Border.all(color: Colors.black),
                                                                                 ),
+                                                                                child: Icon(
+                                                                                  LucideIcons.minus,
+                                                                                  size: 10,
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                          SizedBox(
+                                                                              width: 20.w),
+                                                                          Obx(
+                                                                            () =>
+                                                                                Text(
+                                                                              "${count[index]}",
+                                                                              style: TextStyle(
+                                                                                color: Colors.black,
+                                                                                fontFamily: "Poppins",
+                                                                                fontSize: 14.sp,
+                                                                                fontWeight: FontWeight.bold,
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                          SizedBox(
+                                                                              width: 20.w),
+                                                                          Material(
+                                                                            color:
+                                                                                Colors.transparent,
+                                                                            child:
+                                                                                InkWell(
+                                                                              onTap: () {
+                                                                                if (count[index] < postController.posts3.value['variants'][index]['stok']) {
+                                                                                  count[index]++;
+                                                                                }
+                                                                              },
+                                                                              splashColor: Colors.grey,
+                                                                              child: Container(
+                                                                                height: 20.dm,
+                                                                                width: 20.dm,
+                                                                                decoration: BoxDecoration(
+                                                                                  borderRadius: BorderRadius.circular(2.dm),
+                                                                                  border: Border.all(color: Colors.black),
+                                                                                ),
+                                                                                child: const Icon(
+                                                                                  LucideIcons.plus,
+                                                                                  size: 10,
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                          ),
                                                                         ],
                                                                       ),
-                                                                    );
-                                                                  },
-                                                                )),
+                                                              ],
+                                                            ),
+                                                          );
+                                                        },
+                                                      ),
+                                                    ),
                                                   ),
                                                   Center(
                                                     child: Text(
@@ -1801,34 +1828,101 @@ class _OnMapState extends State<OnMap> {
                                                                           SizedBox(
                                                                               height: 30.h),
                                                                           Center(
-                                                                            child: Obx(() =>
-                                                                                CardButton(context, isPressedRate, onTap: (_) async {
+                                                                            child:
+                                                                                Obx(
+                                                                              () => CardButton(
+                                                                                context,
+                                                                                isPressedRate,
+                                                                                onTap: (_) async {
                                                                                   isPressedRate.value = true;
-                                                                                  // Navigator.pushReplacementNamed(context, "/formfood");
                                                                                   log("rating : ${rating_donasi!.ceil()}");
-                                                                                  await transController.postConfirmation(postController.posts3.value['transaction']['id'], rating_donasi!.ceil(), komenController.text).then((value) {
-                                                                                    // Get.snackbar("Review berhasil dikirim", "Terima kasih Anda telah membantu menyelamatkan Bumi🙏🙏 ");
-                                                                                    // Navigator.pushReplacementNamed(context, "/home");
-                                                                                    log("pesan konfirmasi : ${value['message']}");
-                                                                                    postController.isLoading3.value = true;
-                                                                                    a = 0;
-                                                                                  });
+
+                                                                                  var confirmationResponse = await transController.postConfirmation(
+                                                                                    postController.posts3.value['transaction']['id'],
+                                                                                    rating_donasi!.ceil(),
+                                                                                    komenController.text,
+                                                                                  );
+
+                                                                                  var inventoryData = {
+                                                                                    "detail": {
+                                                                                      "variant_id": confirmationResponse['detail']['variant_id'],
+                                                                                      "jumlah": confirmationResponse['detail']['jumlah']
+                                                                                    }
+                                                                                  };
+
+                                                                                  Navigator.of(context, rootNavigator: true).pop();
+
+                                                                                  showDialog(
+                                                                                    context: context,
+                                                                                    builder: (BuildContext context) {
+                                                                                      return AlertDialog(
+                                                                                        title: Text("Apakah ingin disimpan di Inventory?"),
+                                                                                        actions: <Widget>[
+                                                                                          TextButton(
+                                                                                            onPressed: () {
+                                                                                              Navigator.pop(context);
+                                                                                              Navigator.pushReplacementNamed(context, "/home");
+                                                                                            },
+                                                                                            child: Text("Tidak"),
+                                                                                          ),
+                                                                                          TextButton(
+                                                                                            onPressed: () async {
+                                                                                              var ipAdd = Ip();
+                                                                                              String? _baseUrl = '${ipAdd.getType()}://${ipAdd.getIp()}';
+                                                                                              SharedPreferences prefs = await SharedPreferences.getInstance();
+                                                                                              var token = prefs.getString('token') ?? '';
+
+                                                                                              final response = await http.post(
+                                                                                                Uri.parse('$_baseUrl/inventory/create'),
+                                                                                                headers: {
+                                                                                                  'Authorization': 'Bearer $token',
+                                                                                                  'Content-Type': 'application/json',
+                                                                                                },
+                                                                                                body: jsonEncode(inventoryData),
+                                                                                              );
+
+                                                                                              Navigator.pop(context); // Close the dialog first
+                                                                                              if (response.statusCode == 201) {
+                                                                                                log("Inventory created successfully");
+                                                                                                Navigator.pushReplacementNamed(context, "/home");
+                                                                                              } else {
+                                                                                                log("Failed to create inventory");
+                                                                                              }
+                                                                                            },
+                                                                                            child: Text("Ya, simpan"),
+                                                                                          ),
+                                                                                        ],
+                                                                                      );
+                                                                                    },
+                                                                                  );
+                                                                                  log("pesan konfirmasi : ${confirmationResponse['message']}");
+                                                                                  postController.isLoading3.value = true;
+                                                                                  a = 0;
                                                                                 },
-                                                                                    width_a: 0.78,
-                                                                                    width_b: 0.8,
-                                                                                    height_a: 0.05,
-                                                                                    height_b: 0.06,
-                                                                                    borderRadius: 10.dm,
-                                                                                    gradient: const LinearGradient(colors: [
-                                                                                      Color.fromRGBO(52, 135, 98, 1),
-                                                                                      Color.fromRGBO(48, 122, 99, 1),
-                                                                                    ]),
-                                                                                    child: Center(
-                                                                                      child: Text(
-                                                                                        "Konfirmasi",
-                                                                                        style: TextStyle(fontFamily: "Poppins", color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold),
-                                                                                      ),
-                                                                                    ))),
+                                                                                width_a: 0.78,
+                                                                                width_b: 0.8,
+                                                                                height_a: 0.05,
+                                                                                height_b: 0.06,
+                                                                                borderRadius: 10.dm,
+                                                                                gradient: const LinearGradient(
+                                                                                  colors: [
+                                                                                    Color.fromRGBO(52, 135, 98, 1),
+                                                                                    Color.fromRGBO(48, 122, 99, 1),
+                                                                                  ],
+                                                                                ),
+                                                                                child: Center(
+                                                                                  child: Text(
+                                                                                    "Konfirmasi",
+                                                                                    style: TextStyle(
+                                                                                      fontFamily: "Poppins",
+                                                                                      color: Colors.white,
+                                                                                      fontSize: 16.sp,
+                                                                                      fontWeight: FontWeight.bold,
+                                                                                    ),
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                            ),
                                                                           )
                                                                         ])),
                                                                   ),

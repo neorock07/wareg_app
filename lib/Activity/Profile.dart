@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wareg_app/Controller/API/Postingan/GetByLokasi.dart';
 import 'package:wareg_app/Controller/API/Transaksi/TransaksiController.dart';
 import 'package:wareg_app/Controller/PrefController.dart';
 import 'package:intl/intl.dart';
@@ -387,6 +388,8 @@ class _NavigationMenuState extends State<NavigationMenu> {
         return 1;
       case 'Pesan':
         return 2;
+      case 'Post':
+        return 3;
       default:
         return 0;
     }
@@ -400,6 +403,8 @@ class _NavigationMenuState extends State<NavigationMenu> {
         return 'Point';
       case 2:
         return 'Pesan';
+      case 3:
+        return 'Post';
       default:
         return 'Riwayat';
     }
@@ -434,6 +439,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
               const RiwayatList(),
               const PointPage(),
               const ChatContent(),
+              const UserPostsPage()
             ],
           ),
         ),
@@ -478,6 +484,12 @@ class ButtonSection extends StatelessWidget {
             label: 'Pesan',
             isActive: activeButton == 'Pesan',
             onPressed: () => onButtonPressed('Pesan'),
+          ),
+          ButtonWithText(
+            color: color,
+            label: 'Post',
+            isActive: activeButton == 'Post',
+            onPressed: () => onButtonPressed('Post'),
           ),
         ],
       ),
@@ -1156,6 +1168,106 @@ class _PointPageState extends State<PointPage> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class UserPostsPage extends StatefulWidget {
+  const UserPostsPage({Key? key}) : super(key: key);
+
+  @override
+  _UserPostsPageState createState() => _UserPostsPageState();
+}
+
+class _UserPostsPageState extends State<UserPostsPage> {
+  final GetPostController postController = Get.put(GetPostController());
+
+  @override
+  void initState() {
+    super.initState();
+    postController.fetchPostUser();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('My Posts'),
+      ),
+      body: Obx(() {
+        if (postController.isLoading5.value) {
+          return Center(child: CircularProgressIndicator());
+        } else {
+          return RefreshIndicator(
+            onRefresh: () async {
+              await postController.fetchPostUser();
+            },
+            child: postController.posts5.isEmpty
+                ? Center(child: Text('No posts found.'))
+                : ListView.builder(
+                    itemCount: postController.posts5.length,
+                    itemBuilder: (context, index) {
+                      final post = postController.posts5[index];
+                      final createdAt = DateFormat('dd/MM/yyyy HH:mm:ss')
+                          .format(DateTime.parse(post['createdAt']).toLocal());
+                      final expiredAt = DateFormat('dd/MM/yyyy HH:mm:ss')
+                          .format(DateTime.parse(post['expiredAt']).toLocal());
+                      final mediaUrl = post['media'].isNotEmpty
+                          ? post['media'][0]['url'].replaceFirst(
+                              'http://localhost:3000',
+                              '${Ip().getType()}://${Ip().getIp()}')
+                          : 'https://via.placeholder.com/150';
+
+                      return Card(
+                        margin: EdgeInsets.all(10.0),
+                        child: Padding(
+                          padding: EdgeInsets.all(10.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                post['title'],
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold),
+                              ),
+                              SizedBox(height: 10),
+                              Image.network(
+                                mediaUrl,
+                                height: 150,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Icon(Icons.error),
+                              ),
+                              SizedBox(height: 10),
+                              Text('Address: ${post['body']['alamat']}'),
+                              Text(
+                                  'Description: ${post['body']['description']}'),
+                              Text('Created At: $createdAt'),
+                              Text('Expired At: $expiredAt'),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(Icons.delete, color: Colors.red),
+                                    onPressed: () async {
+                                      await postController
+                                          .deletePost(post['id']);
+                                      postController
+                                          .fetchPostUser(); // Refresh the list after deletion
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+          );
+        }
+      }),
     );
   }
 }

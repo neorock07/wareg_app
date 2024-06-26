@@ -120,7 +120,7 @@ class _LoginActivityState extends State<LoginActivity> {
                         });
 
                         if (value == true) {
-                          Navigator.pushNamed(context, "/home");
+                          Navigator.pushReplacementNamed(context, "/home");
                         } else {
                           setState(() {
                             isLoad.value = false;
@@ -213,7 +213,6 @@ class _LoginActivityState extends State<LoginActivity> {
                 ),
               ),
               SizedBox(height: 10.h),
-              
             ],
           ),
         ),
