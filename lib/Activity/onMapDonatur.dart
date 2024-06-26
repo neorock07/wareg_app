@@ -13,6 +13,7 @@ import 'package:wareg_app/Controller/API/Transaksi/TransaksiController.dart';
 import 'package:wareg_app/Controller/MapsController.dart';
 import 'package:wareg_app/Controller/notification_controller.dart';
 import 'package:wareg_app/Partials/MapBox.dart';
+import 'package:wareg_app/Util/IconMaker.dart';
 import 'package:wareg_app/Util/Ip.dart';
 import '../Controller/API/Postingan/GetByLokasi.dart';
 
@@ -68,90 +69,113 @@ class _OnMapDonaturState extends State<OnMapDonatur> {
       getTrans.value = value;
     });
 
-    // post_foto = mpController.map_dataTarget['url']
-    //     .toString()
-    //     .replaceFirst("http://localhost:3000", newBaseUrl);
-    // donatur_foto = mpController?.map_dataTarget['donatur_profile']
-    //     .toString()
-    //     .replaceFirst("http://localhost:3000", newBaseUrl);
-    // koordinat = [
-    //   StaticPositionGeoPoint(
-    //       "2",
-    //       MarkerIcon(
-    //         iconWidget: IconMaker(
-    //             title: mpController.map_dataTarget['title'],
-    //             link: "${mpController.map_dataTarget['url']}"),
-    //       ),
-    //       [
-    //         GeoPoint(
-    //             latitude: mpController.target_lat!,
-    //             longitude: mpController.target_long!),
-    //       ]),
-    // ];
-    // setState(() {
-    //   userProfile = prefs.getString('profile_picture')!;
-    //   id_user = prefs.getInt('user_id')!;
-    //   log("user id : $id_user");
-    //   markerUser =
-    //       userProfile.replaceFirst("http://localhost:3000", newBaseUrl);
-    // });
+    koordinat = [
+      StaticPositionGeoPoint(
+          "2",
+          MarkerIcon(
+            iconWidget: IconMaker(title: "Penerima", link: userProfile),
+          ),
+          [
+            GeoPoint(latitude: latRecipient!, longitude: longRecipient!),
+          ]),
+      StaticPositionGeoPoint(
+          "3",
+          MarkerIcon(
+            iconWidget: IconMaker(title: "Lokasi Anda", link: userProfile),
+          ),
+          [
+            GeoPoint(
+                latitude: (getTrans.value == null)
+                    ? 0
+                    : double.parse(
+                        getTrans.value['post_coordinate'].split(",")[0]),
+                longitude: (getTrans.value == null)
+                    ? 0
+                    : double.parse(
+                        getTrans.value['post_coordinate'].split(",")[1])),
+          ]),
+          
+    ];
+
+    await mpController.controller.setMarkerOfStaticPoint(
+        id: "2",
+        markerIcon: MarkerIcon(
+          iconWidget: IconMaker(title: "Penerima", link: userProfile),
+        ));
+    await mpController.controller.setMarkerOfStaticPoint(
+        id: "3",
+        markerIcon: MarkerIcon(
+            iconWidget: MarkerIcon(
+          iconWidget: IconMaker(title: "Lokasi Anda", link: userProfile),
+        )));
+
+         await mpController.controller.addMarker(
+          GeoPoint(latitude: double.parse(
+                        getTrans.value['post_coordinate'].split(",")[0]), longitude: double.parse(
+                        getTrans.value['post_coordinate'].split(",")[1])),
+          markerIcon: MarkerIcon(
+            iconWidget: IconMaker(link: "", title: "Lokasi Donasi"),
+          ),
+        );
+
+    setState(() {});
   }
 
   @override
   void initState() {
     super.initState();
+    startLocationUpdates();
     _loadProfile();
 
     // startLocationUpdates();
     notificationController.checkNotification();
   }
 
-  // @override
-  // void dispose() {
-  //   locationUpdateTimer?.cancel();
-  //   streamController?.close();
-  //   mpController.controller.dispose();
-  //   // _timer.cancel();
-  //   super.dispose();
-  // }
+  @override
+  void dispose() {
+    locationUpdateTimer?.cancel();
+    streamController?.close();
+    mpController.controller.dispose();
+    // _timer.cancel();
+    super.dispose();
+  }
 
   void startLocationUpdates() {
     locationUpdateTimer = Timer.periodic(Duration(seconds: 10), (timer) async {
+      
       await updateLocationController.getUpdateLocation(id_trans).then((value) {
         log("update lokasi pengambil : ${value}");
-        latRecipient = value['lat'];
-        longRecipient = value['lon'];
+        latRecipient = double.parse(value['lat']);
+        longRecipient = double.parse( value['lon']);
+        setState(() {});
       });
-      // await mpController.controller.myLocation().then((value) async {
-      //   latUser = value.latitude;
-      //   longUser = value.longitude;
-      //   if (a <= 0) {
-      //     await postController
-      //         .fetchPostDetail(
-      //             latUser, longUser, mpController.map_dataTarget['id'])
-      //         .then((value) {
-      //       count =
-      //           List.filled(postController.posts3.value['variants'].length, 0)
-      //               .obs;
-
-      //       a++;
-      //     });
-      //   }
-      // });
-      if (latRecipient != null && longRecipient != null) {
+      
+      if (latRecipient != null && longRecipient != null && getTrans.value != null) {
         streamController
             ?.add(GeoPoint(latitude: latRecipient!, longitude: longRecipient!));
+        log("nilai untuk stream : ${latRecipient} | ${longRecipient}");
+      }else{
+        log("ada null");
       }
+      
     });
   }
 
-  Future<void> drawRoute(GeoPoint userLocation) async {
+  Future<void> drawRoute(GeoPoint recipientLocation) async {
     await mpController.controller.removeLastRoad();
     roadInfo = await mpController.controller.drawRoad(
-        userLocation,
+        // Lokasi donasi,
         GeoPoint(
-            latitude: mpController.target_lat!,
-            longitude: mpController.target_long!),
+            latitude: (getTrans.value == null)
+                ? 0
+                : double.parse(getTrans.value['post_coordinate'].split(",")[0]),
+            longitude: (getTrans.value == null)
+                ? 0
+                : double.parse(
+                    getTrans.value['post_coordinate'].split(",")[1])),
+        GeoPoint(
+            latitude: recipientLocation.latitude,
+            longitude: recipientLocation.longitude),
         roadType: RoadType.bike,
         roadOption: const RoadOption(
             roadColor: Color.fromRGBO(42, 122, 89, 1),
@@ -173,7 +197,7 @@ class _OnMapDonaturState extends State<OnMapDonatur> {
         children: [
           Container(
               height: MediaQuery.of(context).size.height * 0.6,
-              child: StreamBuilder<GeoPoint>(
+              child: (streamController!.stream == null)? Text("") : StreamBuilder<GeoPoint>(
                   stream: streamController?.stream,
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
@@ -185,8 +209,17 @@ class _OnMapDonaturState extends State<OnMapDonatur> {
                       koordinat,
                       userProfile,
                       isDraw: true,
-                      lat: mpController.target_lat,
-                      long: mpController.target_long,
+                      isUserTrack: false,
+                      lat: (getTrans.value == null)
+                          ? 0
+                          : double.parse(
+                              getTrans.value['post_coordinate'].split(",")[0]),
+                      long: (getTrans.value == null)
+                          ? 0
+                          : double.parse(
+                              getTrans.value['post_coordinate'].split(",")[1]),
+                      lat_recipient: latRecipient,
+                      long_recipient: longRecipient,
                     );
                   })),
           DraggableScrollableSheet(
@@ -283,29 +316,7 @@ class _OnMapDonaturState extends State<OnMapDonatur> {
                                               );
                                             }
 
-                                            if (getTrans.value[
-                                                        'transaction_timeline']
-                                                    ['konfirmasi'] !=
-                                                null) {
-                                              currIndex = 0;
-                                              return const DotIndicator(
-                                                  color: Color.fromRGBO(
-                                                      48, 122, 89, 1));
-                                            } else if (getTrans.value[
-                                                            'transaction_timeline']
-                                                        ['pengambilan'] !=
-                                                    null &&
-                                                getTrans.value[
-                                                            'transaction_timeline']
-                                                        ['konfirmasi'] !=
-                                                    null) {
-                                              return const DotIndicator(
-                                                  color: Color.fromRGBO(
-                                                      48, 122, 89, 1));
-                                            } else {
-                                              return const DotIndicator(
-                                                  color: Colors.grey);
-                                            }
+                                            
                                           },
                                           connectorBuilder: (_, index, ___) {
                                             return SolidLineConnector(
@@ -404,6 +415,7 @@ class _OnMapDonaturState extends State<OnMapDonatur> {
                                   ),
                                 ]),
                               ),
+                              
                               (getTrans['variant'] == null)
                                   ? Text("")
                                   : Padding(

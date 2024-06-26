@@ -83,7 +83,6 @@ class _MenuState extends State<Menu> {
         String updatedUrl =
             post.media[0].url.replaceFirst("http://localhost:3000", newBaseUrl);
 
-        // Add marker to the map with the correct icon and title
         await mpController.controller.addMarker(
           point,
           markerIcon: MarkerIcon(

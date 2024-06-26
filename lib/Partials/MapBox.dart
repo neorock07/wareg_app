@@ -24,6 +24,9 @@ Widget MapBox(
   bool? isTrack = true,
   double? lat,
   double? long,
+  bool? isUserTrack = true,
+  double? lat_recipient, 
+  double? long_recipient
 }) {
   var mpController = Get.put(MapsController());
 
@@ -39,6 +42,26 @@ Widget MapBox(
                   latitude: userLocation.latitude,
                   longitude: userLocation.longitude),
               GeoPoint(latitude: lat!, longitude: long!),
+              roadType: RoadType.bike,
+              roadOption: RoadOption(
+                roadWidth: 10,
+                roadColor: Color.fromRGBO(48, 122, 89, 1),
+              ),
+            );
+          }
+          // mpController.roadInfo!.value;
+        } finally {
+          mpController.isLoading.value = false;
+        }
+      }else if(condition == true && isDraw == true && isUserTrack == false){
+        try {
+          var userLocation = await mpController.getUserLocation();
+          if (userLocation != null) {
+            await controller.drawRoad(
+              GeoPoint(
+                  latitude: lat!,
+                  longitude: long!),
+              GeoPoint(latitude: lat_recipient!, longitude: long_recipient!),
               roadType: RoadType.bike,
               roadOption: RoadOption(
                 roadWidth: 10,
@@ -67,7 +90,7 @@ Widget MapBox(
         maxZoomLevel: 19,
         stepZoom: 1.0,
       ),
-      userLocationMarker: UserLocationMaker(
+      userLocationMarker: (isUserTrack == false)? null : UserLocationMaker(
         personMarker: MarkerIcon(
           iconWidget: IconMaker(
             title: "Aku",
