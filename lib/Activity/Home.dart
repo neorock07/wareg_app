@@ -12,6 +12,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wareg_app/Controller/API/Point/PointController.dart';
 import 'package:wareg_app/Controller/API/Postingan/GetByLokasi.dart';
+import 'package:wareg_app/Controller/API/Transaksi/TransaksiController.dart';
 import 'package:wareg_app/Controller/MapsController.dart';
 import 'package:wareg_app/Controller/message_controller.dart';
 import 'package:wareg_app/Controller/notification_controller.dart';
@@ -39,8 +40,10 @@ class _HomeState extends State<Home> {
   var postController = Get.put(GetPostController());
   MapsController mpController = Get.put(MapsController());
   var pointController = Get.put(PointController());
+  var transController = Get.put(TransaksiController());
 
   var lat, long;
+  RxList<dynamic> data_ongoing = [].obs;
   final NotificationController notificationController =
       Get.put(NotificationController());
   List<Widget> widgetList = [];
@@ -107,6 +110,8 @@ class _HomeState extends State<Home> {
           position.latitude, position.longitude);
       var result2 = await postController.fetchPostsNew(
           position.latitude, position.longitude);
+      data_ongoing.value = await transController.getOngoing();     
+
 
       if (result1 == 401 || result2 == 401) {
         // jika not authorized maka hapus sharedPref data
@@ -146,7 +151,7 @@ class _HomeState extends State<Home> {
                 },
                 child: Stack(children: [
                   Container(
-                      height: 100.h,
+                      height: 120.h,
                       width: MediaQuery.of(context).size.width * 0.9,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(5.dm),
@@ -249,7 +254,7 @@ class _HomeState extends State<Home> {
               height: 10.h,
             ),
             Obx(() => CardBoard(context,
-                status: (postController.posts3.value != null)? postController.posts3.value['transaction'].toString() : null,
+                status: (data_ongoing.value != null)? data_ongoing.value : null,
                 point: pointController.point_result.value.toString())),
             SizedBox(
               height: 10.h,
@@ -257,7 +262,7 @@ class _HomeState extends State<Home> {
             CarouselSlider(
                 items: widgetList,
                 options: CarouselOptions(
-                  height: 100.h,
+                  height: 120.h,
                   aspectRatio: 16 / 9,
                   viewportFraction: 0.8,
                   initialPage: 0,

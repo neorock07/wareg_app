@@ -14,7 +14,7 @@ var ipAdd = Ip();
 var prefController = Get.put(PrefController());
 var mpController = Get.put(MapsController());
 
-Widget MapBox(
+Widget MapBoxDonatur(
   BuildContext context,
   var controller,
   dynamic point,
@@ -32,8 +32,10 @@ Widget MapBox(
   var mpController = Get.put(MapsController());
 
   return OSMFlutter(
+    
     onMapIsReady: (condition) async {
       if (condition == true && isDraw == true) {
+        // Ensure the getUserLocation method returns a valid location
         try {
           var userLocation = await mpController.getUserLocation();
           if (userLocation != null) {
@@ -49,6 +51,7 @@ Widget MapBox(
               ),
             );
           }
+
           // mpController.roadInfo!.value;
         } finally {
           mpController.isLoading.value = false;
@@ -77,12 +80,21 @@ Widget MapBox(
     },
     osmOption: OSMOption(
       isPicker: isPicker ?? false,
+      markerOption: MarkerOption(
+         defaultMarker: MarkerIcon(
+                    icon: Icon(
+                      Icons.person_pin_circle,
+                      color: Colors.blue,
+                      size: 56,
+                    ),
+                )
+      ),
       staticPoints: (point != null) ? point : [],
       showDefaultInfoWindow: true,
       showZoomController: false,
       userTrackingOption: UserTrackingOption(
-        enableTracking: isTrack!,
-        unFollowUser: false,
+        enableTracking: false,
+        unFollowUser: true,
       ),
       zoomOption: const ZoomOption(
         initZoom: 15,

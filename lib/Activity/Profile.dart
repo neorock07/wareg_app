@@ -652,6 +652,8 @@ class _RiwayatListState extends State<RiwayatList> {
                       transaksiKon.transaksi_id = transaction['id'];
                       Navigator.pushNamed(context, "/onmap_donor").then(
                           (_) => transactionController.fetchTransactions());
+                    }else{
+                      
                     }
                   },
                   child: Card(

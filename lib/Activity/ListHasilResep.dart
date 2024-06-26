@@ -187,6 +187,7 @@ class _ListHasilResepState extends State<ListHasilResep> {
                 'Selengkapnya',
                 style: TextStyle(
                   fontSize: 12.sp,
+            
                   fontFamily: 'Poppins',
                 ),
               ),

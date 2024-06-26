@@ -18,6 +18,7 @@ class TransaksiController extends GetxController {
   RxMap<String, dynamic> transDonor = <String, dynamic>{}.obs;
   /* variable untuk simpan trans_id dari page lain -- intent */
   int transaksi_id = 0;
+  String? role_to_riwayat;
 
   Future<Map<String, dynamic>> postTransaction(
       int postId, List<Map<String, dynamic>> detail) async {
@@ -47,11 +48,7 @@ class TransaksiController extends GetxController {
     return result!;
   }
 
-// {
-//     "transactionId":7,
-//     "review":4,
-//     "comment":"terpercaya"
-// }
+
   Future<Map<String, dynamic>> postConfirmation(
       int? transId, int? review, String? comment) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -163,6 +160,33 @@ class TransaksiController extends GetxController {
       log("lha iki respon 200");
       log("${result}");
     } else {
+      result = jsonDecode(response.body);
+      log("response : ${response.statusCode} | ${result}");
+    }
+    return result!;
+  }
+
+  Future<List<dynamic>> getOngoing() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var token = prefs.getString('token') ?? '';
+    String authorizationHeader = "Bearer $token";
+
+   var result;
+
+    final response = await http.get(
+        Uri.parse(
+            "${ipAdd.getType()}://${ipAdd.getIp()}/transactions/ongoing"),
+        headers: {
+          "Authorization": authorizationHeader,
+          "Content-Type": "application/json"
+        });
+
+    if (response.statusCode == 200) {
+      result = jsonDecode(response.body);
+      log("lha iki respon 200 untuk ongoing");
+      log("${result}");
+    } else {
+      log("data ongoing : ${result}");
       result = jsonDecode(response.body);
       log("response : ${response.statusCode} | ${result}");
     }

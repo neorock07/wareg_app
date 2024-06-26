@@ -13,6 +13,7 @@ import 'package:wareg_app/Controller/API/Transaksi/TransaksiController.dart';
 import 'package:wareg_app/Controller/MapsController.dart';
 import 'package:wareg_app/Controller/notification_controller.dart';
 import 'package:wareg_app/Partials/MapBox.dart';
+import 'package:wareg_app/Partials/MapBoxDonatur.dart';
 import 'package:wareg_app/Util/IconMaker.dart';
 import 'package:wareg_app/Util/Ip.dart';
 import '../Controller/API/Postingan/GetByLokasi.dart';
@@ -48,6 +49,7 @@ class _OnMapDonaturState extends State<OnMapDonatur> {
   var markerUser;
   int? id_user;
   final ipAdd = Ip();
+  String? newBaseUrl;
   String? updatedUrl;
   String? post_foto;
   String? donatur_foto;
@@ -62,71 +64,122 @@ class _OnMapDonaturState extends State<OnMapDonatur> {
 
   Future<void> _loadProfile() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String newBaseUrl = "${ipAdd.getType()}://${ipAdd.getIp()}";
+    newBaseUrl = "${ipAdd.getType()}://${ipAdd.getIp()}";
 
     id_trans = transController.transaksi_id;
     try {
-      final value = await transController.getTransaksiDonor(id_trans);
+      final value =
+          await transController.getTransaksiDonor(id_trans).then((value) async {
+        getTrans.value = value;
+        
+        latRecipient = double.parse(value['lat']);
+        longRecipient = double.parse(value['lon']);
+        // GeoPoint point = GeoPoint(latitude: latRecipient!, longitude:longRecipient!);
+        // await mpController.controller.addMarker(point,
+        // markerIcon:  MarkerIcon(
+        //             icon: Icon(
+        //                 Icons.location_history_rounded,
+        //                 color: Colors.red,
+        //                 size: 48,
+        //             )),
+        // // angle: pi / 3,
+        // iconAnchor: IconAnchor(
+        //   anchor: Anchor.top,
+        // ));
+
+        GeoPoint geo_target = GeoPoint(latitude: double.parse(
+                            getTrans.value['post_coordinate'].split(",")[0]), longitude: double.parse(
+                            getTrans.value['post_coordinate'].split(",")[1]));
+        await mpController.controller.addMarker(
+          geo_target,
+          markerIcon: MarkerIcon(
+            icon: Icon(
+              Icons.pin_drop,
+              color: Colors.red,
+              size: 48,
+            ),
+          ),
+          iconAnchor: IconAnchor(
+            anchor: Anchor.top,
+          ),
+        );
+
+        koordinat = [
+          StaticPositionGeoPoint(
+              "2",
+              MarkerIcon(
+                iconWidget: IconMaker(title: "Penerima", link: userProfile),
+              ),
+              [
+                GeoPoint(latitude: latRecipient!, longitude: longRecipient!),
+              ]),
+          StaticPositionGeoPoint(
+              "3",
+              MarkerIcon(
+                iconWidget: IconMaker(title: "Lokasi Anda", link: userProfile),
+              ),
+              [
+                GeoPoint(
+                    latitude: (getTrans.value == null)
+                        ? 0
+                        : double.parse(
+                            getTrans.value['post_coordinate'].split(",")[0]),
+                    longitude: (getTrans.value == null)
+                        ? 0
+                        : double.parse(
+                            getTrans.value['post_coordinate'].split(",")[1])),
+              ]),
+        ];
+
+        await _setMarkers();
+      });
       log("sudah mendapatkan data transaksi : ${value['user_recipient_name']}");
-      getTrans.value = value;
-
-      latRecipient = double.parse(value['lat']);
-      longRecipient = double.parse(value['lon']);
-
-      koordinat = [
-        StaticPositionGeoPoint(
-            "2",
-            MarkerIcon(
-              iconWidget: IconMaker(title: "Penerima", link: userProfile),
-            ),
-            [
-              GeoPoint(latitude: latRecipient!, longitude: longRecipient!),
-            ]),
-        StaticPositionGeoPoint(
-            "3",
-            MarkerIcon(
-              iconWidget: IconMaker(title: "Lokasi Anda", link: userProfile),
-            ),
-            [
-              GeoPoint(
-                  latitude: (getTrans.value == null)
-                      ? 0
-                      : double.parse(
-                          getTrans.value['post_coordinate'].split(",")[0]),
-                  longitude: (getTrans.value == null)
-                      ? 0
-                      : double.parse(
-                          getTrans.value['post_coordinate'].split(",")[1])),
-            ]),
-      ];
-
-      await mpController.controller.setMarkerOfStaticPoint(
-          id: "2",
-          markerIcon: MarkerIcon(
-            iconWidget: IconMaker(title: "Penerima", link: userProfile),
-          ));
-      await mpController.controller.setMarkerOfStaticPoint(
-          id: "3",
-          markerIcon: MarkerIcon(
-              iconWidget: MarkerIcon(
-            iconWidget: IconMaker(title: "Lokasi Anda", link: userProfile),
-          )));
-
-      await mpController.controller.addMarker(
-        GeoPoint(
-            latitude:
-                double.parse(getTrans.value['post_coordinate'].split(",")[0]),
-            longitude:
-                double.parse(getTrans.value['post_coordinate'].split(",")[1])),
-        markerIcon: MarkerIcon(
-          iconWidget: IconMaker(link: "", title: "Lokasi Donasi"),
-        ),
-      );
     } catch (e) {
       log("Error loading profile: $e");
     }
 
     setState(() {});
+  }
+
+  Future<void> _setMarkers() async {
+//     await mpController.controller.setMarkerOfStaticPoint(
+//         id: "2",
+//         markerIcon: MarkerIcon(
+//           iconWidget: IconMaker(title: "Penerima", link: userProfile),
+//         ));
+//     await mpController.controller.setMarkerOfStaticPoint(
+//         id: "3",
+//         markerIcon: MarkerIcon(
+//           iconWidget: IconMaker(title: "Lokasi Anda", link: userProfile),
+//         ));
+//     await mpController.controller.addMarker(
+//       GeoPoint(
+//           latitude:
+//           double.parse(getTrans.value['post_coordinate'].split(",")[0]),
+//           longitude:
+//           double.parse(getTrans.value['post_coordinate'].split(",")[1])),
+//       markerIcon: MarkerIcon(
+//         iconWidget: IconMaker(link: "", title: "Lokasi Donasi"),
+//       ),
+//     );
+
+//     await mpController.controller.addMarker(GeoPoint(latitude: double.parse(getTrans.value['post_coordinate'].split(",")[0]), longitude: double.parse(getTrans.value['post_coordinate'].split(",")[0])),
+//       markerIcon:MarkerIcon(
+//             iconWidget: IconMaker(link: "donatur", title:"donatur"),
+//           ),
+
+// );
+    // await mpController.controller.addMarker(GeoPoint(latitude: -7.051894836887435, longitude: 110.43593567094251),
+    //     markerIcon:  MarkerIcon(
+    //                 icon: Icon(
+    //                     Icons.location_history_rounded,
+    //                     color: Colors.red,
+    //                     size: 48,
+    //                 )),
+    //     // angle: pi / 3,
+    //     iconAnchor: IconAnchor(
+    //       anchor: Anchor.top,
+    //     ));
   }
 
   @override
@@ -146,28 +199,73 @@ class _OnMapDonaturState extends State<OnMapDonatur> {
   }
 
   void startLocationUpdates() {
-    locationUpdateTimer = Timer.periodic(Duration(seconds: 10), (timer) async {
-      try {
-        final value =
-            await updateLocationController.getUpdateLocation(id_trans);
-        log("update lokasi pengambil : ${value}");
-        latRecipient = double.parse(value['lat']);
-        longRecipient = double.parse(value['lon']);
-        setState(() {});
-        if (latRecipient != null &&
-            longRecipient != null &&
-            getTrans.isNotEmpty) {
-          streamController.add(
-              GeoPoint(latitude: latRecipient!, longitude: longRecipient!));
-          log("nilai untuk stream : ${latRecipient} | ${longRecipient}");
-        } else {
-          log("ada null");
-        }
-      } catch (e) {
-        log("Error updating location: $e");
+  locationUpdateTimer = Timer.periodic(Duration(seconds: 10), (timer) async {
+    try {
+      final value = await updateLocationController.getUpdateLocation(id_trans);
+      log("update lokasi pengambil : ${value}");
+      latRecipient = double.parse(value['lat']);
+      longRecipient = double.parse(value['lon']);
+      setState(() {});
+      if (latRecipient != null &&
+          longRecipient != null &&
+          getTrans.isNotEmpty) {
+        GeoPoint oldPoint = GeoPoint(latitude: latRecipient!, longitude: longRecipient!);
+        GeoPoint newPoint = GeoPoint(latitude: latRecipient!, longitude: longRecipient!);
+
+        GeoPoint geo_target = GeoPoint(latitude: double.parse(
+                            getTrans.value['post_coordinate'].split(",")[0]), longitude: double.parse(
+                            getTrans.value['post_coordinate'].split(",")[1]));
+        await mpController.controller.addMarker(
+          geo_target,
+          markerIcon: MarkerIcon(
+            icon: Icon(
+              Icons.pin_drop,
+              color: Colors.red,
+              size: 48,
+            ),
+          ),
+          iconAnchor: IconAnchor(
+            anchor: Anchor.top,
+          ),
+        );
+
+
+        await mpController.controller.changeLocationMarker(
+          oldLocation:  oldPoint,
+          newLocation : newPoint,
+          markerIcon : MarkerIcon(
+            iconWidget: IconMaker(
+              title: "Aku",
+              link: "${getTrans.value['user_recipient_profile_picture'].toString().replaceFirst("http://localhost:3000", newBaseUrl!)}",
+            ),
+          ),
+        );
+
+        // GeoPoint oldPoint2 = GeoPoint(latitude: double.parse(getTrans['post_coordinate'].split(",")[0]), longitude: double.parse(getTrans['post_coordinate'].split(",")[1]));
+        // GeoPoint newPoint2 = GeoPoint(latitude: double.parse(getTrans['post_coordinate'].split(",")[0]), longitude: double.parse(getTrans['post_coordinate'].split(",")[1]));
+        // await mpController.controller.changeLocationMarker(
+        //   oldLocation: oldPoint2,
+        //   newLocation: newPoint2,
+        //   markerIcon: MarkerIcon(
+        //     icon: Icon(
+        //       Icons.pin_drop,
+        //       color: Colors.red,
+        //       size: 48,
+        //     ),
+        //   ),
+        //   iconAnchor: IconAnchor(
+        //     anchor: Anchor.top,
+        //   ),
+        // );
+      } else {
+        log("ada null");
       }
-    });
-  }
+    } catch (e) {
+      log("Error updating location: $e");
+    }
+  });
+}
+
 
   Future<void> drawRoute(GeoPoint recipientLocation) async {
     await mpController.controller.removeLastRoad();
@@ -209,7 +307,7 @@ class _OnMapDonaturState extends State<OnMapDonatur> {
                   if (snapshot.hasData) {
                     drawRoute(snapshot.data!);
                   }
-                  return MapBox(
+                  return MapBoxDonatur(
                     context,
                     mpController.controller,
                     koordinat,
