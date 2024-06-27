@@ -74,18 +74,7 @@ class _OnMapDonaturState extends State<OnMapDonatur> {
         
         latRecipient = double.parse(value['lat']);
         longRecipient = double.parse(value['lon']);
-        // GeoPoint point = GeoPoint(latitude: latRecipient!, longitude:longRecipient!);
-        // await mpController.controller.addMarker(point,
-        // markerIcon:  MarkerIcon(
-        //             icon: Icon(
-        //                 Icons.location_history_rounded,
-        //                 color: Colors.red,
-        //                 size: 48,
-        //             )),
-        // // angle: pi / 3,
-        // iconAnchor: IconAnchor(
-        //   anchor: Anchor.top,
-        // ));
+       
 
         GeoPoint geo_target = GeoPoint(latitude: double.parse(
                             getTrans.value['post_coordinate'].split(",")[0]), longitude: double.parse(
@@ -400,30 +389,43 @@ class _OnMapDonaturState extends State<OnMapDonatur> {
                               indicatorBuilder: (context, index) {
                                 String step = data_timeline[index];
                                 String? date = getTrans[step];
-                                if (date != null) {
-                                  return DotIndicator(
-                                    color: Colors.green,
-                                  );
-                                } else if (index == 0 ||
-                                    getTrans[data_timeline[index - 1]] !=
-                                        null) {
-                                  return DotIndicator(
-                                    color: Colors.green,
-                                  );
-                                } else {
-                                  return OutlinedDotIndicator(
-                                    borderWidth: 2.0,
-                                    color: Colors.grey,
-                                  );
-                                }
+                                
+                                if (getTrans.value['transaction_timeline'] != null) {
+                                    if(getTrans.value['transaction_timeline']['konfirmasi'] != null){
+                                        if(index == 0){
+                                          return DotIndicator(color: Colors.green,);
+                                        }
+                                    }
+
+                                    if(getTrans.value['transaction_timeline']['pengambilan'] != null){
+                                      if(index == 1){
+                                          return DotIndicator(color: Colors.green,);
+                                        }
+                                    }else{
+                                          return DotIndicator(color: Colors.grey,);
+
+                                    }
+                                    
+                                    if(getTrans.value['transaction_timeline']['konfirmasi'] == null && getTrans.value['transaction_timeline']['pengambilan'] == null){
+                                      if(index == 2){
+                                          return DotIndicator(color: Colors.grey,);
+                                        }
+                                    }else{
+                                          return DotIndicator(color: Colors.green,);
+
+                                        }
+
+                                  }
                               },
                               connectorBuilder: (_, index, ___) {
                                 return SolidLineConnector(
-                                  color: (getTrans['transaction_timeline']
+                                  color: (getTrans.value['transaction_timeline'] !=
+                                            null)
+                                        ? (getTrans.value['transaction_timeline']
                                               ['pengambilan'] !=
                                           null)
                                       ? Color.fromRGBO(48, 122, 89, 1)
-                                      : Colors.grey,
+                                      : Colors.grey : Colors.grey,
                                 );
                               },
                               itemCount: 3,

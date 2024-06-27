@@ -193,6 +193,33 @@ class TransaksiController extends GetxController {
     return result!;
   }
 
+  Future<Map<String, dynamic>> getCompleted(int transId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var token = prefs.getString('token') ?? '';
+    String authorizationHeader = "Bearer $token";
+
+   var result;
+
+    final response = await http.get(
+        Uri.parse(
+            "${ipAdd.getType()}://${ipAdd.getIp()}/transactions/completed/$transId"),
+        headers: {
+          "Authorization": authorizationHeader,
+          "Content-Type": "application/json"
+        });
+
+    if (response.statusCode == 200) {
+      result = jsonDecode(response.body);
+      log("lha iki respon 200 untuk completed");
+      log("${result}");
+    } else {
+      log("data completed : ${result}");
+      result = jsonDecode(response.body);
+      log("response : ${response.statusCode} | ${result}");
+    }
+    return result!;
+  }
+
 //   {
 //     "reason":"Makanan telah basi",
 //     "transactionId":5

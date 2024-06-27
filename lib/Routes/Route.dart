@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wareg_app/Activity/BottomNavPage.dart';
 import 'package:wareg_app/Activity/CekLayak.dart';
 import 'package:wareg_app/Activity/ChatActivity.dart';
+import 'package:wareg_app/Activity/CompletedActivity.dart';
 import 'package:wareg_app/Activity/Donasi.dart';
 import 'package:wareg_app/Activity/FoodPicture.dart';
 import 'package:wareg_app/Activity/FormFood.dart';
@@ -37,6 +38,8 @@ class Routes {
         return MaterialPageRoute(builder: (_) => OnMap());
       case '/onmap_donor':
         return MaterialPageRoute(builder: (_) => OnMapDonatur());
+      case '/completed':
+        return MaterialPageRoute(builder: (_) => CompletedActivity());
       case '/chat':
         return MaterialPageRoute(builder: (_) => ChatActivity());
 
