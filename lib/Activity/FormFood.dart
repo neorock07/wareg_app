@@ -391,6 +391,7 @@ class _FormFoodState extends State<FormFood> {
                       onChanged: (String? newValue) {
                         setState(() {
                           dropdownValue = newValue!;
+                          log(dropdownValue.toString());
                         });
                       },
 
@@ -680,6 +681,8 @@ class _FormFoodState extends State<FormFood> {
                           foodController.data_food!['categories[]'] =
                               "${items.indexOf(dropdownValue!)}";
 
+                          foodController.data_food!['kategori'] =
+                              "${dropdownValue!}";
                           foodController.data_food!['body[alamat]'] =
                               "${lokasiController.text}";
 

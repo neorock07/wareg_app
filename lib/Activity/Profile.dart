@@ -382,13 +382,13 @@ class _NavigationMenuState extends State<NavigationMenu> {
 
   int _getPageIndex(String label) {
     switch (label) {
-      case 'Riwayat':
+      case 'Post':
         return 0;
       case 'Point':
         return 1;
       case 'Pesan':
         return 2;
-      case 'Post':
+      case 'Riwayat':
         return 3;
       default:
         return 0;
@@ -398,15 +398,15 @@ class _NavigationMenuState extends State<NavigationMenu> {
   String _getPageLabel(int index) {
     switch (index) {
       case 0:
-        return 'Riwayat';
+        return 'Post';
       case 1:
         return 'Point';
       case 2:
         return 'Pesan';
       case 3:
-        return 'Post';
-      default:
         return 'Riwayat';
+      default:
+        return 'Post';
     }
   }
 
@@ -436,10 +436,10 @@ class _NavigationMenuState extends State<NavigationMenu> {
               });
             },
             children: <Widget>[
-              const RiwayatList(),
+              const UserPostsPage(),
               const PointPage(),
               const ChatContent(),
-              const UserPostsPage()
+              const RiwayatList(),
             ],
           ),
         ),
@@ -469,9 +469,9 @@ class ButtonSection extends StatelessWidget {
         children: [
           ButtonWithText(
             color: color,
-            label: 'Riwayat',
-            isActive: activeButton == 'Riwayat',
-            onPressed: () => onButtonPressed('Riwayat'),
+            label: 'Post',
+            isActive: activeButton == 'Post',
+            onPressed: () => onButtonPressed('Post'),
           ),
           ButtonWithText(
             color: color,
@@ -487,9 +487,9 @@ class ButtonSection extends StatelessWidget {
           ),
           ButtonWithText(
             color: color,
-            label: 'Post',
-            isActive: activeButton == 'Post',
-            onPressed: () => onButtonPressed('Post'),
+            label: 'Riwayat',
+            isActive: activeButton == 'Riwayat',
+            onPressed: () => onButtonPressed('Riwayat'),
           ),
         ],
       ),
@@ -652,8 +652,6 @@ class _RiwayatListState extends State<RiwayatList> {
                       transaksiKon.transaksi_id = transaction['id'];
                       Navigator.pushNamed(context, "/onmap_donor").then(
                           (_) => transactionController.fetchTransactions());
-                    }else{
-                      
                     }
                   },
                   child: Card(
@@ -1193,9 +1191,6 @@ class _UserPostsPageState extends State<UserPostsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('My Posts'),
-      ),
       body: Obx(() {
         if (postController.isLoading5.value) {
           return Center(child: CircularProgressIndicator());
@@ -1214,11 +1209,12 @@ class _UserPostsPageState extends State<UserPostsPage> {
                           .format(DateTime.parse(post['createdAt']).toLocal());
                       final expiredAt = DateFormat('dd/MM/yyyy HH:mm:ss')
                           .format(DateTime.parse(post['expiredAt']).toLocal());
+
                       final mediaUrls = post['media'].isNotEmpty
-                          ? post['media']
-                              .map<String>((media) => media['url'].replaceFirst(
-                                  'http://localhost:3000',
-                                  '${Ip().getType()}://${Ip().getIp()}'))
+                          ? (post['media'] as List)
+                              .map<String>((media) => (media['url'] as String)
+                                  .replaceFirst('http://localhost:3000',
+                                      '${Ip().getType()}://${Ip().getIp()}'))
                               .toList()
                           : ['https://via.placeholder.com/150'];
 
@@ -1235,32 +1231,49 @@ class _UserPostsPageState extends State<UserPostsPage> {
                                     fontSize: 18, fontWeight: FontWeight.bold),
                               ),
                               SizedBox(height: 10),
-                              CarouselSlider(
-                                options: CarouselOptions(
-                                  height: 150.0,
-                                  enlargeCenterPage: true,
-                                  autoPlay: true,
-                                ),
-                                items: mediaUrls.map((url) {
-                                  return Builder(
-                                    builder: (BuildContext context) {
-                                      return Container(
-                                        width:
-                                            MediaQuery.of(context).size.width,
-                                        margin: EdgeInsets.symmetric(
-                                            horizontal: 5.0),
+                              mediaUrls.length > 1
+                                  ? CarouselSlider(
+                                      options: CarouselOptions(
+                                        height: 250.0,
+                                        enlargeCenterPage: true,
+                                        autoPlay: true,
+                                      ),
+                                      items: mediaUrls.map((url) {
+                                        return Builder(
+                                          builder: (BuildContext context) {
+                                            return Container(
+                                              width: MediaQuery.of(context)
+                                                  .size
+                                                  .width,
+                                              margin: EdgeInsets.symmetric(
+                                                  horizontal: 5.0),
+                                              child: FittedBox(
+                                                fit: BoxFit.contain,
+                                                child: Image.network(
+                                                  url,
+                                                  errorBuilder: (context, error,
+                                                          stackTrace) =>
+                                                      Icon(Icons.error),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        );
+                                      }).toList(),
+                                    )
+                                  : Container(
+                                      width: double.infinity,
+                                      height: 250.0,
+                                      child: FittedBox(
+                                        fit: BoxFit.contain,
                                         child: Image.network(
-                                          url,
-                                          fit: BoxFit.cover,
+                                          mediaUrls[0],
                                           errorBuilder:
                                               (context, error, stackTrace) =>
                                                   Icon(Icons.error),
                                         ),
-                                      );
-                                    },
-                                  );
-                                }).toList(),
-                              ),
+                                      ),
+                                    ),
                               SizedBox(height: 10),
                               Text('Alamat: ${post['body']['alamat']}'),
                               Text('Deskripsi: ${post['body']['description']}'),
