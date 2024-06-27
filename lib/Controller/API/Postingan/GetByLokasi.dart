@@ -56,6 +56,7 @@ class GetPostController extends GetxController {
       if (fetchedPosts == 401) {
         return 401;
       } else if (fetchedPosts != null) {
+        log(fetchedPosts.toString());
         posts2.value = fetchedPosts;
       }
     } finally {

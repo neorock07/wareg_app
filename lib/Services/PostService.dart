@@ -64,7 +64,6 @@ class PostService extends GetxService {
 
   Future<dynamic> fetchPostsNew(var lat, var long) async {
     var ipAdd = Ip();
-
     String? _baseUrl = '${ipAdd.getType()}://${ipAdd.getIp()}';
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var token = prefs.getString('token') ?? '';
@@ -73,18 +72,18 @@ class PostService extends GetxService {
       'Authorization': 'Bearer $token',
     };
 
-    final response = await http.get(
-      Uri.parse('$_baseUrl/post/recent?lat=$lat&lon=$long'),
-      headers: headers,
-    );
+    String url1 = '$_baseUrl/post/recent?lat=$lat&lon=$long';
 
-    if (response.statusCode == 200) {
-      List<dynamic> body = jsonDecode(response.body);
+    final response1 = await http.get(Uri.parse(url1), headers: headers);
+
+    if (response1.statusCode == 200) {
+      log(response1.body.toString());
+      List<dynamic> body = jsonDecode(response1.body);
       return body.map((dynamic item) => Post.fromJson(item)).toList();
-    } else if (response.statusCode == 401) {
+    } else if (response1.statusCode == 401) {
       return 401;
     } else {
-      log("response : ${response.statusCode}");
+      log("response : ${response1.statusCode}");
       throw Exception('Failed to load posts');
     }
   }
