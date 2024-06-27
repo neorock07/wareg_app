@@ -678,9 +678,9 @@ class _FormFoodState extends State<FormFood> {
                         } else {
                           foodController.data_food!['title'] =
                               "${nameController.text}";
-                          foodController.data_food!['categories[]'] =
-                              "${items.indexOf(dropdownValue!)}";
-
+                          foodController.data_food!['categories'] =
+                              (items.indexOf(dropdownValue!) + 1);
+                          log("index =${items.indexOf(dropdownValue!)}");
                           foodController.data_food!['kategori'] =
                               "${dropdownValue!}";
                           foodController.data_food!['body[alamat]'] =

@@ -43,10 +43,10 @@ class PostFood extends GetxController {
     final response = await request.send();
 
     // Check the status code of the response
-    if (response.statusCode == 200) {
+    if (response.statusCode == 201) {
       // The request was successful
       print('Success!');
-      result = {"response": 200};
+      result = {"response": 201};
     } else {
       final responseBody = await http.Response.fromStream(response);
       // The request failed

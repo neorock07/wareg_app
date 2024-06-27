@@ -39,8 +39,7 @@ class Routes {
         return MaterialPageRoute(builder: (_) => OnMapDonatur());
       case '/chat':
         return MaterialPageRoute(builder: (_) => ChatActivity());
-      case '/picture':
-        return MaterialPageRoute(builder: (_) => FoodPicture());
+
       case '/formfood':
         return MaterialPageRoute(builder: (_) => FormFood());
       case '/cek':

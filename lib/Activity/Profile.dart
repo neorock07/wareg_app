@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
@@ -45,7 +46,9 @@ class _ProfileState extends State<Profile> {
         backgroundColor: const Color.fromARGB(255, 255, 255, 255),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pushNamed(context, "/home");
+          },
           color: Colors.black,
         ),
         title: const Center(
@@ -129,6 +132,7 @@ class _CardExampleState extends State<CardExample> {
 
   Future<void> _loadUserData() async {
     var userData = await prefController.getUserData();
+    log(userData['profilePicture'].toString());
     if (userData.isNotEmpty) {
       setState(() {
         _nameController.text = userData['name'] ?? '';
@@ -165,10 +169,7 @@ class _CardExampleState extends State<CardExample> {
       var responseData = await response.stream.bytesToString();
       var jsonResponse = jsonDecode(responseData);
       if (jsonResponse['success']) {
-        String newProfilePicture = jsonResponse['newProfilePicture']
-            .toString()
-            .replaceFirst('http://localhost:3000',
-                '${ipAdd.getType()}://${ipAdd.getIp()}');
+        String newProfilePicture = jsonResponse['newProfilePicture'].toString();
         setState(() {
           prefController.setProfilePicture(newProfilePicture);
         });
@@ -224,6 +225,7 @@ class _CardExampleState extends State<CardExample> {
 
   @override
   Widget build(BuildContext context) {
+    var ipAdd = Ip();
     return FutureBuilder<Map<String, String>>(
       future: prefController.getUserData(),
       builder: (context, snapshot) {
@@ -264,7 +266,11 @@ class _CardExampleState extends State<CardExample> {
                                           fit: BoxFit.cover,
                                         )
                                       : Image.network(
-                                          userData['profilePicture']!,
+                                          userData['profilePicture']!
+                                              .replaceFirst(
+                                            'http://localhost:3000',
+                                            '${ipAdd.getType()}://${ipAdd.getIp()}',
+                                          ),
                                           width: 100,
                                           height: 100,
                                           fit: BoxFit.cover,

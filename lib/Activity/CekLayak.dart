@@ -270,6 +270,8 @@ class _CekLayakState extends State<CekLayak> {
                                               .then((value) {
                                             log("sudah rampung!! | ${value.toString()}");
                                           }).then((value) {
+                                            picController.arr_img.value.clear();
+
                                             Navigator.pushNamed(
                                                 context, "/result_check");
                                           });

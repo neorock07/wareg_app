@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:permission_handler/permission_handler.dart';
 import 'package:wareg_app/Partials/CardButton.dart';
 import 'package:wareg_app/Util/Ip.dart';
 
@@ -40,6 +41,13 @@ class _InventoryFormPageState extends State<InventoryFormPage> {
     setState(() {
       _selectedImage = pickedFile != null ? File(pickedFile.path) : null;
     });
+  }
+
+  Future<void> requestCameraPermission() async {
+    var status = await Permission.camera.status;
+    if (status.isDenied || status.isRestricted || status.isPermanentlyDenied) {
+      await Permission.camera.request();
+    }
   }
 
   Future<void> _submitForm() async {
@@ -99,10 +107,19 @@ class _InventoryFormPageState extends State<InventoryFormPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    requestCameraPermission();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Inventory Item', style: TextStyle(fontFamily: "Poppins", fontSize: 12.sp),),
+        title: Text(
+          'Add Inventory Item',
+          style: TextStyle(fontFamily: "Poppins", fontSize: 12.sp),
+        ),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -111,16 +128,22 @@ class _InventoryFormPageState extends State<InventoryFormPage> {
             children: [
               TextField(
                 controller: _nameController,
-                decoration: InputDecoration(labelText: 'Nama', labelStyle: TextStyle(fontFamily: "Poppins")),
+                decoration: InputDecoration(
+                    labelText: 'Nama',
+                    labelStyle: TextStyle(fontFamily: "Poppins")),
               ),
               TextField(
                 controller: _quantityController,
-                decoration: InputDecoration(labelText: 'Quantity', labelStyle: TextStyle(fontFamily: "Poppins")),
+                decoration: InputDecoration(
+                    labelText: 'Quantity',
+                    labelStyle: TextStyle(fontFamily: "Poppins")),
                 keyboardType: TextInputType.number,
               ),
               TextField(
                 controller: _expiredAtController,
-                decoration: InputDecoration(labelText: 'Expired At', labelStyle: TextStyle(fontFamily: "Poppins")),
+                decoration: InputDecoration(
+                    labelText: 'Expired At',
+                    labelStyle: TextStyle(fontFamily: "Poppins")),
                 onTap: _pickDateTime,
                 readOnly: true,
               ),
@@ -133,13 +156,17 @@ class _InventoryFormPageState extends State<InventoryFormPage> {
                 children: [
                   TextButton.icon(
                     icon: Icon(Icons.image),
-                    label: Text('Pick Image', style: TextStyle(fontFamily: "Poppins"),),
+                    label: Text(
+                      'Pick Image',
+                      style: TextStyle(fontFamily: "Poppins"),
+                    ),
                     onPressed: _pickImageFromGallery,
                   ),
                   SizedBox(width: 10.w),
                   TextButton.icon(
                     icon: Icon(Icons.camera),
-                    label: Text('Take Photo', style: TextStyle(fontFamily: "Poppins")),
+                    label: Text('Take Photo',
+                        style: TextStyle(fontFamily: "Poppins")),
                     onPressed: _takePhoto,
                   ),
                 ],
@@ -150,29 +177,29 @@ class _InventoryFormPageState extends State<InventoryFormPage> {
               //   child: Text('Submit'),
               // ),
               Obx(() => CardButton(context, isPressed, onTap: (_) {
-                  isPressed.value = true;
-                  // Navigator.pushReplacementNamed(context, "/formfood");
-                  _submitForm();
-                },
-                    width_a: 0.78,
-                    width_b: 0.8,
-                    height_a: 0.05,
-                    height_b: 0.06,
-                    borderRadius: 10.dm,
-                    gradient: const LinearGradient(colors: [
-                      Color.fromRGBO(52, 135, 98, 1),
-                      Color.fromRGBO(48, 122, 99, 1),
-                    ]),
-                    child: Center(
-                      child: Text(
-                        "Simpan",
-                        style: TextStyle(
-                            fontFamily: "Poppins",
-                            color: Colors.white,
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.bold),
-                      ),
-                    )))
+                    isPressed.value = true;
+                    // Navigator.pushReplacementNamed(context, "/formfood");
+                    _submitForm();
+                  },
+                      width_a: 0.78,
+                      width_b: 0.8,
+                      height_a: 0.05,
+                      height_b: 0.06,
+                      borderRadius: 10.dm,
+                      gradient: const LinearGradient(colors: [
+                        Color.fromRGBO(52, 135, 98, 1),
+                        Color.fromRGBO(48, 122, 99, 1),
+                      ]),
+                      child: Center(
+                        child: Text(
+                          "Simpan",
+                          style: TextStyle(
+                              fontFamily: "Poppins",
+                              color: Colors.white,
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      )))
             ],
           ),
         ),
