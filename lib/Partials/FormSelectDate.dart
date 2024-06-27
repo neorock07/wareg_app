@@ -21,15 +21,14 @@ Widget FormSelectDate(BuildContext context,
       Container(
           width: MediaQuery.of(context).size.width * width!,
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(radius!)
-          ),
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(radius!)),
           child: TextField(
               readOnly: true,
               controller: controller,
               onTap: () {
                 if (isEditable == true) {
-                  foodController.showDate(context).then((value) {
+                  foodController.selectDate(context).then((value) {
                     controller!.text = value;
                     log("waktu : ${controller.text}");
                   });
@@ -42,9 +41,7 @@ Widget FormSelectDate(BuildContext context,
                     size: 20,
                   )),
               style: TextStyle(
-                  fontFamily: "Poppins",
-                  fontSize: 12.sp,
-                  color: Colors.black)))
+                  fontFamily: "Poppins", fontSize: 12.sp, color: Colors.black)))
     ],
   );
 }

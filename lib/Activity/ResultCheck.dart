@@ -71,7 +71,7 @@ class _ResultCheckState extends State<ResultCheck> {
                   child: CardButton(context, isPressed2, onTap: (_) {
                     isPressed2.value = true;
                     foodController.arr_img.value.clear();
-                    Navigator.pushReplacementNamed(context, "/profile");
+                    Navigator.pushReplacementNamed(context, "/home");
                     // log("${foodController.data_food!.values}");
                     // log("${foodController.data_food!['date_donate']}");
                   },

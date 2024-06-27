@@ -18,29 +18,10 @@ class FoodController extends GetxController {
   var nameController = <int, TextEditingController>{};
   var typeController = <int, TextEditingController>{};
 
-  //untuk tanggal
-  var selectedDate = DateTime.now().obs;
   var pilihDate = DateTime(2000).obs;
-  var selectedTime = TimeOfDay.now().obs;
+  Rx<DateTime> selectedDate = DateTime.now().obs;
+  Rx<TimeOfDay> selectedTime = TimeOfDay.now().obs;
   String? formattedDate;
-
-  Future<String> showDate(BuildContext context) async {
-    final DateTime? datePilih = await showDatePicker(
-      context: context,
-      initialDate: pilihDate.value,
-      firstDate: DateTime(1901),
-      lastDate: DateTime(DateTime.now().year, DateTime.now().month),
-    );
-
-    if (datePilih != null) {
-      pilihDate.value = datePilih;
-      String formattedDate = DateFormat('yyyy-MM-dd').format(pilihDate.value);
-      log("kiii $formattedDate");
-      return "${formattedDate!.substring(0, 10)}";
-    } else {
-      return "no data";
-    }
-  }
 
   Future<String> selectDate(BuildContext context) async {
     // Show date picker and get the selected date
@@ -48,7 +29,7 @@ class FoodController extends GetxController {
       context: context,
       initialDate: selectedDate.value,
       firstDate: DateTime(1998),
-      lastDate: DateTime(DateTime.now().year + 10),
+      lastDate: DateTime.now(),
     );
 
     if (pickedDate != null) {
@@ -62,14 +43,36 @@ class FoodController extends GetxController {
 
       if (pickedTime != null) {
         selectedTime.value = pickedTime;
+
+        // Combine selected date and time
+        final DateTime finalDateTime = DateTime(
+          selectedDate.value.year,
+          selectedDate.value.month,
+          selectedDate.value.day,
+          selectedTime.value.hour,
+          selectedTime.value.minute,
+        );
+
+        // Check if the selected date and time is in the past
+        if (finalDateTime.isAfter(DateTime.now())) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Cannot select a future date and time."),
+            ),
+          );
+          return "Invalid date selected";
+        }
+
+        // Format the selected date
+        String formattedDate =
+            DateFormat('yyyy-MM-dd HH:mm:ss').format(finalDateTime);
+        log("kiii $formattedDate");
+
+        return formattedDate;
+      } else {
+        // Handle case when no time is picked
+        return "No time selected";
       }
-
-      // Format the selected date
-      String formattedDate =
-          DateFormat('yyyy-MM-dd').format(selectedDate.value);
-      log("kiii $formattedDate");
-
-      return "${formattedDate.substring(0, 10)} ${selectedTime.value.hour}:${selectedTime.value.minute}";
     } else {
       // Handle case when no date is picked
       return "No date selected";
