@@ -125,6 +125,7 @@ class _CardExampleState extends State<CardExample> {
   final TextEditingController _nameController = TextEditingController();
   bool _isEditingName = false;
   RxBool isPressed = false.obs;
+
   @override
   void initState() {
     super.initState();
@@ -211,11 +212,9 @@ class _CardExampleState extends State<CardExample> {
 
   Future<void> _logout() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    // Clear all stored data
     var ipAdd = Ip();
     String? _baseUrl = '${ipAdd.getType()}://${ipAdd.getIp()}';
 
-    // Send a POST request to logout endpoint
     await http.post(
       Uri.parse('$_baseUrl/auth/logout'),
       headers: {'Authorization': 'Bearer ${prefs.getString('token')}'},
@@ -239,142 +238,155 @@ class _CardExampleState extends State<CardExample> {
         } else {
           var userData = snapshot.data!;
           return Center(
-            child: Card(
-              color: Color.fromRGBO(48, 122, 89, 1),
-              margin: const EdgeInsets.all(13.0),
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Stack(
-                      alignment: Alignment.topRight,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Row(
-                              children: [
-                                GestureDetector(
-                                  onTap: _pickImage,
-                                  child: CircleAvatar(
-                                    radius: 50,
-                                    backgroundColor: Colors.white,
-                                    child: ClipOval(
-                                      child: _imageFile != null
-                                          ? Image.file(
-                                              _imageFile!,
-                                              width: 100,
-                                              height: 100,
-                                              fit: BoxFit.cover,
-                                            )
-                                          : Image.network(
-                                              userData['profilePicture']!,
-                                              width: 100,
-                                              height: 100,
-                                              fit: BoxFit.cover,
-                                            ),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 400),
+              child: Card(
+                color: Color.fromRGBO(48, 122, 89, 1),
+                margin: const EdgeInsets.all(13.0),
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Stack(
+                        alignment: Alignment.topRight,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: _pickImage,
+                                    child: CircleAvatar(
+                                      radius: 50,
+                                      backgroundColor: Colors.white,
+                                      child: ClipOval(
+                                        child: _imageFile != null
+                                            ? Image.file(
+                                                _imageFile!,
+                                                width: 100,
+                                                height: 100,
+                                                fit: BoxFit.cover,
+                                              )
+                                            : Image.network(
+                                                userData['profilePicture']!,
+                                                width: 100,
+                                                height: 100,
+                                                fit: BoxFit.cover,
+                                              ),
+                                      ),
                                     ),
                                   ),
-                                ),
-                                SizedBox(width: 10.w),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const SizedBox(height: 10),
-                                    if (_isEditingName)
-                                      TextField(
-                                        controller: _nameController,
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                        onSubmitted: (value) {
-                                          _updateUserName();
-                                          setState(() {
-                                            _isEditingName = false;
-                                          });
-                                        },
-                                        decoration: const InputDecoration(
-                                          border: InputBorder.none,
-                                        ),
-                                      )
-                                    else
-                                      GestureDetector(
-                                        onTap: () {
-                                          setState(() {
-                                            _isEditingName = true;
-                                          });
-                                        },
-                                        child: Text(
-                                          _nameController.text,
-                                          style: const TextStyle(
-                                            fontFamily: "Poppins",
-                                            color: Colors.white,
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold,
+                                  SizedBox(width: 10),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment
+                                        .start, // Align text to the start
+                                    children: [
+                                      if (_isEditingName)
+                                        ConstrainedBox(
+                                          constraints: BoxConstraints(
+                                            maxWidth:
+                                                200, // Set a maximum width for the text field
                                           ),
-                                          textAlign: TextAlign.center,
+                                          child: TextField(
+                                            controller: _nameController,
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            onSubmitted: (value) {
+                                              _updateUserName();
+                                              setState(() {
+                                                _isEditingName = false;
+                                              });
+                                            },
+                                            decoration: const InputDecoration(
+                                              border: InputBorder.none,
+                                              hintText:
+                                                  "Enter your name", // Optional: placeholder text
+                                              hintStyle: TextStyle(
+                                                  color: Colors.white30),
+                                            ),
+                                          ),
+                                        )
+                                      else
+                                        GestureDetector(
+                                          onTap: () {
+                                            setState(() {
+                                              _isEditingName = true;
+                                            });
+                                          },
+                                          child: Text(
+                                            _nameController.text.isEmpty
+                                                ? "Tap to edit name"
+                                                : _nameController
+                                                    .text, // Show a placeholder if no name
+                                            style: const TextStyle(
+                                              fontFamily: "Poppins",
+                                              color: Colors.white,
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
                                         ),
+                                      const SizedBox(height: 5),
+                                      Text(
+                                        userData['gender']!,
+                                        style: const TextStyle(
+                                            fontFamily: "Poppins",
+                                            color: Colors.white70),
                                       ),
-                                    const SizedBox(height: 5),
-                                    Text(
-                                      userData['gender']!,
-                                      style: const TextStyle(
-                                          fontFamily: "Poppins",
-                                          color: Colors.white70),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    Text(
-                                      userData['email']!,
-                                      style: const TextStyle(
-                                          fontFamily: "Poppins",
-                                          color: Colors.white70),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            Center(
-                              child: Padding(
-                                padding: const EdgeInsets.only(top: 10.0),
-                                child: Obx(() => CardButton(context, isPressed,
-                                        width_a: 0.78,
-                                        width_b: 0.8,
-                                        height_a: 0.05,
-                                        height_b: 0.06,
-                                        borderRadius: 10.dm,
-                                        color: Colors.white, onTap: (_) {
-                                      isPressed.value = true;
-                                      _logout();
-                                      log("ini coeg");
-                                    },
-                                        child: Center(
-                                            child: Text("Logout",
-                                                style: TextStyle(
-                                                  color: Colors.black,
-                                                  fontFamily: "Poppins",
-                                                  fontSize: 14.sp,
-                                                  fontWeight: FontWeight.bold,
-                                                ))))),
+                                      Text(
+                                        userData['email']!,
+                                        style: const TextStyle(
+                                            fontFamily: "Poppins",
+                                            color: Colors.white70),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
-                            ),
-                          ],
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.white),
-                          onPressed: () {
-                            setState(() {
-                              _isEditingName = true;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
+                              Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(top: 10.0),
+                                  child: Obx(() => CardButton(
+                                          context, isPressed,
+                                          width_a: 0.78,
+                                          width_b: 0.8,
+                                          height_a: 0.05,
+                                          height_b: 0.06,
+                                          borderRadius: 10,
+                                          color: Colors.white, onTap: (_) {
+                                        isPressed.value = true;
+                                        _logout();
+                                        log("ini coeg");
+                                      },
+                                          child: Center(
+                                              child: Text("Logout",
+                                                  style: TextStyle(
+                                                    color: Colors.black,
+                                                    fontFamily: "Poppins",
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.bold,
+                                                  ))))),
+                                ),
+                              ),
+                            ],
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.white),
+                            onPressed: () {
+                              setState(() {
+                                _isEditingName = true;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -675,7 +687,7 @@ class _RiwayatListState extends State<RiwayatList> {
                       transaksiKon.transaksi_id = transaction['id'];
                       Navigator.pushNamed(context, "/onmap_donor").then(
                           (_) => transactionController.fetchTransactions());
-                    }else{
+                    } else {
                       transaksiKon.transaksi_id = transaction['id'];
                       Navigator.pushNamed(context, "/completed");
                     }
@@ -687,9 +699,8 @@ class _RiwayatListState extends State<RiwayatList> {
                       //     vertical: 10, horizontal: 15),
                       // color: Colors.white,
                       decoration: BoxDecoration(
-                        color: Colors.white, 
-                        borderRadius: BorderRadius.circular(10.dm)
-                      ),
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10.dm)),
                       child: Padding(
                         padding: EdgeInsets.all(10.dm),
                         child: Column(
@@ -701,19 +712,16 @@ class _RiwayatListState extends State<RiwayatList> {
                                 Text(
                                   role,
                                   style: TextStyle(
-                                    fontSize: 12.sp,
-                                    color: Colors.grey,
-                                    fontFamily: "Poppins"
-                                  ),
+                                      fontSize: 12.sp,
+                                      color: Colors.grey,
+                                      fontFamily: "Poppins"),
                                 ),
                                 Text(
                                   updatedAt,
                                   style: TextStyle(
-                                    fontSize: 12.sp,
-                                    color: Colors.grey,
-                                    fontFamily: "Poppins"
-                  
-                                  ),
+                                      fontSize: 12.sp,
+                                      color: Colors.grey,
+                                      fontFamily: "Poppins"),
                                 ),
                               ],
                             ),
@@ -724,21 +732,17 @@ class _RiwayatListState extends State<RiwayatList> {
                                 Text(
                                   postTitle,
                                   style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16.sp,
-                                    fontFamily: "Poppins"
-                  
-                                  ),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16.sp,
+                                      fontFamily: "Poppins"),
                                 ),
                                 Row(
                                   children: [
                                     Text(
                                       review,
                                       style: TextStyle(
-                                        fontSize: 14.sp,
-                                    fontFamily: "Poppins"
-                  
-                                      ),
+                                          fontSize: 14.sp,
+                                          fontFamily: "Poppins"),
                                     ),
                                     if (transaction['review'] != null)
                                       Icon(Icons.star,
@@ -796,30 +800,25 @@ class _RiwayatListState extends State<RiwayatList> {
                               children: [
                                 Container(
                                   decoration: BoxDecoration(
-                                    color: Colors.black,
-                                    borderRadius: BorderRadius.circular(10.dm)
-                                  ),
+                                      color: Colors.black,
+                                      borderRadius:
+                                          BorderRadius.circular(10.dm)),
                                   child: Padding(
                                     padding: EdgeInsets.all(10.dm),
                                     child: Text(
                                       status,
                                       style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14.sp,
-                                        color: Colors.
-                                        white, 
-                                        fontFamily: "Poppins"
-                                                                  
-                                      ),
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14.sp,
+                                          color: Colors.white,
+                                          fontFamily: "Poppins"),
                                     ),
                                   ),
                                 ),
                                 Text(
                                   'Jumlah: $totalJumlah',
                                   style: TextStyle(
-                                    fontSize: 14,
-                                    fontFamily: "Poppins"
-                                  ),
+                                      fontSize: 14, fontFamily: "Poppins"),
                                 ),
                               ],
                             ),
@@ -870,6 +869,13 @@ class _ChatContentState extends State<ChatContent> {
     }
   }
 
+  Future<void> _refreshConversations() async {
+    setState(() {
+      isLoading = true;
+    });
+    await fetchConversations();
+  }
+
   String formatMessage(String? message) {
     if (message == null) {
       return "mengirim file";
@@ -890,74 +896,77 @@ class _ChatContentState extends State<ChatContent> {
       return Center(child: Text('No conversations found.'));
     }
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: 20.h),
-      child: ListView.builder(
-        itemCount: conversations!.length,
-        itemBuilder: (context, index) {
-          final conversation = conversations![index];
-          final otherUser = conversation['otherUser'];
-          final lastMessage = conversation['lastMessage'];
-          final lastMessageTime = lastMessage['timestamp'] != null
-              ? DateFormat('hh:mm a')
-                  .format(DateTime.parse(lastMessage['timestamp']).toLocal())
-              : '';
-          final truncatedMessage = formatMessage(lastMessage['message']);
+    return RefreshIndicator(
+      onRefresh: _refreshConversations,
+      child: Padding(
+        padding: EdgeInsets.only(bottom: 20.h),
+        child: ListView.builder(
+          itemCount: conversations!.length,
+          itemBuilder: (context, index) {
+            final conversation = conversations![index];
+            final otherUser = conversation['otherUser'];
+            final lastMessage = conversation['lastMessage'];
+            final lastMessageTime = lastMessage['timestamp'] != null
+                ? DateFormat('hh:mm a')
+                    .format(DateTime.parse(lastMessage['timestamp']).toLocal())
+                : '';
+            final truncatedMessage = formatMessage(lastMessage['message']);
 
-          return ListTile(
-            leading: CircleAvatar(
-              backgroundImage: NetworkImage(otherUser['profile_picture']
-                  .toString()
-                  .replaceFirst('http://localhost:3000',
-                      '${ipAdd.getType()}://${ipAdd.getIp()}')),
-            ),
-            title: Text(otherUser['username'], style: TextStyle(
-              fontFamily: "Poppins",
-              fontSize: 12.sp, 
-
-            )),
-            subtitle: Text(truncatedMessage, style: TextStyle(
-              fontFamily: "Poppins",
-              fontSize: 12.sp, 
-              
-            )),
-            trailing: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (conversation['unreadMessagesCount'] > 0)
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 4),
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(12),
+            return ListTile(
+              leading: CircleAvatar(
+                backgroundImage: NetworkImage(otherUser['profile_picture']
+                    .toString()
+                    .replaceFirst('http://localhost:3000',
+                        '${ipAdd.getType()}://${ipAdd.getIp()}')),
+              ),
+              title: Text(otherUser['username'],
+                  style: TextStyle(
+                    fontFamily: "Poppins",
+                    fontSize: 12.sp,
+                  )),
+              subtitle: Text(truncatedMessage,
+                  style: TextStyle(
+                    fontFamily: "Poppins",
+                    fontSize: 12.sp,
+                  )),
+              trailing: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (conversation['unreadMessagesCount'] > 0)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 4),
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        conversation['unreadMessagesCount'].toString(),
+                        style: TextStyle(fontSize: 12, color: Colors.white),
+                      ),
                     ),
-                    child: Text(
-                      conversation['unreadMessagesCount'].toString(),
-                      style: TextStyle(fontSize: 12, color: Colors.white),
-                    ),
+                  Text(
+                    lastMessageTime,
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
                   ),
-                Text(
-                  lastMessageTime,
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-              ],
-            ),
-            onTap: () {
-              mpController.map_dataTarget['userId'] = otherUser['id'];
-              mpController.map_dataTarget['donatur_name'] =
-                  otherUser['username'];
-              Navigator.pushNamed(
-                context,
-                "/chat",
-                arguments: {
-                  'userId': otherUser['id'],
-                  'donatur_name': otherUser['username'],
-                },
-              );
-            },
-          );
-        },
+                ],
+              ),
+              onTap: () {
+                mpController.map_dataTarget['userId'] = otherUser['id'];
+                mpController.map_dataTarget['donatur_name'] =
+                    otherUser['username'];
+                Navigator.pushNamed(
+                  context,
+                  "/chat",
+                  arguments: {
+                    'userId': otherUser['id'],
+                    'donatur_name': otherUser['username'],
+                  },
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }
@@ -1088,153 +1097,171 @@ class _PointPageState extends State<PointPage> {
     }
   }
 
+  Future<void> _refreshPoints() async {
+    await fetchPoints();
+    await fetchInitialLimit();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      physics: AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Total Point Anda',
-                style: TextStyle(
-                  fontSize: 18.sp,
-                  fontFamily:"Poppins",
-                  fontWeight: FontWeight.bold,
+    return RefreshIndicator(
+      onRefresh: _refreshPoints,
+      child: SingleChildScrollView(
+        physics: AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Total Point Anda',
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontFamily: "Poppins",
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              Row(
-                children: [
-                  Text(
-                    '$points Point',
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontFamily:"Poppins",
+                Row(
+                  children: [
+                    Text(
+                      '$points Point',
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontFamily: "Poppins",
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    Icon(
+                      LucideIcons.checkCircle,
                       color: Colors.green,
-                      fontWeight: FontWeight.bold,
+                      size: 24.sp,
                     ),
-                  ),
-                  SizedBox(width: 8.w),
-                  Icon(
-                    LucideIcons.checkCircle,
-                    color: Colors.green,
-                    size: 24.sp,
-                  ),
-                ],
-              ),
-            ],
-          ),
-          SizedBox(height: 16.h),
-          Text(
-            'Tambah limit pengambilan anda dengan tukarkan point yang didapat, per 1 kali kesempatan senilai 20 point.',
-            style: TextStyle(fontSize: 14.sp,fontFamily:"Poppins",),
-          ),
-          SizedBox(height: 16.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Tambah Limit',
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontFamily:"Poppins",
-                  fontWeight: FontWeight.bold,
+                  ],
                 ),
-              ),
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      if (currentLimit > initialLimit) {
-                        setState(() {
-                          currentLimit--;
-                          neededPoints -= 20;
-                        });
-                      }
-                    },
-                    icon: Icon(Icons.remove_circle_outline),
-                    color: Colors.black,
-                  ),
-                  Text(
-                    '$currentLimit',
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      setState(() {
-                        currentLimit++;
-                        neededPoints += 20;
-                      });
-                    },
-                    icon: Icon(Icons.add_circle_outline),
-                    color: Colors.black,
-                  ),
-                ],
-              ),
-            ],
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            'Jumlah limit pengambilan Anda saat ini : $initialLimit/hari',
-            style: TextStyle(fontSize: 14.sp,fontFamily:"Poppins",),
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            'Limit pengambilan Anda hari ini : $todayLimit',
-            style: TextStyle(fontSize: 14.sp,fontFamily:"Poppins",),
-          ),
-          SizedBox(height: 16.h),
-          Text(
-            '*Jumlah limit pengambilan yang ditambah hanya berlaku selama 1 minggu.',
-            style: TextStyle(
-              fontSize: 14.sp,
-              color: Colors.red,
-              fontFamily:"Poppins",
+              ],
             ),
-          ),
-          SizedBox(height: 16.h),
-          Column(
-            children: [
-              Text(
-                'Total point yang dibutuhkan : $neededPoints',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontFamily:"Poppins",
-                ),
+            SizedBox(height: 16.h),
+            Text(
+              'Tambah limit pengambilan anda dengan tukarkan point yang didapat, per 1 kali kesempatan senilai 20 point.',
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontFamily: "Poppins",
               ),
-              SizedBox(height: 8.h),
-              ElevatedButton.icon(
-                onPressed: points >= neededPoints && neededPoints > 0
-                    ? () async {
-                        await _showConfirmationDialog();
-                      }
-                    : null,
-                icon: Icon(
-                  LucideIcons.checkCircle,
-                  size: 20.sp,
+            ),
+            SizedBox(height: 16.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Tambah Limit',
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontFamily: "Poppins",
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                label: Text(
-                  'Tukarkan Point',
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        if (currentLimit > initialLimit) {
+                          setState(() {
+                            currentLimit--;
+                            neededPoints -= 20;
+                          });
+                        }
+                      },
+                      icon: Icon(Icons.remove_circle_outline),
+                      color: Colors.black,
+                    ),
+                    Text(
+                      '$currentLimit',
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        setState(() {
+                          currentLimit++;
+                          neededPoints += 20;
+                        });
+                      },
+                      icon: Icon(Icons.add_circle_outline),
+                      color: Colors.black,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              'Jumlah limit pengambilan Anda saat ini : $initialLimit/hari',
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontFamily: "Poppins",
+              ),
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              'Limit pengambilan Anda hari ini : $todayLimit',
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontFamily: "Poppins",
+              ),
+            ),
+            SizedBox(height: 16.h),
+            Text(
+              '*Jumlah limit pengambilan yang ditambah hanya berlaku selama 1 minggu.',
+              style: TextStyle(
+                fontSize: 14.sp,
+                color: Colors.red,
+                fontFamily: "Poppins",
+              ),
+            ),
+            SizedBox(height: 16.h),
+            Column(
+              children: [
+                Text(
+                  'Total point yang dibutuhkan : $neededPoints',
                   style: TextStyle(
                     fontSize: 14.sp,
-                    fontFamily:"Poppins",
+                    fontFamily: "Poppins",
                   ),
                 ),
-                style: ElevatedButton.styleFrom(
-                  primary: Color(0xFF307A59), // Background color
-                  onPrimary: Colors.white, // Text color
-                  minimumSize: Size(double.infinity, 36.h), // Full width button
+                SizedBox(height: 8.h),
+                ElevatedButton.icon(
+                  onPressed: points >= neededPoints && neededPoints > 0
+                      ? () async {
+                          await _showConfirmationDialog();
+                        }
+                      : null,
+                  icon: Icon(
+                    LucideIcons.checkCircle,
+                    size: 20.sp,
+                  ),
+                  label: Text(
+                    'Tukarkan Point',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontFamily: "Poppins",
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    primary: Color(0xFF307A59), // Background color
+                    onPrimary: Colors.white, // Text color
+                    minimumSize:
+                        Size(double.infinity, 36.h), // Full width button
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1290,7 +1317,7 @@ class _UserPostsPageState extends State<UserPostsPage> {
                         padding: EdgeInsets.all(10.dm),
                         child: Container(
                           // margin: EdgeInsets.all(10.0),
-                          color: Colors.white, 
+                          color: Colors.white,
                           child: Padding(
                             padding: EdgeInsets.all(10.0),
                             child: Column(
@@ -1299,7 +1326,10 @@ class _UserPostsPageState extends State<UserPostsPage> {
                                 Text(
                                   post['title'],
                                   style: TextStyle(
-                                      fontSize: 18.sp, fontWeight: FontWeight.bold,fontFamily:"Poppins",),
+                                    fontSize: 18.sp,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: "Poppins",
+                                  ),
                                 ),
                                 SizedBox(height: 10.h),
                                 mediaUrls.length > 1
@@ -1322,7 +1352,8 @@ class _UserPostsPageState extends State<UserPostsPage> {
                                                   fit: BoxFit.contain,
                                                   child: Image.network(
                                                     url,
-                                                    errorBuilder: (context, error,
+                                                    errorBuilder: (context,
+                                                            error,
                                                             stackTrace) =>
                                                         Icon(Icons.error),
                                                   ),
@@ -1333,7 +1364,9 @@ class _UserPostsPageState extends State<UserPostsPage> {
                                         }).toList(),
                                       )
                                     : Container(
-                                        width: MediaQuery.of(context).size.width*0.8,
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.8,
                                         height: 150.h,
                                         child: FittedBox(
                                           fit: BoxFit.contain,
@@ -1348,75 +1381,93 @@ class _UserPostsPageState extends State<UserPostsPage> {
                                 SizedBox(height: 10),
                                 Row(
                                   children: [
-                                    Text('Alamat : ', style: TextStyle(
-                                      fontFamily:"Poppins",
-                                      fontSize: 12.sp,
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold,
-                                    ),),
-                                    Text('${post['body']['alamat']}', style: TextStyle(
-                                      fontFamily:"Poppins",
-                                      fontSize: 12.sp,
-                                      color: Colors.grey
-                                    ),),
+                                    Text(
+                                      'Alamat : ',
+                                      style: TextStyle(
+                                        fontFamily: "Poppins",
+                                        fontSize: 12.sp,
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Text(
+                                      '${post['body']['alamat']}',
+                                      style: TextStyle(
+                                          fontFamily: "Poppins",
+                                          fontSize: 12.sp,
+                                          color: Colors.grey),
+                                    ),
                                   ],
                                 ),
                                 SingleChildScrollView(
                                   scrollDirection: Axis.horizontal,
                                   child: Row(
                                     children: [
-                                      Text('Deskripsi : ', style: TextStyle(
-                                        fontFamily:"Poppins",
-                                        fontSize: 12.sp,
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.bold,
-                                
-                                      ),),
-                                      Text('${post['body']['description']}', style: TextStyle(
-                                        fontFamily:"Poppins",
-                                        fontSize: 12.sp,
-                                        color: Colors.grey
-                                      ),),
+                                      Text(
+                                        'Deskripsi : ',
+                                        style: TextStyle(
+                                          fontFamily: "Poppins",
+                                          fontSize: 12.sp,
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${post['body']['description']}',
+                                        style: TextStyle(
+                                            fontFamily: "Poppins",
+                                            fontSize: 12.sp,
+                                            color: Colors.grey),
+                                      ),
                                     ],
                                   ),
                                 ),
                                 Row(
                                   children: [
-                                    Text('Dibuat : ', style: TextStyle(
-                                      fontFamily:"Poppins",
-                                      fontSize: 12.sp,
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold,
-
-                                    ),),
-                                    Text('$createdAt', style: TextStyle(
-                                      fontFamily:"Poppins",
-                                      fontSize: 12.sp,
-                                      color: Colors.grey
-                                    ),),
+                                    Text(
+                                      'Dibuat : ',
+                                      style: TextStyle(
+                                        fontFamily: "Poppins",
+                                        fontSize: 12.sp,
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Text(
+                                      '$createdAt',
+                                      style: TextStyle(
+                                          fontFamily: "Poppins",
+                                          fontSize: 12.sp,
+                                          color: Colors.grey),
+                                    ),
                                   ],
                                 ),
                                 Row(
                                   children: [
-                                    Text('Kadaluarsa : ', style: TextStyle(
-                                      fontFamily:"Poppins",
-                                      fontSize: 12.sp,
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold,
-
-                                    ),),
-                                    Text('$expiredAt', style: TextStyle(
-                                      fontFamily:"Poppins",
-                                      fontSize: 12.sp,
-                                      color: Colors.grey
-                                    ),),
+                                    Text(
+                                      'Kadaluarsa : ',
+                                      style: TextStyle(
+                                        fontFamily: "Poppins",
+                                        fontSize: 12.sp,
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Text(
+                                      '$expiredAt',
+                                      style: TextStyle(
+                                          fontFamily: "Poppins",
+                                          fontSize: 12.sp,
+                                          color: Colors.grey),
+                                    ),
                                   ],
                                 ),
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
                                     IconButton(
-                                      icon: Icon(Icons.delete, color: Colors.red),
+                                      icon:
+                                          Icon(Icons.delete, color: Colors.red),
                                       onPressed: () async {
                                         await postController
                                             .deletePost(post['id']);
