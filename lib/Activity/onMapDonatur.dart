@@ -230,22 +230,7 @@ class _OnMapDonaturState extends State<OnMapDonatur> {
           ),
         );
 
-        // GeoPoint oldPoint2 = GeoPoint(latitude: double.parse(getTrans['post_coordinate'].split(",")[0]), longitude: double.parse(getTrans['post_coordinate'].split(",")[1]));
-        // GeoPoint newPoint2 = GeoPoint(latitude: double.parse(getTrans['post_coordinate'].split(",")[0]), longitude: double.parse(getTrans['post_coordinate'].split(",")[1]));
-        // await mpController.controller.changeLocationMarker(
-        //   oldLocation: oldPoint2,
-        //   newLocation: newPoint2,
-        //   markerIcon: MarkerIcon(
-        //     icon: Icon(
-        //       Icons.pin_drop,
-        //       color: Colors.red,
-        //       size: 48,
-        //     ),
-        //   ),
-        //   iconAnchor: IconAnchor(
-        //     anchor: Anchor.top,
-        //   ),
-        // );
+        
       } else {
         log("ada null");
       }

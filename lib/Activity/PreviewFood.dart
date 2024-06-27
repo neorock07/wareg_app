@@ -40,7 +40,8 @@ class _PreviewFoodState extends State<PreviewFood> {
           ],
         ),
         body: Stack(
-          children: [GridView.count(
+          children: [
+            GridView.count(
             mainAxisSpacing: 7.dm,
             crossAxisSpacing: 5.dm,
             padding: EdgeInsets.all(10.dm),
@@ -78,6 +79,29 @@ class _PreviewFoodState extends State<PreviewFood> {
                                 fit: BoxFit.cover,
                                 image: FileImage(
                                     File(picController.arr_img.value![index])))),
+                        child: InkWell(
+                          onTap: (){
+                            picController.arr_img.value.removeAt(index);
+                            setState(() {
+                              
+                            });
+                          },
+                          child: Align(
+                            alignment: Alignment.topRight,
+                            child: Container(
+                              height: 20.dm,
+                              width: 20.dm,
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(10.dm) 
+                                
+                              ),
+                              child: Align(
+                                alignment: Alignment.center,
+                                child: Icon(LucideIcons.x,size: 15.dm,  color: Colors.white,)),
+                            ),
+                          ),
+                        ),            
                       ));
             }),
           ),

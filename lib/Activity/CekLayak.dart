@@ -247,14 +247,19 @@ class _CekLayakState extends State<CekLayak> {
                                         color: Colors.black,
                                         fontWeight: FontWeight.bold),
                                   ),
-                                  Text(
-                                    "Alasan : $reason\n Kadaluwarsa: $dateTimeLocal",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontFamily: "Poppins",
-                                        fontSize: 14.sp,
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.normal),
+                                  SingleChildScrollView(
+                                    child: SizedBox(
+                                      height: 220.h,
+                                      child: Text(
+                                        "Alasan : $reason\nKadaluwarsa: $dateTimeLocal",
+                                        textAlign: TextAlign.start,
+                                        style: TextStyle(
+                                            fontFamily: "Poppins",
+                                            fontSize: 12.sp,
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.normal),
+                                      ),
+                                    ),
                                   ),
                                   Obx(() => Padding(
                                         padding: EdgeInsets.only(
