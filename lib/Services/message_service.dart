@@ -92,13 +92,15 @@ class MessageService extends GetxService {
 
     request.files
         .add(await httpMultipart.MultipartFile.fromPath('file', filePath));
-
+    log("request send : ${request.toString()}");
     var streamedResponse = await request.send();
+    
 
     final response = await http.Response.fromStream(streamedResponse);
 
     if (response.statusCode != 201) {
       log('Failed to send file.');
+      log(response.body);
       throw Exception('Failed to send file');
     }
   }

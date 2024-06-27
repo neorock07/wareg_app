@@ -273,7 +273,8 @@ class _CekLayakState extends State<CekLayak> {
                                             picController.arr_img.value.clear();
 
                                             Navigator.pushNamed(
-                                                context, "/result_check");
+                                                context, "/home");
+                                            Get.snackbar("Donasi berhasil diposting", "Terimakasih telah membantu orang-orang disekitar!");    
                                           });
 
                                           // log("${foodController.data_food!.values}");
