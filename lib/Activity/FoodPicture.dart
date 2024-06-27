@@ -13,7 +13,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
 class FoodPicture extends StatefulWidget {
-  const FoodPicture({Key? key}) : super(key: key);
+  final CameraDescription cameraDescription;
+
+  const FoodPicture({Key? key, required this.cameraDescription})
+      : super(key: key);
 
   @override
   _FoodPictureState createState() => _FoodPictureState();
@@ -23,16 +26,24 @@ class _FoodPictureState extends State<FoodPicture> {
   PictureController picController = Get.put(PictureController());
   FoodController foodController = Get.put(FoodController());
   var paths = <String>[].obs;
-  CameraController? _camController;
+  late CameraController _cameraController;
   final ImagePicker _picker = ImagePicker();
   File? _selectedImage;
   bool _isCameraInitialized = false;
 
-  Future<void> initCamera() async {
+  @override
+  void initState() {
+    super.initState();
+    _cameraController = CameraController(
+      widget.cameraDescription,
+      ResolutionPreset.medium,
+    );
+    _initializeCamera();
+  }
+
+  Future<void> _initializeCamera() async {
     try {
-      var cameras = await availableCameras();
-      _camController = CameraController(cameras[0], ResolutionPreset.medium);
-      await _camController!.initialize();
+      await _cameraController.initialize();
       setState(() {
         _isCameraInitialized = true;
       });
@@ -41,30 +52,52 @@ class _FoodPictureState extends State<FoodPicture> {
     }
   }
 
-  @override
-  void dispose() {
-    _camController?.dispose();
-    super.dispose();
-  }
+  Future<void> takePicture() async {
+    if (!_isCameraInitialized) return;
 
-  Future<String> takePicture() async {
     Directory root = await getTemporaryDirectory();
     String dir = "${root.path}/ReFood";
     await Directory(dir).create(recursive: true);
     String filePath = "${dir}/${DateTime.now()}.jpg";
     try {
-      XFile? pic = await _camController!.takePicture();
-      await pic.saveTo(filePath);
+      XFile? pic = await _cameraController.takePicture();
+      if (pic != null) {
+        await pic.saveTo(filePath);
+        picController.arr_img.value.add(filePath);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => PreviewFood(),
+          ),
+        );
+      }
     } catch (e) {
-      log("Error : ${e.toString()}");
+      log("Error taking picture: ${e.toString()}");
     }
-    return filePath;
+  }
+
+  Future<void> getImageFromGallery() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+        picController.arr_img.value.add(pickedFile.path);
+      });
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => PreviewFood(),
+        ),
+      );
+    } else {
+      log('No image selected.');
+    }
   }
 
   @override
-  void initState() {
-    super.initState();
-    initCamera();
+  void dispose() {
+    _cameraController.dispose();
+    super.dispose();
   }
 
   @override
@@ -83,23 +116,23 @@ class _FoodPictureState extends State<FoodPicture> {
             icon: Icon(
               LucideIcons.bell,
               color: Colors.black,
-            )),
+            ),
+          ),
           SizedBox(
             width: 5.dm,
           ),
         ],
       ),
-      body: !_isCameraInitialized
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
-          : Column(
+      body: _isCameraInitialized
+          ? Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  height: MediaQuery.of(context).size.height * 0.8 / _camController!.value.aspectRatio,
+                  height: MediaQuery.of(context).size.height *
+                      0.8 /
+                      _cameraController.value.aspectRatio,
                   width: MediaQuery.of(context).size.width * 0.9,
-                  child: CameraPreview(_camController!),
+                  child: CameraPreview(_cameraController),
                 ),
                 SizedBox(
                   height: 20.h,
@@ -113,17 +146,8 @@ class _FoodPictureState extends State<FoodPicture> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(50.dm)),
                         backgroundColor: Color.fromRGBO(42, 122, 89, 1),
-                        onPressed: () {
-                          takePicture().then((value) {
-                            log("path : ${value}");
-                            picController.arr_img.value.add(value);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => PreviewFood()
-                              )
-                            );
-                          });
+                        onPressed: () async {
+                          await takePicture();
                         },
                         child: const Center(
                           child: Icon(
@@ -141,22 +165,14 @@ class _FoodPictureState extends State<FoodPicture> {
                         child: Column(
                           children: [
                             IconButton(
-                              onPressed: () {
-                                picController.getImageFromGaleri().then((value) {
-                                  log("path : $value");
-                                  picController.arr_img.value.add(value);
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => PreviewFood()
-                                    )
-                                  );
-                                });
+                              onPressed: () async {
+                                await getImageFromGallery();
                               },
                               icon: const Icon(
                                 Icons.upload_file,
                                 color: Colors.black,
-                              )),
+                              ),
+                            ),
                             Text(
                               "Upload Foto",
                               style: TextStyle(
@@ -168,8 +184,12 @@ class _FoodPictureState extends State<FoodPicture> {
                         ),
                       )
                     ],
-                  )),
+                  ),
+                ),
               ],
+            )
+          : const Center(
+              child: CircularProgressIndicator(),
             ),
     );
   }

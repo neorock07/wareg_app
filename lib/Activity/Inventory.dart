@@ -91,10 +91,9 @@ class _InventoryPageState extends State<InventoryPage> {
                         child: Text(
                           '',
                           style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 8.sp
-                            , fontFamily: "Poppins"
-                          ),
+                              color: Colors.white,
+                              fontSize: 8.sp,
+                              fontFamily: "Poppins"),
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -121,7 +120,11 @@ class _InventoryPageState extends State<InventoryPage> {
         if (inventoryController.isLoading.value) {
           return Center(child: CircularProgressIndicator());
         } else if (inventoryController.items.isEmpty) {
-          return Center(child: Text('No items found.', style: TextStyle(fontSize: 14.sp, fontFamily: "Poppins"),));
+          return Center(
+              child: Text(
+            'No items found.',
+            style: TextStyle(fontSize: 14.sp, fontFamily: "Poppins"),
+          ));
         } else {
           return ListView.builder(
             itemCount: inventoryController.items.length,
@@ -165,9 +168,13 @@ class _InventoryPageState extends State<InventoryPage> {
         });
       },
       style: ElevatedButton.styleFrom(
-        primary: currentFilter == filter ? Color.fromRGBO(48, 122, 89, 1) : Colors.grey,
+        primary: currentFilter == filter
+            ? Color.fromRGBO(48, 122, 89, 1)
+            : Colors.grey,
       ),
-      child: Text(label, style: TextStyle(color: Colors.white, fontFamily: "Poppins", fontSize: 12.sp)),
+      child: Text(label,
+          style: TextStyle(
+              color: Colors.white, fontFamily: "Poppins", fontSize: 12.sp)),
     );
   }
 }
