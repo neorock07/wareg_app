@@ -18,7 +18,7 @@ class InventoryCard extends StatelessWidget {
     final name = item['name'] ?? 'Unnamed Item';
     final quantity = item['quantity'].toString();
     final expiredAt = item['expiredAt'] != null
-        ? dateFormatter.format(DateTime.parse(item['expiredAt']).toLocal())
+        ? dateFormatter.format(DateTime.parse(item['expiredAt']))
         : 'No expiration date';
     final imageUrl = _getFormattedFilePath(item['image'] ?? '');
 
@@ -114,7 +114,7 @@ class InventoryCard extends StatelessWidget {
     TextEditingController dateController = TextEditingController(
       text: item['expiredAt'] != null
           ? DateFormat('dd/MM/yyyy HH:mm:ss')
-              .format(DateTime.parse(item['expiredAt']).toLocal())
+              .format(DateTime.parse(item['expiredAt']))
           : '',
     );
 

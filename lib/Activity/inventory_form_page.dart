@@ -73,6 +73,7 @@ class _InventoryFormPageState extends State<InventoryFormPage> {
     var response = await request.send();
     if (response.statusCode == 201) {
       print('Inventory item added successfully');
+      widget.onSubmit();
       Navigator.pop(context); // Navigate back to the inventory page
     } else {
       print('Failed to add inventory item');
@@ -172,13 +173,8 @@ class _InventoryFormPageState extends State<InventoryFormPage> {
                 ],
               ),
               SizedBox(height: 20.h),
-              // ElevatedButton(
-              //   onPressed: _submitForm,
-              //   child: Text('Submit'),
-              // ),
               Obx(() => CardButton(context, isPressed, onTap: (_) {
                     isPressed.value = true;
-                    // Navigator.pushReplacementNamed(context, "/formfood");
                     _submitForm();
                   },
                       width_a: 0.78,
