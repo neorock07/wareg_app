@@ -30,6 +30,7 @@ class _CekLayakState extends State<CekLayak> {
 
   var isPressed = false.obs;
   var isPressed2 = false.obs;
+  var isLoadingPost = false.obs;
   var query = Get.put(PromptController());
   var foodController = Get.put(FoodController());
   RxMap<String, dynamic>? presiden = <String, dynamic>{}.obs;
@@ -224,10 +225,10 @@ class _CekLayakState extends State<CekLayak> {
                         Navigator.of(context, rootNavigator: true).pop();
                         DialogPop(
                           context,
-                          size: [300.h, 150.w],
+                          size: [350.h, 150.w],
                           dismissable: false,
                           icon: Container(
-                              height: 300.h,
+                              height: 350.h,
                               child: Column(
                                 children: [
                                   Icon(
@@ -247,26 +248,35 @@ class _CekLayakState extends State<CekLayak> {
                                         color: Colors.black,
                                         fontWeight: FontWeight.bold),
                                   ),
-                                  SingleChildScrollView(
-                                    child: SizedBox(
-                                      height: 220.h,
-                                      child: Text(
-                                        "Alasan : $reason\nKadaluwarsa: $dateTimeLocal",
-                                        textAlign: TextAlign.start,
-                                        style: TextStyle(
-                                            fontFamily: "Poppins",
-                                            fontSize: 12.sp,
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.normal),
-                                      ),
+                                  SizedBox(height: 10.h),
+                                  Container(
+                                    height: 150.h,
+                                    child: Text(
+                                      "Alasan : $reason\n\nKadaluwarsa: $dateTimeLocal",
+                                      // "djgasgasjasgdgadjgasjdgajgdjaggdjjddasdshadkahdksahdkahdkahdkahajgajdajg ajgajfgjagfjfja ajfgajgajgdahsdja djad ja djagd jagsjdgaj dajs djasgdjags da jsdgajsdgajsd ajajsgdjasgdjagdajsdgwqtqtuqwuqdasgdasjhdgjadasdgajgdajg jasdgajgdasjgdasjdgajsdgajhdgajdgagsdjgasjgajd\nadadasdgajgdjsajad\ndgagdasjdgajsgdjagdajgdajsgdjasgdajgdajjad\nadjadjagsdjgajdgajgasjdgasjgdajgdjagajdags\ndasgajdagsjdahgjdaghdjasjd\ngfgjajsdhgajdhgajhgajsdg",
+                                      textAlign: TextAlign.start,
+                                      style: TextStyle(
+                                          fontFamily: "Poppins",
+                                          fontSize: 12.sp,
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.normal),
                                     ),
                                   ),
+                                  Obx(() {
+                                    if (isLoadingPost.value == true &&
+                                        isPressed2.value == true) {
+                                      return CircularProgressIndicator();
+                                    } else {
+                                      return Text("");
+                                    }
+                                  }),
                                   Obx(() => Padding(
                                         padding: EdgeInsets.only(
                                             bottom: 20.h, top: 20.h),
                                         child: CardButton(context, isPressed2,
                                             onTap: (_) async {
                                           isPressed2.value = true;
+                                          isLoadingPost.value = true;
 
                                           await postController
                                               .postData(
@@ -276,11 +286,14 @@ class _CekLayakState extends State<CekLayak> {
                                             log("sudah rampung!! | ${value.toString()}");
                                           }).then((value) {
                                             picController.arr_img.value.clear();
-
+                                            isLoadingPost.value = false;
                                             Navigator.pushNamed(
                                                 context, "/home");
-                                            Get.snackbar("Donasi berhasil diposting", "Terimakasih telah membantu orang-orang disekitar!");    
+                                            Get.snackbar(
+                                                "Donasi berhasil diposting",
+                                                "Terimakasih telah membantu orang-orang disekitar!");
                                           });
+
 
                                           // log("${foodController.data_food!.values}");
                                           // log("${foodController.data_food!['date_donate']}");
@@ -306,7 +319,8 @@ class _CekLayakState extends State<CekLayak> {
                                                         FontWeight.normal),
                                               ),
                                             )),
-                                      ))
+                                      )),
+                                  
                                 ],
                               )),
                         );

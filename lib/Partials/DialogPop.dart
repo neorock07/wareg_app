@@ -16,7 +16,8 @@ Future<dynamic> DialogPop(BuildContext context,
               curve: Curves.elasticIn,
               height: (size != null) ? size[0] : 100.h,
               width: (size != null) ? size[1] : 100.h,
-              child: Column(
+              child: Column
+              (
                 children: [icon!],
               )),
         );

@@ -221,7 +221,8 @@ class _FormFoodState extends State<FormFood> {
     "Makanan kemasan",
     "Karbohidrat",
     "Lauk Pauk",
-    "Cemilan/Minuman",
+    "Cemilan",
+    "Minuman"
   ];
 
   List<String> treatments = [
@@ -238,6 +239,7 @@ class _FormFoodState extends State<FormFood> {
     LucideIcons.cookie,
     LucideIcons.wheat,
     LucideIcons.beef,
+    LucideIcons.donut,
     LucideIcons.cupSoda
   ];
 
