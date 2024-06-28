@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timelines/timelines.dart';
 import 'package:wareg_app/Controller/API/Lokasi/LocationController.dart';
@@ -62,67 +63,77 @@ class _OnMapDonaturState extends State<OnMapDonatur> {
   final List<String> data_timeline = ["Konfirmasi", "Pengambilan", "Selesai"];
   int currIndex = 0;
 
+  MarkerIcon? recipientMarker;
+  MarkerIcon? postMarker;
+  bool recipientMarkerAdded = false;
+  GeoPoint? previousRecipientLocation;
+
   Future<void> _loadProfile() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     newBaseUrl = "${ipAdd.getType()}://${ipAdd.getIp()}";
 
     id_trans = transController.transaksi_id;
     try {
-      final value =
-          await transController.getTransaksiDonor(id_trans).then((value) async {
-        getTrans.value = value;
-        
-        latRecipient = double.parse(value['lat']);
-        longRecipient = double.parse(value['lon']);
-       
+      final value = await transController.getTransaksiDonor(id_trans);
+      getTrans.value = value;
+      final value1 = await updateLocationController.getUpdateLocation(id_trans);
+      // Check if coordinates and other required fields are not null
+      if (value1['lat'] != null &&
+          value1['lon'] != null &&
+          value['post_coordinate'] != null) {
+        latRecipient = double.parse(value1['lat']);
+        longRecipient = double.parse(value1['lon']);
 
-        GeoPoint geo_target = GeoPoint(latitude: double.parse(
-                            getTrans.value['post_coordinate'].split(",")[0]), longitude: double.parse(
-                            getTrans.value['post_coordinate'].split(",")[1]));
-        await mpController.controller.addMarker(
-          geo_target,
-          markerIcon: MarkerIcon(
+        List<String> postCoordinates = value['post_coordinate'].split(",");
+        if (postCoordinates.length == 2) {
+          GeoPoint geo_target = GeoPoint(
+            latitude: double.parse(postCoordinates[0]),
+            longitude: double.parse(postCoordinates[1]),
+          );
+
+          postMarker = MarkerIcon(
             icon: Icon(
               Icons.pin_drop,
               color: Colors.red,
               size: 48,
             ),
-          ),
-          iconAnchor: IconAnchor(
-            anchor: Anchor.top,
-          ),
-        );
+          );
 
-        koordinat = [
-          StaticPositionGeoPoint(
-              "2",
-              MarkerIcon(
-                iconWidget: IconMaker(title: "Penerima", link: userProfile),
-              ),
-              [
-                GeoPoint(latitude: latRecipient!, longitude: longRecipient!),
-              ]),
-          StaticPositionGeoPoint(
-              "3",
-              MarkerIcon(
-                iconWidget: IconMaker(title: "Lokasi Anda", link: userProfile),
-              ),
-              [
-                GeoPoint(
-                    latitude: (getTrans.value == null)
-                        ? 0
-                        : double.parse(
-                            getTrans.value['post_coordinate'].split(",")[0]),
-                    longitude: (getTrans.value == null)
-                        ? 0
-                        : double.parse(
-                            getTrans.value['post_coordinate'].split(",")[1])),
-              ]),
-        ];
+          await mpController.controller.addMarker(
+            geo_target,
+            markerIcon: postMarker!,
+            iconAnchor: IconAnchor(
+              anchor: Anchor.top,
+            ),
+          );
 
-        await _setMarkers();
-      });
-      log("sudah mendapatkan data transaksi : ${value['user_recipient_name']}");
+          recipientMarker = MarkerIcon(
+            iconWidget: IconMaker(
+              title: "Penerima",
+              link: getTrans.value['user_recipient_profile_picture']
+                  .toString()
+                  .replaceFirst('http://localhost:3000', newBaseUrl ?? ''),
+            ),
+          );
+
+          // Initial recipient marker
+          GeoPoint recipientGeoPoint =
+              GeoPoint(latitude: latRecipient!, longitude: longRecipient!);
+          await mpController.controller.addMarker(
+            recipientGeoPoint,
+            markerIcon: recipientMarker!,
+          );
+          previousRecipientLocation = recipientGeoPoint;
+          recipientMarkerAdded = true;
+
+          await _setMarkers();
+          startLocationUpdates(); // Moved here to ensure markers are set before starting location updates
+        } else {
+          log("Error: post_coordinate is not in the expected format.");
+        }
+      } else {
+        log("Error: Required fields are null.");
+      }
     } catch (e) {
       log("Error loading profile: $e");
     }
@@ -131,50 +142,21 @@ class _OnMapDonaturState extends State<OnMapDonatur> {
   }
 
   Future<void> _setMarkers() async {
-//     await mpController.controller.setMarkerOfStaticPoint(
-//         id: "2",
-//         markerIcon: MarkerIcon(
-//           iconWidget: IconMaker(title: "Penerima", link: userProfile),
-//         ));
-//     await mpController.controller.setMarkerOfStaticPoint(
-//         id: "3",
-//         markerIcon: MarkerIcon(
-//           iconWidget: IconMaker(title: "Lokasi Anda", link: userProfile),
-//         ));
-//     await mpController.controller.addMarker(
-//       GeoPoint(
-//           latitude:
-//           double.parse(getTrans.value['post_coordinate'].split(",")[0]),
-//           longitude:
-//           double.parse(getTrans.value['post_coordinate'].split(",")[1])),
-//       markerIcon: MarkerIcon(
-//         iconWidget: IconMaker(link: "", title: "Lokasi Donasi"),
-//       ),
-//     );
-
-//     await mpController.controller.addMarker(GeoPoint(latitude: double.parse(getTrans.value['post_coordinate'].split(",")[0]), longitude: double.parse(getTrans.value['post_coordinate'].split(",")[0])),
-//       markerIcon:MarkerIcon(
-//             iconWidget: IconMaker(link: "donatur", title:"donatur"),
-//           ),
-
-// );
-    // await mpController.controller.addMarker(GeoPoint(latitude: -7.051894836887435, longitude: 110.43593567094251),
-    //     markerIcon:  MarkerIcon(
-    //                 icon: Icon(
-    //                     Icons.location_history_rounded,
-    //                     color: Colors.red,
-    //                     size: 48,
-    //                 )),
-    //     // angle: pi / 3,
-    //     iconAnchor: IconAnchor(
-    //       anchor: Anchor.top,
-    //     ));
+    if (koordinat != null && koordinat!.isNotEmpty) {
+      for (var point in koordinat!) {
+        await mpController.controller.addMarker(
+          point.geoPoints.first,
+          markerIcon: point.markerIcon,
+        );
+      }
+    } else {
+      log("Error: koordinat is null or empty.");
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    startLocationUpdates();
     _loadProfile();
     notificationController.checkNotification();
   }
@@ -188,58 +170,50 @@ class _OnMapDonaturState extends State<OnMapDonatur> {
   }
 
   void startLocationUpdates() {
-  locationUpdateTimer = Timer.periodic(Duration(seconds: 10), (timer) async {
-    try {
-      final value = await updateLocationController.getUpdateLocation(id_trans);
-      log("update lokasi pengambil : ${value}");
-      latRecipient = double.parse(value['lat']);
-      longRecipient = double.parse(value['lon']);
-      setState(() {});
-      if (latRecipient != null &&
-          longRecipient != null &&
-          getTrans.isNotEmpty) {
-        GeoPoint oldPoint = GeoPoint(latitude: latRecipient!, longitude: longRecipient!);
-        GeoPoint newPoint = GeoPoint(latitude: latRecipient!, longitude: longRecipient!);
+    locationUpdateTimer = Timer.periodic(Duration(seconds: 10), (timer) async {
+      try {
+        final value =
+            await updateLocationController.getUpdateLocation(id_trans);
+        log("update lokasi pengambil : ${value}");
 
-        GeoPoint geo_target = GeoPoint(latitude: double.parse(
-                            getTrans.value['post_coordinate'].split(",")[0]), longitude: double.parse(
-                            getTrans.value['post_coordinate'].split(",")[1]));
-        await mpController.controller.addMarker(
-          geo_target,
-          markerIcon: MarkerIcon(
-            icon: Icon(
-              Icons.pin_drop,
-              color: Colors.red,
-              size: 48,
-            ),
-          ),
-          iconAnchor: IconAnchor(
-            anchor: Anchor.top,
-          ),
-        );
+        if (value['lat'] != null && value['lon'] != null) {
+          latRecipient = double.parse(value['lat']);
+          longRecipient = double.parse(value['lon']);
 
+          if (latRecipient != null &&
+              longRecipient != null &&
+              getTrans.isNotEmpty &&
+              recipientMarker != null) {
+            GeoPoint newPoint =
+                GeoPoint(latitude: latRecipient!, longitude: longRecipient!);
 
-        await mpController.controller.changeLocationMarker(
-          oldLocation:  oldPoint,
-          newLocation : newPoint,
-          markerIcon : MarkerIcon(
-            iconWidget: IconMaker(
-              title: "Aku",
-              link: "${getTrans.value['user_recipient_profile_picture'].toString().replaceFirst("http://localhost:3000", newBaseUrl!)}",
-            ),
-          ),
-        );
-
-        
-      } else {
-        log("ada null");
+            if (recipientMarkerAdded) {
+              await mpController.controller
+                  .removeMarker(previousRecipientLocation!);
+              await mpController.controller.addMarker(
+                newPoint,
+                markerIcon: recipientMarker!,
+              );
+              previousRecipientLocation = newPoint;
+            } else {
+              await mpController.controller.addMarker(
+                newPoint,
+                markerIcon: recipientMarker!,
+              );
+              recipientMarkerAdded = true;
+              previousRecipientLocation = newPoint;
+            }
+          } else {
+            log("Some values are null: latRecipient=$latRecipient, longRecipient=$longRecipient, getTrans=${getTrans.isNotEmpty}, recipientMarker=$recipientMarker");
+          }
+        } else {
+          log("Received null values for lat or lon from getUpdateLocation");
+        }
+      } catch (e) {
+        log("Error updating location: $e");
       }
-    } catch (e) {
-      log("Error updating location: $e");
-    }
-  });
-}
-
+    });
+  }
 
   Future<void> drawRoute(GeoPoint recipientLocation) async {
     await mpController.controller.removeLastRoad();
@@ -337,6 +311,8 @@ class _OnMapDonaturState extends State<OnMapDonatur> {
 
                     return ListView(
                       controller: scrollController,
+                      shrinkWrap:
+                          true, // Ensure the ListView takes minimum space
                       children: [
                         Container(
                           child: Column(
@@ -374,43 +350,62 @@ class _OnMapDonaturState extends State<OnMapDonatur> {
                               indicatorBuilder: (context, index) {
                                 String step = data_timeline[index];
                                 String? date = getTrans[step];
-                                
-                                if (getTrans.value['transaction_timeline'] != null) {
-                                    if(getTrans.value['transaction_timeline']['konfirmasi'] != null){
-                                        if(index == 0){
-                                          return DotIndicator(color: Colors.green,);
-                                        }
+
+                                if (getTrans.value['transaction_timeline'] !=
+                                    null) {
+                                  if (getTrans.value['transaction_timeline']
+                                          ['konfirmasi'] !=
+                                      null) {
+                                    if (index == 0) {
+                                      return DotIndicator(
+                                        color: Colors.green,
+                                      );
                                     }
-
-                                    if(getTrans.value['transaction_timeline']['pengambilan'] != null){
-                                      if(index == 1){
-                                          return DotIndicator(color: Colors.green,);
-                                        }
-                                    }else{
-                                          return DotIndicator(color: Colors.grey,);
-
-                                    }
-                                    
-                                    if(getTrans.value['transaction_timeline']['konfirmasi'] == null && getTrans.value['transaction_timeline']['pengambilan'] == null){
-                                      if(index == 2){
-                                          return DotIndicator(color: Colors.grey,);
-                                        }
-                                    }else{
-                                          return DotIndicator(color: Colors.green,);
-
-                                        }
-
                                   }
+
+                                  if (getTrans.value['transaction_timeline']
+                                          ['pengambilan'] !=
+                                      null) {
+                                    if (index == 1) {
+                                      return DotIndicator(
+                                        color: Colors.green,
+                                      );
+                                    }
+                                  } else {
+                                    return DotIndicator(
+                                      color: Colors.grey,
+                                    );
+                                  }
+
+                                  if (getTrans.value['transaction_timeline']
+                                              ['konfirmasi'] ==
+                                          null &&
+                                      getTrans.value['transaction_timeline']
+                                              ['pengambilan'] ==
+                                          null) {
+                                    if (index == 2) {
+                                      return DotIndicator(
+                                        color: Colors.grey,
+                                      );
+                                    }
+                                  } else {
+                                    return DotIndicator(
+                                      color: Colors.green,
+                                    );
+                                  }
+                                }
                               },
                               connectorBuilder: (_, index, ___) {
                                 return SolidLineConnector(
-                                  color: (getTrans.value['transaction_timeline'] !=
-                                            null)
-                                        ? (getTrans.value['transaction_timeline']
-                                              ['pengambilan'] !=
+                                  color: (getTrans
+                                              .value['transaction_timeline'] !=
                                           null)
-                                      ? Color.fromRGBO(48, 122, 89, 1)
-                                      : Colors.grey : Colors.grey,
+                                      ? (getTrans.value['transaction_timeline']
+                                                  ['pengambilan'] !=
+                                              null)
+                                          ? Color.fromRGBO(48, 122, 89, 1)
+                                          : Colors.grey
+                                      : Colors.grey,
                                 );
                               },
                               itemCount: 3,
@@ -428,67 +423,103 @@ class _OnMapDonaturState extends State<OnMapDonatur> {
                         Padding(
                           padding: EdgeInsets.all(10.h),
                           child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Container(
-                                height: 45.dm,
-                                width: 45.dm,
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(50.dm),
-                                    image: DecorationImage(
+                              Row(
+                                children: [
+                                  Container(
+                                    height: 45.dm,
+                                    width: 45.dm,
+                                    decoration: BoxDecoration(
+                                      borderRadius:
+                                          BorderRadius.circular(50.dm),
+                                      image: DecorationImage(
                                         fit: BoxFit.cover,
                                         image: NetworkImage(
-                                            getTrans['user_recipient_profile_picture']
-                                                    ?.toString()
-                                                    ?.replaceFirst(
-                                                        'http://localhost:3000',
-                                                        "${ipAdd.getType()}://${ipAdd.getIp()}") ??
-                                                userProfile,
-                                            scale: 1))),
-                              ),
-                              SizedBox(width: 10.w),
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "${getTrans['user_recipient_name']}",
-                                    style: TextStyle(
-                                        fontFamily: "Poppins",
-                                        fontSize: 14.sp,
-                                        color: Colors.black),
+                                          getTrans['user_recipient_profile_picture']
+                                                  ?.toString()
+                                                  ?.replaceFirst(
+                                                      'http://localhost:3000',
+                                                      "${ipAdd.getType()}://${ipAdd.getIp()}") ??
+                                              userProfile,
+                                          scale: 1,
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                  Text(
-                                    "penerima",
-                                    style: TextStyle(
-                                        fontFamily: "Poppins",
-                                        fontSize: 12.sp,
-                                        color: Colors.grey),
+                                  SizedBox(width: 10.w),
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "${getTrans['user_recipient_name']}",
+                                        style: TextStyle(
+                                          fontFamily: "Poppins",
+                                          fontSize: 14.sp,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                      Text(
+                                        "penerima",
+                                        style: TextStyle(
+                                          fontFamily: "Poppins",
+                                          fontSize: 12.sp,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
-                              )
+                              ),
+                              IconButton(
+                                color: Colors.grey,
+                                onPressed: () async {
+                                  mpController.map_dataTarget['userId'] =
+                                      getTrans['user_recipient_id'];
+                                  mpController.map_dataTarget['donatur_name'] =
+                                      getTrans['user_recipient_name'];
+                                  Navigator.pushNamed(
+                                    context,
+                                    "/chat",
+                                    arguments: {
+                                      'userId':
+                                          mpController.map_dataTarget['userId'],
+                                      'donatur_name':
+                                          getTrans['user_recipient_name'],
+                                    },
+                                  );
+                                },
+                                icon: const Icon(LucideIcons.messagesSquare),
+                              ),
                             ],
                           ),
                         ),
                         Padding(
                           padding: EdgeInsets.all(10.dm),
-                          child: Row(children: [
-                            Text(
-                              "${getTrans['post_title']}",
-                              style: TextStyle(
+                          child: Row(
+                            children: [
+                              Text(
+                                "${getTrans['post_title']}",
+                                style: TextStyle(
                                   fontFamily: "Poppins",
                                   fontSize: 14.sp,
-                                  color: Colors.black),
-                            ),
-                            Text(
-                              (getTrans['transaction_timeline'] == null)
-                                  ? ""
-                                  : " | ${formattedDate}",
-                              style: TextStyle(
+                                  color: Colors.black,
+                                ),
+                              ),
+                              Text(
+                                (getTrans['transaction_timeline'] == null)
+                                    ? ""
+                                    : " | $formattedDate",
+                                style: TextStyle(
                                   fontFamily: "Poppins",
                                   fontSize: 14.sp,
-                                  color: Colors.black),
-                            ),
-                          ]),
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                         (getTrans['variant'] == null)
                             ? Text("")
@@ -497,9 +528,10 @@ class _OnMapDonaturState extends State<OnMapDonatur> {
                                 child: Text(
                                   "${getTrans['variant'].length} Pesanan",
                                   style: TextStyle(
-                                      fontFamily: "Poppins",
-                                      fontSize: 14.sp,
-                                      color: Colors.grey),
+                                    fontFamily: "Poppins",
+                                    fontSize: 14.sp,
+                                    color: Colors.grey,
+                                  ),
                                 ),
                               ),
                         (getTrans['variant'] == null)
@@ -509,17 +541,27 @@ class _OnMapDonaturState extends State<OnMapDonatur> {
                                 width: MediaQuery.of(context).size.width * 0.4,
                                 child: ListView.builder(
                                   // scrollDirection: Axis.horizontal,
+                                  shrinkWrap:
+                                      true, // Ensure the ListView takes minimum space
                                   itemCount: getTrans['variant'].length,
                                   itemBuilder: (_, index) {
                                     return Padding(
                                       padding: EdgeInsets.only(
-                                          top: 5.h, left: 10.w, right: 10.w),
+                                        top: 5.h,
+                                        left: 10.w,
+                                        right: 10.w,
+                                      ),
                                       child: Container(
                                         decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(5.dm),
-                                            color: const Color.fromARGB(
-                                                255, 247, 247, 247)),
+                                          borderRadius:
+                                              BorderRadius.circular(5.dm),
+                                          color: const Color.fromARGB(
+                                            255,
+                                            247,
+                                            247,
+                                            247,
+                                          ),
+                                        ),
                                         child: Padding(
                                           padding: EdgeInsets.all(3.dm),
                                           child: Row(

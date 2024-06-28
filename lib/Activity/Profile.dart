@@ -685,8 +685,8 @@ class _RiwayatListState extends State<RiwayatList> {
                     } else if (role == 'Sebagai Pendonasi' &&
                         status.toLowerCase() == 'ongoing') {
                       transaksiKon.transaksi_id = transaction['id'];
-                      Navigator.pushNamed(context, "/onmap_donor").then(
-                          (_) => transactionController.fetchTransactions());
+                      Navigator.pushNamed(context, "/onmap_donor").then((_) =>
+                          transaksiKon.getTransaksiDonor(transaction['id']));
                     } else {
                       transaksiKon.transaksi_id = transaction['id'];
                       Navigator.pushNamed(context, "/completed");

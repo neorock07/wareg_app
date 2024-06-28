@@ -5,17 +5,16 @@ import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:get/get.dart';
 
 class MapsController extends GetxController {
-  double? latitude, longtitude;
+  double? latitude, longitude;
   double? target_lat, target_long;
-  Rx<RoadInfo>? roadInfo;
+  Rx<RoadInfo>? roadInfo = Rx<RoadInfo>(RoadInfo());
   var isLoading = true.obs;
+
   Map<String, dynamic> map_dataTarget = {};
-  
   @override
   void onInit() {
-    // TODO: implement onInit
-    controller;
     super.onInit();
+    controller;
   }
 
   MapController controller = MapController(
@@ -29,15 +28,14 @@ class MapsController extends GetxController {
   );
 
   Future<GeoPoint?> getUserLocation() async {
-    // double? latitude, longtitude;
-    GeoPoint? user_location;
+    GeoPoint? userLocation;
     await controller.myLocation().then((value) {
       latitude = value.latitude;
-      longtitude = value.longitude;
+      longitude = value.longitude;
     });
-    user_location = GeoPoint(latitude: latitude!, longitude: longtitude!);
+    userLocation = GeoPoint(latitude: latitude!, longitude: longitude!);
 
-    return user_location;
+    return userLocation;
   }
 
   Future<RoadInfo?> drawRoad({
@@ -45,25 +43,24 @@ class MapsController extends GetxController {
     GeoPoint? end,
     RoadType? type,
   }) async {
-    double? lat_user, long_user;
+    double? latUser, longUser;
     await controller.myLocation().then((value) {
-      lat_user = value.latitude;
-      long_user = value.longitude;
+      latUser = value.latitude;
+      longUser = value.longitude;
     });
-    log("lokasi : ${lat_user} ${long_user}");
+    log("lokasi : ${latUser} ${longUser}");
     roadInfo!.value = await controller.drawRoad(
-        GeoPoint(latitude: lat_user!, longitude: long_user!),
-        GeoPoint(
-            latitude: target_lat!,
-            longitude: target_long!),
-        roadType: RoadType.bike,
-        roadOption: const RoadOption(
-            roadColor: Color.fromRGBO(42, 122, 89, 1),
-            roadBorderColor: Color.fromRGBO(42, 122, 89, 1),
-            zoomInto: true,
-            roadWidth: 10));
-    
+      GeoPoint(latitude: latUser!, longitude: longUser!),
+      GeoPoint(latitude: target_lat!, longitude: target_long!),
+      roadType: RoadType.bike,
+      roadOption: const RoadOption(
+        roadColor: Color.fromRGBO(42, 122, 89, 1),
+        roadBorderColor: Color.fromRGBO(42, 122, 89, 1),
+        zoomInto: true,
+        roadWidth: 10,
+      ),
+    );
+
     return roadInfo!.value;
-    
   }
 }
