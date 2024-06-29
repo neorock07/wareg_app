@@ -12,8 +12,6 @@ import 'package:wareg_app/Partials/CardButton.dart';
 import 'package:wareg_app/Partials/CardKonPassword.dart';
 import 'package:wareg_app/Partials/CardPassword.dart';
 import 'package:wareg_app/Partials/DialogPop.dart';
-import 'package:wareg_app/Partials/FormDate.dart';
-import 'package:wareg_app/Partials/FormSelectDate.dart';
 import 'package:wareg_app/Partials/FormText.dart';
 
 class RegisterActivity extends StatefulWidget {
@@ -25,7 +23,6 @@ class RegisterActivity extends StatefulWidget {
 
 class _RegisterActivityState extends State<RegisterActivity> {
   var namaController = TextEditingController();
-  var deskripsiController = TextEditingController();
   var emailController = TextEditingController();
   var passController = TextEditingController();
   var passKonController = TextEditingController();
@@ -36,13 +33,11 @@ class _RegisterActivityState extends State<RegisterActivity> {
   RxBool passKonCondition = false.obs;
   RxBool isPressed = false.obs;
   RxBool isPressed2 = false.obs;
-  RxBool isLoad = false.obs;
   GlobalKey<FormState> global_key = GlobalKey<FormState>();
   File? file_img;
 
   String? dropdownValue;
   List<String> items = ["l", "p"];
-  late TextEditingController dateStart = TextEditingController();
   var picController = Get.put(PictureController());
 
   @override
@@ -104,7 +99,6 @@ class _RegisterActivityState extends State<RegisterActivity> {
                                     .getImageFromGaleri()
                                     .then((value) {
                                   log("path : $value");
-                                  // picController.arr_img.value.add(value);
                                   file_img = File(value);
                                   setState(() {});
                                 });
@@ -161,19 +155,12 @@ class _RegisterActivityState extends State<RegisterActivity> {
                                     border: Border.all(color: Colors.grey)),
                                 child: Padding(
                                     padding: EdgeInsets.all(5.dm),
-                                    child: Expanded(
-                                        child: DropdownButton<String>(
-                                      underline: SizedBox(
-                                        height: 5.h,
-                                      ),
+                                    child: DropdownButton<String>(
+                                      underline: SizedBox.shrink(),
                                       dropdownColor: Colors.white,
                                       isExpanded: true,
-
                                       borderRadius:
                                           BorderRadius.circular(10.dm),
-                                      padding: EdgeInsets.only(
-                                          left: 10.w, right: 10.w),
-                                      // value: (controller.current_value == null)? "" : controller.current_value!.value ,
                                       value: dropdownValue,
                                       hint: Text(
                                         "--pilih--",
@@ -188,14 +175,15 @@ class _RegisterActivityState extends State<RegisterActivity> {
                                           dropdownValue = newValue!;
                                         });
                                       },
-
-                                      items: items!
+                                      items: items
                                           .map<DropdownMenuItem<String>>(
                                               (String value) {
                                         return DropdownMenuItem<String>(
                                           value: value,
                                           child: Text(
-                                            "${value}",
+                                            value == "l"
+                                                ? "Laki-laki"
+                                                : "Perempuan",
                                             style: TextStyle(
                                                 color: Colors.black,
                                                 fontSize: 14.sp,
@@ -203,7 +191,7 @@ class _RegisterActivityState extends State<RegisterActivity> {
                                           ),
                                         );
                                       }).toList(),
-                                    )))),
+                                    ))),
                             SizedBox(height: 10.h),
                             FormText(context,
                                 label: "Email",
@@ -246,7 +234,6 @@ class _RegisterActivityState extends State<RegisterActivity> {
                                         ),
                                       )));
                                     } else {
-                                      // Navigator.pushNamed(context, "/cek");
                                       Map<String, dynamic> data_post = {
                                         'name': namaController.text,
                                         'email': emailController.text,
@@ -285,143 +272,132 @@ class _RegisterActivityState extends State<RegisterActivity> {
                                               ],
                                             )),
                                       );
-                                      /*
-                                    Kirim data
-                                    */
-                                    await regisController
-                                            .register(data_post, file_img!)
-                                            .then((value) {
-                                          Navigator.of(context,
-                                                  rootNavigator: true)
-                                              .pop();
-                                          log("${value}");    
-                                          if (value!['response'] == 200 || value!['response'] == 201) {
-                                            DialogPop(
-                                              context,
-                                              size: [130.h, 100.h],
-                                              dismissable: false,
-                                              icon: Container(
-                                                  height: 130.h,
-                                                  child: Column(
-                                                    children: [
-                                                      Icon(
-                                                        LucideIcons.checkCircle,
-                                                        color: Color.fromRGBO(
-                                                            48, 122, 99, 1),
-                                                        size: 30.dm,
-                                                      ),
-                                                      Text(
-                                                        "AKUN BERHASIL DIBUAT",
-                                                        style: TextStyle(
-                                                            fontFamily:
-                                                                "Poppins",
-                                                            fontSize: 14.sp,
-                                                            color: Colors.black,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold),
-                                                      ),
-                                                      Obx(() => Padding(
-                                                            padding:
-                                                                EdgeInsets.only(
-                                                                    bottom:
-                                                                        20.h,
-                                                                    top: 20.h),
-                                                            child: CardButton(
+
+                                      await regisController
+                                          .register(data_post, file_img!)
+                                          .then((value) {
+                                        Navigator.of(context,
+                                                rootNavigator: true)
+                                            .pop();
+                                        log("$value");
+                                        if (value!['response'] == 200 ||
+                                            value['response'] == 201) {
+                                          DialogPop(
+                                            context,
+                                            size: [130.h, 100.h],
+                                            dismissable: false,
+                                            icon: Container(
+                                                height: 130.h,
+                                                child: Column(
+                                                  children: [
+                                                    Icon(
+                                                      LucideIcons.checkCircle,
+                                                      color: Color.fromRGBO(
+                                                          48, 122, 99, 1),
+                                                      size: 30.dm,
+                                                    ),
+                                                    Text(
+                                                      "AKUN BERHASIL DIBUAT",
+                                                      style: TextStyle(
+                                                          fontFamily: "Poppins",
+                                                          fontSize: 14.sp,
+                                                          color: Colors.black,
+                                                          fontWeight:
+                                                              FontWeight.bold),
+                                                    ),
+                                                    Obx(() => Padding(
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  bottom: 20.h,
+                                                                  top: 20.h),
+                                                          child: CardButton(
+                                                              context,
+                                                              isPressed2,
+                                                              onTap: (_) async {
+                                                            isPressed2.value =
+                                                                true;
+                                                            Navigator.pushNamed(
                                                                 context,
-                                                                isPressed2,
-                                                                onTap:
-                                                                    (_) async {
-                                                              isPressed2.value =
-                                                                  true;
-                                                              Navigator
-                                                                  .pushNamed(
-                                                                      context,
-                                                                      "/login");
-
-                                                              // log("${foodController.data_food!.values}");
-                                                              // log("${foodController.data_food!['date_donate']}");
-                                                            },
-                                                                width_a: 0.25,
-                                                                width_b: 0.3,
-                                                                height_a: 0.05,
-                                                                height_b: 0.06,
-                                                                borderRadius:
-                                                                    10.dm,
-                                                                gradient:
-                                                                    const LinearGradient(
-                                                                        colors: [
-                                                                      Color.fromRGBO(
-                                                                          52,
-                                                                          135,
-                                                                          98,
-                                                                          1),
-                                                                      Color.fromRGBO(
-                                                                          48,
-                                                                          122,
-                                                                          99,
-                                                                          1),
-                                                                    ]),
-                                                                child: Center(
-                                                                  child: Text(
-                                                                    "Konfirmasi",
-                                                                    style: TextStyle(
-                                                                        fontFamily:
-                                                                            "Poppins",
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontSize: 14
-                                                                            .sp,
-                                                                        fontWeight:
-                                                                            FontWeight.normal),
-                                                                  ),
-                                                                )),
-                                                          ))
-                                                    ],
-                                                  )),
-                                            );
-                                          } else {
-                                            DialogPop(
-                                              context,
-                                              icon: Container(
-                                                  height: 100.h,
-                                                  child: Column(
-                                                    mainAxisAlignment: MainAxisAlignment.center,
-                                                    mainAxisSize: MainAxisSize.max,
-                                                    children: [
-                                                      Text(
-                                                        "Gagal membuat akun",
-                                                        style: TextStyle(
-                                                            fontFamily:
-                                                                "Poppins",
-                                                            fontSize: 14.sp,
-                                                            color: Colors.black,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold),
-                                                      ),
-                                                      Text(
-                                                        "maaf, coba ulangi pendaftaran lagi",
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                        style: TextStyle(
-                                                            fontFamily:
-                                                                "Poppins",
-                                                            fontSize: 10.sp,
-                                                            color: Colors.grey,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold),
-                                                      ),
-                                                    ],
-                                                  )),
-                                            );
-                                          }
-                                        });
+                                                                "/login");
+                                                          },
+                                                              width_a: 0.25,
+                                                              width_b: 0.3,
+                                                              height_a: 0.05,
+                                                              height_b: 0.06,
+                                                              borderRadius:
+                                                                  10.dm,
+                                                              gradient:
+                                                                  const LinearGradient(
+                                                                      colors: [
+                                                                    Color
+                                                                        .fromRGBO(
+                                                                            52,
+                                                                            135,
+                                                                            98,
+                                                                            1),
+                                                                    Color
+                                                                        .fromRGBO(
+                                                                            48,
+                                                                            122,
+                                                                            99,
+                                                                            1),
+                                                                  ]),
+                                                              child: Center(
+                                                                child: Text(
+                                                                  "Konfirmasi",
+                                                                  style: TextStyle(
+                                                                      fontFamily:
+                                                                          "Poppins",
+                                                                      color: Colors
+                                                                          .white,
+                                                                      fontSize:
+                                                                          14.sp,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .normal),
+                                                                ),
+                                                              )),
+                                                        ))
+                                                  ],
+                                                )),
+                                          );
+                                        } else {
+                                          DialogPop(
+                                            context,
+                                            icon: Container(
+                                                height: 100.h,
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  mainAxisSize:
+                                                      MainAxisSize.max,
+                                                  children: [
+                                                    Text(
+                                                      "Gagal membuat akun",
+                                                      style: TextStyle(
+                                                          fontFamily: "Poppins",
+                                                          fontSize: 14.sp,
+                                                          color: Colors.black,
+                                                          fontWeight:
+                                                              FontWeight.bold),
+                                                    ),
+                                                    Text(
+                                                      "maaf, coba ulangi pendaftaran lagi",
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                      style: TextStyle(
+                                                          fontFamily: "Poppins",
+                                                          fontSize: 10.sp,
+                                                          color: Colors.grey,
+                                                          fontWeight:
+                                                              FontWeight.bold),
+                                                    ),
+                                                  ],
+                                                )),
+                                          );
+                                        }
+                                      });
                                     }
-
-                                    // log("${foodController.data_food!.values}");
-                                    // log("${foodController.data_food!['date_donate']}");
                                   },
                                       width_a: 0.8,
                                       width_b: 0.9,
@@ -452,26 +428,6 @@ class _RegisterActivityState extends State<RegisterActivity> {
               ]),
             ),
           ),
-        ])
-
-        // Stack(
-        //   children: [
-        //     DraggableScrollableSheet(
-        //                 initialChildSize: 0.45,
-        //                 minChildSize: 0.45,
-        //                 maxChildSize: 0.6,
-        //                 builder: ((context, scrollController) {
-        //                   return Container(
-        //                     color: Colors.white,
-        //                     child: ListView(
-        //                             controller: scrollController,
-        //                             children: [
-
-        //                               ]),
-        //                   );
-        //                 })),
-        //   ],
-        // )
-        );
+        ]));
   }
 }
