@@ -414,6 +414,7 @@ class _OnMapState extends State<OnMap> {
           onWillPop: () async {
             postController.isLoading3.value = true;
             a = 0;
+            mpController.controller.clearAllRoads();
             return true;
           },
           child: Stack(

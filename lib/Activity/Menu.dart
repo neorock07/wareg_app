@@ -213,227 +213,222 @@ class _MenuState extends State<Menu> {
           ],
         ),
         DraggableScrollableSheet(
-            initialChildSize: 0.45,
-            minChildSize: 0.45,
-            maxChildSize: 0.9,
-            builder: (context, scrollController) {
-              if (isSelected.value == false) {
-                menu_title.value = title_menu_list[0];
-              } else {
-                menu_title.value = title_menu_list[1];
-              }
-              return Container(
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(15.dm),
-                        topRight: Radius.circular(15.dm))),
-                child: ListView(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Obx(() => Text(
-                              // "Makanan Terdekat",
-                              "${menu_title.value}",
-                              style: TextStyle(
-                                  fontFamily: "Bree",
+          initialChildSize: 0.45,
+          minChildSize: 0.45,
+          maxChildSize: 0.9,
+          builder: (context, scrollController) {
+            if (isSelected.value == false) {
+              menu_title.value = title_menu_list[0];
+            } else {
+              menu_title.value = title_menu_list[1];
+            }
+            return Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(15),
+                  topRight: Radius.circular(15),
+                ),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Obx(() => Text(
+                            "${menu_title.value}",
+                            style: TextStyle(
+                              fontFamily: "Bree",
+                              color: Colors.black,
+                              fontSize: 16,
+                            ),
+                          )),
+                      Obx(() => Row(
+                            children: [
+                              ChoiceChip(
+                                label: const Center(
+                                  child: Text(
+                                    "Terdekat",
+                                  ),
+                                ),
+                                onSelected: (value) {
+                                  isSelected.value = false;
+                                },
+                                labelStyle: TextStyle(
                                   color: Colors.black,
-                                  fontSize: 16.sp),
-                            )),
-                        Obx(() => Row(
-                              children: [
-                                ChoiceChip(
-                                  label: const Center(
-                                    child: Text(
-                                      "Terdekat",
-                                    ),
-                                  ),
-                                  onSelected: (value) {
-                                    isSelected.value = false;
-                                  },
-                                  labelStyle: TextStyle(
-                                      color: Colors.black, fontSize: 10.sp),
-                                  selected: (isSelected.value == false)
-                                      ? true
-                                      : false,
-                                  side: BorderSide(
-                                    color: Color.fromRGBO(42, 122, 89, 1),
-                                    width: 2,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(20.dm)),
-                                  selectedColor: Colors.white,
+                                  fontSize: 10,
                                 ),
-                                SizedBox(
-                                  width: 5.w,
+                                selected:
+                                    (isSelected.value == false) ? true : false,
+                                side: BorderSide(
+                                  color: Color.fromRGBO(42, 122, 89, 1),
+                                  width: 2,
                                 ),
-                                ChoiceChip(
-                                  label: Center(
-                                    child: Text(
-                                      "Terbaru",
-                                    ),
-                                  ),
-                                  labelStyle: TextStyle(
-                                      color: Colors.black, fontSize: 10.sp),
-                                  selected:
-                                      (isSelected.value == true) ? true : false,
-                                  onSelected: (value) {
-                                    isSelected.value = true;
-                                  },
-                                  side: BorderSide(
-                                    color: Color.fromRGBO(42, 122, 89, 1),
-                                    width: 2,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(20.dm)),
-                                  selectedColor: Colors.white,
-                                  disabledColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
                                 ),
-                              ],
-                            ))
-                      ],
-                    ),
-                    Obx(() {
+                                selectedColor: Colors.white,
+                              ),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              ChoiceChip(
+                                label: Center(
+                                  child: Text(
+                                    "Terbaru",
+                                  ),
+                                ),
+                                labelStyle: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 10,
+                                ),
+                                selected:
+                                    (isSelected.value == true) ? true : false,
+                                onSelected: (value) {
+                                  isSelected.value = true;
+                                },
+                                side: BorderSide(
+                                  color: Color.fromRGBO(42, 122, 89, 1),
+                                  width: 2,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                selectedColor: Colors.white,
+                                disabledColor: Colors.white,
+                              ),
+                            ],
+                          )),
+                    ],
+                  ),
+                  Expanded(
+                    child: Obx(() {
                       if (postController.isLoading.value) {
                         return Center(
-                            child: Padding(
-                          padding: EdgeInsets.only(top: 10.h),
-                          child: const CircularProgressIndicator(),
-                        ));
-                      } else if (postController.posts.isEmpty) {
-                        return Center(
-                            child: Column(
-                          children: [
-                            Image.asset(
-                              "assets/image/full.png",
-                              fit: BoxFit.fill,
-                              height: 100.dm,
-                              width: 100.dm,
-                            ),
-                            Text("Oops..tidak ada data",
-                                style: TextStyle(
-                                    fontFamily: "Poppins",
-                                    fontSize: 12.sp,
-                                    color: Colors.black))
-                          ],
-                        ));
-                      } else {
-                        return Container(
-                          height: MediaQuery.of(context).size.height,
-                          // height: 80.h,
                           child: Padding(
-                            padding: EdgeInsets.only(bottom: 40.h),
-                            child: ListView.builder(
-                                controller: scrollController,
-                                itemCount: (isSelected == false)
-                                    ? postController.posts.length
-                                    : postController.posts2.length,
-                                scrollDirection: Axis.vertical,
-                                itemBuilder: (context, index) {
-                                  final post = (isSelected == false)
-                                      ? postController.posts[index]
-                                      : postController.posts2[index];
-                                  return InkWell(
-                                    onTap: () {
-                                      Navigator.pushNamed(context, "/onmap");
-                                    },
-                                    child: Padding(
-                                      padding: EdgeInsets.only(bottom: 5.h),
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          InkWell(
-                                            onTap: () {
-                                              String updatedUrl = post
-                                                  .media[0].url
-                                                  .replaceFirst(
-                                                      "http://localhost:3000",
-                                                      newBaseUrl);
-                                              mpController.target_lat =
-                                                  double.parse(post
-                                                      .body.coordinate
-                                                      .toString()
-                                                      .split(",")[0]);
-                                              mpController.target_long =
-                                                  double.parse(post
-                                                      .body.coordinate
-                                                      .toString()
-                                                      .split(",")[1]);
-                                              mpController
-                                                      .map_dataTarget['title'] =
-                                                  post.title;
-                                              mpController
-                                                      .map_dataTarget['stok'] =
-                                                  post.stok;
-                                              mpController.map_dataTarget[
-                                                  'alamat'] = post.body.alamat;
-                                              mpController
-                                                      .map_dataTarget['id'] =
-                                                  post.id;
-                                              mpController.map_dataTarget[
-                                                  'userId'] = post.userId;
-                                              mpController.map_dataTarget[
-                                                  'marker'] = MarkerIcon(
-                                                iconWidget: IconMaker(
-                                                    link: updatedUrl,
-                                                    title: post.title),
-                                              );
-                                              mpController
-                                                      .map_dataTarget['url'] =
-                                                  post.media[0].url;
-                                              mpController.map_dataTarget[
-                                                      'donatur_name'] =
-                                                  post.userName;
-                                              mpController.map_dataTarget[
-                                                      'deskripsi'] =
-                                                  post.body.deskripsi;
-                                              mpController.map_dataTarget[
-                                                      'rating'] =
-                                                  post.averageReview;
-                                              mpController.map_dataTarget[
-                                                      'donatur_profile'] =
-                                                  post.userProfilePicture;
-                                              mpController.map_dataTarget[
-                                                  'updateAt'] = post.updatedAt;
-                                              mpController.map_dataTarget[
-                                                  'expiredAt'] = post.expiredAt;
-                                              // mpController.map_dataTarget['varian'] = post.variants;
-                                              log("data : ${mpController.map_dataTarget['url']} | ${mpController.map_dataTarget['stok']}");
-                                              Navigator.pushNamed(
-                                                  context, "/onmap");
-                                            },
-                                            child: CardMenu(context,
-                                                jarak: post.distance,
-                                                stok: post.stok,
-                                                url: post.media[0].url,
-                                                title: post.title),
-                                          ),
-                                          SizedBox(
-                                            height: 5.h,
-                                          ),
-                                          Divider(
-                                            height: 2.h,
-                                            color: Colors.grey,
-                                            indent: 10,
-                                            endIndent: 10,
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                }),
+                            padding: EdgeInsets.only(top: 10),
+                            child: const CircularProgressIndicator(),
                           ),
                         );
+                      } else if (postController.posts.isEmpty) {
+                        return Center(
+                          child: Column(
+                            children: [
+                              Image.asset(
+                                "assets/image/full.png",
+                                fit: BoxFit.fill,
+                                height: 100,
+                                width: 100,
+                              ),
+                              Text(
+                                "Oops..tidak ada data",
+                                style: TextStyle(
+                                  fontFamily: "Poppins",
+                                  fontSize: 12,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      } else {
+                        return ListView.builder(
+                          controller: scrollController,
+                          itemCount: (isSelected.value == false)
+                              ? postController.posts.length
+                              : postController.posts2.length,
+                          itemBuilder: (context, index) {
+                            final post = (isSelected.value == false)
+                                ? postController.posts[index]
+                                : postController.posts2[index];
+                            return InkWell(
+                              onTap: () {
+                                Navigator.pushNamed(context, "/onmap");
+                              },
+                              child: Padding(
+                                padding: EdgeInsets.only(bottom: 5),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    InkWell(
+                                      onTap: () {
+                                        String updatedUrl = post.media[0].url
+                                            .replaceFirst(
+                                                "http://localhost:3000",
+                                                newBaseUrl);
+                                        mpController.target_lat = double.parse(
+                                            post.body.coordinate.split(",")[0]);
+                                        mpController.target_long = double.parse(
+                                            post.body.coordinate.split(",")[1]);
+                                        mpController.map_dataTarget['title'] =
+                                            post.title;
+                                        mpController.map_dataTarget['stok'] =
+                                            post.stok;
+                                        mpController.map_dataTarget['alamat'] =
+                                            post.body.alamat;
+                                        mpController.map_dataTarget['id'] =
+                                            post.id;
+                                        mpController.map_dataTarget['userId'] =
+                                            post.userId;
+                                        mpController.map_dataTarget['marker'] =
+                                            MarkerIcon(
+                                          iconWidget: IconMaker(
+                                            link: updatedUrl,
+                                            title: post.title,
+                                          ),
+                                        );
+                                        mpController.map_dataTarget['url'] =
+                                            post.media[0].url;
+                                        mpController.map_dataTarget[
+                                            'donatur_name'] = post.userName;
+                                        mpController
+                                                .map_dataTarget['deskripsi'] =
+                                            post.body.deskripsi;
+                                        mpController.map_dataTarget['rating'] =
+                                            post.averageReview;
+                                        mpController.map_dataTarget[
+                                                'donatur_profile'] =
+                                            post.userProfilePicture;
+                                        mpController
+                                                .map_dataTarget['updateAt'] =
+                                            post.updatedAt;
+                                        mpController
+                                                .map_dataTarget['expiredAt'] =
+                                            post.expiredAt;
+                                        log("data : ${mpController.map_dataTarget['url']} | ${mpController.map_dataTarget['stok']}");
+                                        Navigator.pushNamed(context, "/onmap");
+                                      },
+                                      child: CardMenu(
+                                        context,
+                                        jarak: post.distance,
+                                        stok: post.stok,
+                                        url: post.media[0].url,
+                                        title: post.title,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height: 5,
+                                    ),
+                                    Divider(
+                                      height: 2,
+                                      color: Colors.grey,
+                                      indent: 10,
+                                      endIndent: 10,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        );
                       }
-                    })
-                  ],
-                ),
-              );
-            })
+                    }),
+                  ),
+                ],
+              ),
+            );
+          },
+        )
       ]),
     );
   }
