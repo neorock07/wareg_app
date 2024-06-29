@@ -254,99 +254,104 @@ class _CardExampleState extends State<CardExample> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              Row(
-                                children: [
-                                  GestureDetector(
-                                    onTap: _pickImage,
-                                    child: CircleAvatar(
-                                      radius: 50,
-                                      backgroundColor: Colors.white,
-                                      child: ClipOval(
-                                        child: _imageFile != null
-                                            ? Image.file(
-                                                _imageFile!,
-                                                width: 100,
-                                                height: 100,
-                                                fit: BoxFit.cover,
-                                              )
-                                            : Image.network(
-                                                userData['profilePicture']!,
-                                                width: 100,
-                                                height: 100,
-                                                fit: BoxFit.cover,
-                                              ),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(width: 10),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment
-                                        .start, // Align text to the start
+                              SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Container(
+                                  child: Row(
                                     children: [
-                                      if (_isEditingName)
-                                        ConstrainedBox(
-                                          constraints: BoxConstraints(
-                                            maxWidth:
-                                                200, // Set a maximum width for the text field
-                                          ),
-                                          child: TextField(
-                                            controller: _nameController,
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                            onSubmitted: (value) {
-                                              _updateUserName();
-                                              setState(() {
-                                                _isEditingName = false;
-                                              });
-                                            },
-                                            decoration: const InputDecoration(
-                                              border: InputBorder.none,
-                                              hintText:
-                                                  "Enter your name", // Optional: placeholder text
-                                              hintStyle: TextStyle(
-                                                  color: Colors.white30),
-                                            ),
-                                          ),
-                                        )
-                                      else
-                                        GestureDetector(
-                                          onTap: () {
-                                            setState(() {
-                                              _isEditingName = true;
-                                            });
-                                          },
-                                          child: Text(
-                                            _nameController.text.isEmpty
-                                                ? "Tap to edit name"
-                                                : _nameController
-                                                    .text, // Show a placeholder if no name
-                                            style: const TextStyle(
-                                              fontFamily: "Poppins",
-                                              color: Colors.white,
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                      GestureDetector(
+                                        onTap: _pickImage,
+                                        child: CircleAvatar(
+                                          radius: 50,
+                                          backgroundColor: Colors.white,
+                                          child: ClipOval(
+                                            child: _imageFile != null
+                                                ? Image.file(
+                                                    _imageFile!,
+                                                    width: 100,
+                                                    height: 100,
+                                                    fit: BoxFit.cover,
+                                                  )
+                                                : Image.network(
+                                                    userData['profilePicture']!,
+                                                    width: 100,
+                                                    height: 100,
+                                                    fit: BoxFit.cover,
+                                                  ),
                                           ),
                                         ),
-                                      const SizedBox(height: 5),
-                                      Text(
-                                        userData['gender']!,
-                                        style: const TextStyle(
-                                            fontFamily: "Poppins",
-                                            color: Colors.white70),
                                       ),
-                                      Text(
-                                        userData['email']!,
-                                        style: const TextStyle(
-                                            fontFamily: "Poppins",
-                                            color: Colors.white70),
+                                      SizedBox(width: 10),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment
+                                            .start, // Align text to the start
+                                        children: [
+                                          if (_isEditingName)
+                                            ConstrainedBox(
+                                              constraints: BoxConstraints(
+                                                maxWidth:
+                                                    200, // Set a maximum width for the text field
+                                              ),
+                                              child: TextField(
+                                                controller: _nameController,
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                                onSubmitted: (value) {
+                                                  _updateUserName();
+                                                  setState(() {
+                                                    _isEditingName = false;
+                                                  });
+                                                },
+                                                decoration: const InputDecoration(
+                                                  border: InputBorder.none,
+                                                  hintText:
+                                                      "Enter your name", // Optional: placeholder text
+                                                  hintStyle: TextStyle(
+                                                      color: Colors.white30),
+                                                ),
+                                              ),
+                                            )
+                                          else
+                                            GestureDetector(
+                                              onTap: () {
+                                                setState(() {
+                                                  _isEditingName = true;
+                                                });
+                                              },
+                                              child: Text(
+                                                _nameController.text.isEmpty
+                                                    ? "Tap to edit name"
+                                                    : _nameController
+                                                        .text, // Show a placeholder if no name
+                                                style: const TextStyle(
+                                                  fontFamily: "Poppins",
+                                                  color: Colors.white,
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          const SizedBox(height: 5),
+                                          Text(
+                                            userData['gender']!,
+                                            style: const TextStyle(
+                                                fontFamily: "Poppins",
+                                                color: Colors.white70),
+                                          ),
+                                          Text(
+                                              userData['email']!,
+                                              style: const TextStyle(
+                                                  fontFamily: "Poppins",
+                                                  color: Colors.white70),
+                                            ),
+                                        ],
                                       ),
                                     ],
                                   ),
-                                ],
+                                ),
                               ),
                               Center(
                                 child: Padding(

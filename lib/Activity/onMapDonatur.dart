@@ -203,6 +203,7 @@ class _OnMapDonaturState extends State<OnMapDonatur> {
               recipientMarkerAdded = true;
               previousRecipientLocation = newPoint;
             }
+            streamController.add(newPoint);
           } else {
             log("Some values are null: latRecipient=$latRecipient, longRecipient=$longRecipient, getTrans=${getTrans.isNotEmpty}, recipientMarker=$recipientMarker");
           }
